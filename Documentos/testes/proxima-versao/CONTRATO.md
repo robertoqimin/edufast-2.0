@@ -57,6 +57,8 @@ Os testes verificam o código de erro estável, sem impor a redação exata da m
 
 `POST /api/v1/auth/login` recebe email e senha e retorna `data.access_token`. Os testes usam o token real em `Authorization: Bearer ...`. `POST /api/v1/contexto` seleciona a escola autorizada e também estabelece o contexto usado pelas páginas legadas na mesma sessão.
 
+O contrato preserva JWT HS256 nesta etapa. Email inexistente e senha incorreta retornam o mesmo erro `invalid_credentials`, sem emitir token. Um Bearer inválido/expirado não pode ser aceito por existir uma sessão web anterior. O teste de expiração reaproveita o token real, altera somente `exp` e o assina novamente com a chave fictícia do ambiente, para distinguir expiração de assinatura inválida.
+
 A API de teste não ignora autorização e não cria um endpoint público de reset de banco. A massa é inserida diretamente pelo executor isolado.
 
 As entradas antigas de alunos, busca e arquivos são testadas explicitamente: seu nome ou formato de URL não pode permitir contornar o isolamento. Contas com dois vínculos mantêm papéis diferentes em cada escola.

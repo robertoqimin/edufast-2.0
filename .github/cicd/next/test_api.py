@@ -1,6 +1,10 @@
 """API real via cliente Flask, fixtures reais no banco; sem simular respostas."""
 from concurrent.futures import ThreadPoolExecutor
+import base64
+import hashlib
+import hmac
 import io
+import json
 import os
 import re
 import threading
@@ -68,6 +72,21 @@ class ApiTests(unittest.TestCase):
 
     def scenario(self, case):
         headers = self.authenticate(case['actor'])
+        if case.get('auth_override') == 'tampered':
+            headers = {'Authorization': headers['Authorization']+'tampered'}
+        if case.get('auth_override') == 'expired':
+            # Usa o token emitido de verdade, preserva claims e altera somente exp.
+            token = headers['Authorization'].split(' ', 1)[1]
+            first, middle, _ = token.split('.')
+            decode = lambda value: base64.urlsafe_b64decode(value+'='*((4-len(value)%4)%4))
+            encode = lambda value: base64.urlsafe_b64encode(value).rstrip(b'=').decode()
+            self.assertEqual(json.loads(decode(first))['alg'], 'HS256')
+            payload = json.loads(decode(middle))
+            payload['exp'] = 1
+            middle = encode(json.dumps(payload, separators=(',', ':')).encode())
+            message = first+'.'+middle
+            signature = encode(hmac.new(self.app.config['SECRET_KEY'].encode(), message.encode(), hashlib.sha256).digest())
+            headers = {'Authorization': 'Bearer '+message+'.'+signature}
         for before in case.get('before', []):
             response = self.send(self.client, before, headers)
             self.assertEqual(response.status_code, before['status'])

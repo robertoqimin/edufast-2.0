@@ -16,19 +16,19 @@ A imagem de testes foi construída, o Compose exclusivo foi usado, o MySQL ficou
 
 ## Contratos futuros: RED
 
-Comando executado: `python .github/cicd/next_stage.py --suite all --database both`.
+Comandos executados: `python .github/cicd/next_stage.py --suite all --database both` e, após completar os casos de autenticação, `python .github/cicd/next_stage.py --suite api --database both`.
 
 | Suíte | Descobertos | Executados | Resultado observado |
 | --- | ---: | ---: | --- |
 | Unitários | 47 | 47 | 47 erros pela ausência de `app.services.academic_policy` |
-| API em SQLite | 83 | 0 | Preparação bloqueada pelo esquema institucional ausente |
-| API em MySQL | 85 | 0 | Preparação bloqueada pelo esquema institucional ausente |
+| API em SQLite | 88 | 0 | Preparação bloqueada pelo esquema institucional ausente |
+| API em MySQL | 90 | 0 | Preparação bloqueada pelo esquema institucional ausente |
 | Integração em SQLite | 10 | 10 | 10 erros pela ausência de `app.migrations` |
 | Integração em MySQL | 10 | 10 | 10 erros pela ausência de `app.migrations` |
 
 Os dois casos adicionais do perfil MySQL são os cenários concorrentes API-078/079. Não houve testes ignorados para esconder a falta de implementação. O executor retornou código **1**, indicando que o contrato futuro ainda não foi atendido.
 
-**Nenhum dos 85 cenários de API foi validado funcionalmente nessa rodada.** A falha de preparação impede chegar às requisições; ela é exibida nos relatórios como erro de classe, com zero testes executados. Depois de criar o esquema, os cenários começarão a exercer as rotas e poderão mostrar novas falhas independentes.
+**Nenhum dos 90 cenários de API foi validado funcionalmente nessa rodada.** A falha de preparação impede chegar às requisições; ela é exibida nos relatórios como erro de classe, com zero testes executados. Depois de criar o esquema, os cenários começarão a exercer as rotas e poderão mostrar novas falhas independentes.
 
 As falhas unitárias e de migração também não demonstram correção de regras: os módulos ainda precisam existir. Não foram criados serviços substitutos nem respostas simuladas para produzir testes verdes.
 

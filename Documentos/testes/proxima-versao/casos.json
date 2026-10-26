@@ -1552,6 +1552,78 @@
           "papel": "aluno"
         }
       }
+    },
+    {
+      "id": "API-086",
+      "area": "Autenticação",
+      "title": "Email inexistente não recebe token",
+      "actor": null,
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 401,
+      "json": {
+        "email": "inexistente@example.test",
+        "senha": "Senha-ci-123456"
+      },
+      "error": "invalid_credentials",
+      "absent": [
+        "access_token"
+      ]
+    },
+    {
+      "id": "API-087",
+      "area": "Autenticação",
+      "title": "Senha incorreta não recebe token",
+      "actor": null,
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 401,
+      "json": {
+        "email": "gestor_a@example.test",
+        "senha": "senha-incorreta"
+      },
+      "error": "invalid_credentials",
+      "absent": [
+        "access_token"
+      ]
+    },
+    {
+      "id": "API-088",
+      "area": "Autenticação",
+      "title": "Login incompleto retorna validação",
+      "actor": null,
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 422,
+      "json": {
+        "email": "gestor_a@example.test"
+      },
+      "error": "invalid_payload",
+      "absent": [
+        "access_token"
+      ]
+    },
+    {
+      "id": "API-089",
+      "area": "Autenticação",
+      "title": "Token adulterado é rejeitado mesmo com sessão anterior",
+      "actor": "aluno_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/1",
+      "status": 401,
+      "auth_override": "tampered",
+      "error": "unauthenticated"
+    },
+    {
+      "id": "API-090",
+      "area": "Autenticação",
+      "title": "Token válido na assinatura mas expirado é rejeitado",
+      "actor": "aluno_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/1",
+      "status": 401,
+      "auth_override": "expired",
+      "error": "unauthenticated"
     }
   ],
   "unit": [

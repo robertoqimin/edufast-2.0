@@ -180,6 +180,16 @@ api('API-084', 'Compatibilidade', 'Cadastro público de aluno não cria vínculo
 api('API-085', 'Escolas', 'Redução de papel bloqueia token emitido antes da mudança', 'secretaria_a', 'POST', S+'/turmas', 403,
     json={'nome': 'Negada', 'codigo': 'NEGADA', 'periodo_id': 1}, error='forbidden',
     mutate={'table': 'participacoes_escolas', 'where': {'usuario_id': 3, 'escola_id': 1}, 'values': {'papel': 'aluno'}})
+api('API-086', 'Autenticação', 'Email inexistente não recebe token', None, 'POST', '/api/v1/auth/login', 401,
+    json={'email': 'inexistente@example.test', 'senha': 'Senha-ci-123456'}, error='invalid_credentials', absent=['access_token'])
+api('API-087', 'Autenticação', 'Senha incorreta não recebe token', None, 'POST', '/api/v1/auth/login', 401,
+    json={'email': 'gestor_a@example.test', 'senha': 'senha-incorreta'}, error='invalid_credentials', absent=['access_token'])
+api('API-088', 'Autenticação', 'Login incompleto retorna validação', None, 'POST', '/api/v1/auth/login', 422,
+    json={'email': 'gestor_a@example.test'}, error='invalid_payload', absent=['access_token'])
+api('API-089', 'Autenticação', 'Token adulterado é rejeitado mesmo com sessão anterior', 'aluno_a', 'GET', S+'/alunos/1', 401,
+    auth_override='tampered', error='unauthenticated')
+api('API-090', 'Autenticação', 'Token válido na assinatura mas expirado é rejeitado', 'aluno_a', 'GET', S+'/alunos/1', 401,
+    auth_override='expired', error='unauthenticated')
 
 member = {'usuario_id': 3, 'escola_id': 1, 'papel': 'secretaria', 'status': 'ativa'}
 unit('UNIT-001', 'Permissões', 'Secretaria consulta recurso local', 'authorize', {'member': member, 'resource': {'escola_id': 1, 'tipo': 'aluno'}, 'action': 'read'}, result=True)

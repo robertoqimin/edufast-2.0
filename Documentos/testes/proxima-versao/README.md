@@ -7,7 +7,7 @@ Esta etapa segue o ciclo TDD: definir resultado esperado → observar o teste fa
 ## Ordem sugerida de leitura
 
 1. [Contrato e decisões propostas](CONTRATO.md): comportamento, perfis, respostas e preparação dos dados.
-2. [85 cenários de API](API.md): requisições, perfis, resultados e verificações do banco.
+2. [90 cenários de API](API.md): requisições, perfis, resultados e verificações do banco.
 3. [47 regras unitárias](UNITARIOS.md): entradas e saídas das regras isoladas.
 4. [Integração e migrações](INTEGRACAO.md): 10 cenários em cada banco, concorrência e preservação de dados.
 5. [Desempenho e interface](DESEMPENHO_E_INTERFACE.md): limites, executor HTTP e roteiro de aceitação visual.
@@ -19,6 +19,7 @@ Os documentos API/UNITARIOS e [casos.json](casos.json) são gerados do mesmo cat
 
 | Entrega | Evidências propostas |
 | --- | --- |
+| Autenticação | API-001, 086 a 090; credenciais erradas, login incompleto e tokens adulterados/expirados |
 | Várias escolas | API-001 a 012, 085; UNIT-001 a 006; INT-006 e 008 |
 | Participações e convites | API-010, 013 a 018, 079; UNIT-029 a 032 |
 | Períodos letivos | API-019 a 022, 045; UNIT-007 a 010, 015 |

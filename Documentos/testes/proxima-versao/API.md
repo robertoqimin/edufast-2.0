@@ -91,6 +91,11 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 | API-083 | Pessoas | Secretaria cadastra professor apenas na escola local | 201 |
 | API-084 | Compatibilidade | Cadastro público de aluno não cria vínculo na escola informada | 403 |
 | API-085 | Escolas | Redução de papel bloqueia token emitido antes da mudança | 403 |
+| API-086 | Autenticação | Email inexistente não recebe token | 401 |
+| API-087 | Autenticação | Senha incorreta não recebe token | 401 |
+| API-088 | Autenticação | Login incompleto retorna validação | 422 |
+| API-089 | Autenticação | Token adulterado é rejeitado mesmo com sessão anterior | 401 |
+| API-090 | Autenticação | Token válido na assinatura mas expirado é rejeitado | 401 |
 
 ## API-001 — Sem autenticação não lista escolas
 
@@ -1799,5 +1804,87 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
       "papel": "aluno"
     }
   }
+}
+```
+
+## API-086 — Email inexistente não recebe token
+
+**Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
+
+**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+
+```json
+{
+  "json": {
+    "email": "inexistente@example.test",
+    "senha": "Senha-ci-123456"
+  },
+  "error": "invalid_credentials",
+  "absent": [
+    "access_token"
+  ]
+}
+```
+
+## API-087 — Senha incorreta não recebe token
+
+**Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
+
+**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+
+```json
+{
+  "json": {
+    "email": "gestor_a@example.test",
+    "senha": "senha-incorreta"
+  },
+  "error": "invalid_credentials",
+  "absent": [
+    "access_token"
+  ]
+}
+```
+
+## API-088 — Login incompleto retorna validação
+
+**Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
+
+**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+
+```json
+{
+  "json": {
+    "email": "gestor_a@example.test"
+  },
+  "error": "invalid_payload",
+  "absent": [
+    "access_token"
+  ]
+}
+```
+
+## API-089 — Token adulterado é rejeitado mesmo com sessão anterior
+
+**Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/1`.
+
+**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+
+```json
+{
+  "auth_override": "tampered",
+  "error": "unauthenticated"
+}
+```
+
+## API-090 — Token válido na assinatura mas expirado é rejeitado
+
+**Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/1`.
+
+**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+
+```json
+{
+  "auth_override": "expired",
+  "error": "unauthenticated"
 }
 ```
