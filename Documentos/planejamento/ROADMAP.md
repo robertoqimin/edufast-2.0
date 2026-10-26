@@ -4,6 +4,12 @@
 
 Esta é uma sequência proposta, sem datas ou compromisso de entrega. Gestão completa é a visão do produto; a tabela de funcionalidades do README identifica a implementação presente.
 
+**Direção confirmada em 26/10/2026:** consolidar acadêmico e secretaria para várias escolas na mesma plataforma. O [plano da próxima versão](PROXIMA_VERSAO.md) detalha escopo, isolamento institucional, migração e critérios de aceite. A base de CI/CD já foi implantada e validada; os testes atuais ainda não cobrem múltiplas escolas, que permanecem uma entrega futura.
+
+O isolamento institucional vem antes da ativação de várias escolas. A organização em etapas abaixo não autoriza adiar esse requisito até a visão consolidada de gestão.
+
+**Requisito transversal:** desempenho em hardware modesto, com [metas provisórias, cenários e plano de medição](DESEMPENHO.md). Medir a base antes de otimizar e acompanhar o custo de cada módulo. As metas não são resultados já obtidos.
+
 | Etapa | Entrega | Critério de conclusão |
 | --- | --- | --- |
 | 1. Base reproduzível | Instalação, testes e inventário do código ativo | Nova instalação validada e cenários de login, cadastros, turmas, notas e arquivos reproduzíveis |

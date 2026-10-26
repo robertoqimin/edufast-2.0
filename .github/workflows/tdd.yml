@@ -1,0 +1,60 @@
+name: TDD - Próxima versão (contratos em revisão)
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Suíte futura; falha até a implementação cumprir os contratos
+        type: choice
+        options: [all, unit, api, integration, performance]
+        default: all
+      database:
+        description: Banco descartável (concorrência e performance exigem MySQL)
+        type: choice
+        options: [both, sqlite, mysql]
+        default: both
+      smoke:
+        description: Performance apenas smoke, sem homologar metas
+        type: boolean
+        default: true
+      duration:
+        description: Segundos por patamar da carga completa (mínimo 600)
+        type: number
+        default: 600
+
+permissions:
+  contents: read
+
+jobs:
+  contratos:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Verificar infraestrutura e documentos
+        run: python .github/cicd/next_stage.py --check
+      - name: Executar contratos estritamente (RED até implementar)
+        shell: bash
+        env:
+          SUITE: ${{ inputs.suite }}
+          DATABASE: ${{ inputs.database }}
+          SMOKE: ${{ inputs.smoke }}
+          DURATION: ${{ inputs.duration }}
+        run: |
+          args=(--suite "$SUITE" --database "$DATABASE" --duration "$DURATION")
+          if [[ "$SMOKE" == true ]]; then args+=(--smoke); fi
+          python .github/cicd/next_stage.py "${args[@]}"
+      - name: Preservar os resultados, inclusive RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tdd-${{ github.run_id }}
+          path: .ci-results/next/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

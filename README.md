@@ -12,6 +12,8 @@ O **EduFast** é um software de gestão escolar com foco em **agilidade, experi�
 
 **CI/CD:** [configuração central e guia de produção](.github/cicd/README.md). Os workflows em `.github/workflows` executam testes isolados, publicam a mesma imagem validada e oferecem implantação manual por SSH após provisionamento do servidor.
 
+**Próxima versão:** [testes de API e unitários para revisão antes da implementação](Documentos/testes/proxima-versao/README.md). Os contratos de várias escolas e gestão acadêmica estão separados da regressão da versão atual.
+
 ## Por que o EduFast existe?
 
 Escolas lidam diariamente com cadastros, turmas, documentos, notas, comunicação e rotinas de equipe. Quando as informações ficam espalhadas, tarefas simples exigem consultas repetidas e retrabalho.

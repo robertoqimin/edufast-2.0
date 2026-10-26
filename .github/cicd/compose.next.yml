@@ -1,0 +1,46 @@
+# Standalone: nunca combinar com o Compose manual ou de produção.
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: next-root-fixture-only
+      MYSQL_DATABASE: edufast_next
+      MYSQL_USER: next_ci
+      MYSQL_PASSWORD: next-fixture-only
+    volumes: ["next_database:/var/lib/mysql"]
+    networks: [isolated]
+    mem_limit: 1g
+    cpus: 1
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=tcp -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 20s
+  tests:
+    image: ${NEXT_TEST_IMAGE:?Use o executor next_stage.py}
+    # Somente o executor de testes grava nos relatórios montados; produção continua sem root.
+    user: "0:0"
+    environment:
+      EDUFAST_TEST_NEXT: "1"
+      PYTHONPATH: /app:/next
+      NEXT_BACKEND: ${NEXT_BACKEND:-sqlite}
+      DB_URL: ${NEXT_DB_URL:-sqlite:///:memory:}
+      APP_ENV: testing
+      SECRET_KEY: next-test-secret-key-only-not-for-production
+      UPLOAD_FOLDER: /tmp/next-uploads
+      NEXT_DELIVERY: disabled
+    volumes:
+      - ./next:/next:ro
+      - ${NEXT_REPORT_DIR:?Use o executor next_stage.py}:/reports
+    tmpfs: ["/tmp"]
+    working_dir: /next
+    networks: [isolated]
+    mem_limit: 768m
+    cpus: 1
+    entrypoint: ["python", "/next/run_suite.py"]
+networks:
+  isolated:
+    internal: true
+volumes:
+  next_database:

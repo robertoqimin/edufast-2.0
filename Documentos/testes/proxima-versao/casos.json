@@ -1,0 +1,2296 @@
+{
+  "status": "proposta_para_revisao",
+  "api": [
+    {
+      "id": "API-001",
+      "area": "Escolas",
+      "title": "Sem autenticação não lista escolas",
+      "actor": null,
+      "method": "GET",
+      "path": "/api/v1/escolas",
+      "status": 401,
+      "error": "unauthenticated"
+    },
+    {
+      "id": "API-002",
+      "area": "Escolas",
+      "title": "Gestor lista apenas a própria escola",
+      "actor": "gestor_a",
+      "method": "GET",
+      "path": "/api/v1/escolas",
+      "status": 200,
+      "ids": [
+        1
+      ]
+    },
+    {
+      "id": "API-003",
+      "area": "Escolas",
+      "title": "Conta com dois vínculos lista as duas escolas",
+      "actor": "dupla",
+      "method": "GET",
+      "path": "/api/v1/escolas",
+      "status": 200,
+      "ids": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "API-004",
+      "area": "Escolas",
+      "title": "Conta sem vínculo não ganha escola automaticamente",
+      "actor": "sem_vinculo",
+      "method": "GET",
+      "path": "/api/v1/escolas",
+      "status": 200,
+      "ids": []
+    },
+    {
+      "id": "API-005",
+      "area": "Escolas",
+      "title": "Administrador da plataforma cria instituição",
+      "actor": "plataforma",
+      "method": "POST",
+      "path": "/api/v1/escolas",
+      "status": 201,
+      "json": {
+        "nome": "Escola Gama",
+        "codigo": "GAMA"
+      },
+      "equals": {
+        "data.nome": "Escola Gama"
+      },
+      "db": [
+        {
+          "table": "escolas",
+          "where": {
+            "codigo": "GAMA"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-006",
+      "area": "Escolas",
+      "title": "Gestor local não cria outra instituição",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas",
+      "status": 403,
+      "json": {
+        "nome": "Escola Gama",
+        "codigo": "GAMA"
+      },
+      "error": "forbidden",
+      "db": [
+        {
+          "table": "escolas",
+          "where": {
+            "codigo": "GAMA"
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-007",
+      "area": "Escolas",
+      "title": "Seleciona escola autorizada",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/contexto",
+      "status": 200,
+      "json": {
+        "escola_id": 1
+      },
+      "equals": {
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-008",
+      "area": "Escolas",
+      "title": "Selecionar escola alheia não concede acesso",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/contexto",
+      "status": 404,
+      "json": {
+        "escola_id": 2
+      },
+      "error": "not_found"
+    },
+    {
+      "id": "API-009",
+      "area": "Escolas",
+      "title": "Conta dupla mantém papel de aluno na escola B",
+      "actor": "dupla",
+      "method": "POST",
+      "path": "/api/v1/escolas/2/turmas",
+      "status": 403,
+      "json": {
+        "nome": "Sem permissão",
+        "codigo": "NEGADA",
+        "periodo_id": 2,
+        "turno": "manha"
+      },
+      "error": "forbidden"
+    },
+    {
+      "id": "API-010",
+      "area": "Escolas",
+      "title": "Revogação invalida o token já emitido",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos",
+      "status": 403,
+      "mutate": {
+        "table": "participacoes_escolas",
+        "where": {
+          "usuario_id": 3,
+          "escola_id": 1
+        },
+        "values": {
+          "status": "revogada"
+        }
+      },
+      "error": "membership_inactive"
+    },
+    {
+      "id": "API-011",
+      "area": "Escolas",
+      "title": "Escola suspensa bloqueia escrita acadêmica",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 403,
+      "json": {
+        "nome": "Bloqueada",
+        "codigo": "SUSP",
+        "periodo_id": 1,
+        "turno": "manha"
+      },
+      "mutate": {
+        "table": "escolas",
+        "where": {
+          "id": 1
+        },
+        "values": {
+          "status": "suspensa"
+        }
+      },
+      "error": "school_inactive"
+    },
+    {
+      "id": "API-012",
+      "area": "Escolas",
+      "title": "Admin da plataforma não lê conteúdo acadêmico sem vínculo",
+      "actor": "plataforma",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-013",
+      "area": "Convites",
+      "title": "Gestor convida membro local sem enviar email real no teste",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/convites",
+      "status": 201,
+      "json": {
+        "email": "nova@example.test",
+        "papel": "secretaria"
+      },
+      "equals": {
+        "data.escola_id": 1,
+        "data.papel": "secretaria"
+      },
+      "db": [
+        {
+          "table": "convites_escolas",
+          "where": {
+            "email": "nova@example.test",
+            "escola_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-014",
+      "area": "Convites",
+      "title": "Professor não concede papel de gestor",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/convites",
+      "status": 403,
+      "json": {
+        "email": "nova@example.test",
+        "papel": "gestor"
+      },
+      "error": "forbidden"
+    },
+    {
+      "id": "API-015",
+      "area": "Convites",
+      "title": "Aceitar convite cria apenas o vínculo indicado",
+      "actor": "convidado",
+      "method": "POST",
+      "path": "/api/v1/convites/aceitar",
+      "status": 200,
+      "json": {
+        "token": "convite-ci-valido"
+      },
+      "db": [
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "usuario_id": 11,
+            "escola_id": 1,
+            "papel": "secretaria"
+          },
+          "count": 1
+        },
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "usuario_id": 11,
+            "escola_id": 2
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-016",
+      "area": "Convites",
+      "title": "Convite expirado não cria vínculo",
+      "actor": "convidado",
+      "method": "POST",
+      "path": "/api/v1/convites/aceitar",
+      "status": 410,
+      "json": {
+        "token": "convite-ci-expirado"
+      },
+      "error": "invitation_expired",
+      "db": [
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "usuario_id": 11
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-017",
+      "area": "Convites",
+      "title": "Convite não pode ser utilizado por outro email",
+      "actor": "sem_vinculo",
+      "method": "POST",
+      "path": "/api/v1/convites/aceitar",
+      "status": 403,
+      "json": {
+        "token": "convite-ci-valido"
+      },
+      "error": "invitation_recipient_mismatch"
+    },
+    {
+      "id": "API-018",
+      "area": "Convites",
+      "title": "Segundo aceite não duplica participação",
+      "actor": "convidado",
+      "method": "POST",
+      "path": "/api/v1/convites/aceitar",
+      "status": 409,
+      "before": [
+        {
+          "method": "POST",
+          "path": "/api/v1/convites/aceitar",
+          "json": {
+            "token": "convite-ci-valido"
+          },
+          "status": 200
+        }
+      ],
+      "json": {
+        "token": "convite-ci-valido"
+      },
+      "error": "invitation_used",
+      "db": [
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "usuario_id": 11,
+            "escola_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-019",
+      "area": "Períodos",
+      "title": "Secretaria cria período válido",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/periodos",
+      "status": 201,
+      "json": {
+        "nome": "2027",
+        "inicio": "2027-02-01",
+        "fim": "2027-12-15"
+      },
+      "equals": {
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-020",
+      "area": "Períodos",
+      "title": "Fim anterior ao início é rejeitado",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/periodos",
+      "status": 422,
+      "json": {
+        "nome": "Inválido",
+        "inicio": "2027-12-01",
+        "fim": "2027-02-01"
+      },
+      "error": "invalid_period"
+    },
+    {
+      "id": "API-021",
+      "area": "Períodos",
+      "title": "Período alheio não aparece por ID direto",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/periodos/2",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-022",
+      "area": "Períodos",
+      "title": "Fechamento preserva período e registros",
+      "actor": "gestor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/periodos/1/fechar",
+      "status": 200,
+      "equals": {
+        "data.status": "fechado"
+      },
+      "db": [
+        {
+          "table": "periodos_letivos",
+          "where": {
+            "id": 1,
+            "status": "fechado"
+          },
+          "count": 1
+        },
+        {
+          "table": "matriculas",
+          "where": {
+            "id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-023",
+      "area": "Pessoas",
+      "title": "Busca de alunos não revela nome da outra escola",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos?q=Aluno",
+      "status": 200,
+      "ids": [
+        1,
+        3
+      ],
+      "absent": [
+        "Aluno Beta",
+        "aluno.b@example.test"
+      ]
+    },
+    {
+      "id": "API-024",
+      "area": "Pessoas",
+      "title": "Detalhe de aluno externo retorna 404",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/2",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-025",
+      "area": "Pessoas",
+      "title": "Edição de aluno externo não altera o banco",
+      "actor": "secretaria_a",
+      "method": "PATCH",
+      "path": "/api/v1/escolas/1/alunos/2",
+      "status": 404,
+      "json": {
+        "nome": "Alterado"
+      },
+      "error": "not_found",
+      "db": [
+        {
+          "table": "alunos",
+          "where": {
+            "id": 2,
+            "nome": "Aluno Beta"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-026",
+      "area": "Pessoas",
+      "title": "Aluno consulta seu cadastro",
+      "actor": "aluno_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/1",
+      "status": 200,
+      "equals": {
+        "data.nome": "Aluno Alfa"
+      }
+    },
+    {
+      "id": "API-027",
+      "area": "Pessoas",
+      "title": "Aluno não consulta outro aluno da mesma escola",
+      "actor": "aluno_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/3",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-028",
+      "area": "Pessoas",
+      "title": "Professor externo não aparece em busca",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/professores",
+      "status": 200,
+      "ids": [
+        1
+      ],
+      "absent": [
+        "Professor Beta"
+      ]
+    },
+    {
+      "id": "API-029",
+      "area": "Pessoas",
+      "title": "Secretaria cria aluno na escola ativa",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/alunos",
+      "status": 201,
+      "json": {
+        "nome": "Nova Aluna",
+        "email": "nova.aluna@example.test",
+        "matricula": "ALFA-NEW"
+      },
+      "equals": {
+        "data.escola_id": 1
+      },
+      "db": [
+        {
+          "table": "alunos",
+          "where": {
+            "matricula": "ALFA-NEW",
+            "escola_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-030",
+      "area": "Pessoas",
+      "title": "Campo escola_id no corpo não redireciona gravação",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/alunos",
+      "status": 422,
+      "json": {
+        "nome": "Teste",
+        "email": "teste@example.test",
+        "matricula": "INJETADA",
+        "escola_id": 2
+      },
+      "error": "scope_mismatch",
+      "db": [
+        {
+          "table": "alunos",
+          "where": {
+            "matricula": "INJETADA"
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-031",
+      "area": "Pessoas",
+      "title": "Matrícula pode repetir em escolas diferentes",
+      "actor": "gestor_b",
+      "method": "POST",
+      "path": "/api/v1/escolas/2/alunos",
+      "status": 201,
+      "json": {
+        "nome": "Aluna Beta Dois",
+        "email": "beta.dois@example.test",
+        "matricula": "A001"
+      },
+      "equals": {
+        "data.escola_id": 2
+      }
+    },
+    {
+      "id": "API-032",
+      "area": "Pessoas",
+      "title": "Matrícula duplicada na mesma escola é rejeitada",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/alunos",
+      "status": 409,
+      "json": {
+        "nome": "Duplicada",
+        "email": "duplicada@example.test",
+        "matricula": "A001"
+      },
+      "error": "duplicate_student_number"
+    },
+    {
+      "id": "API-033",
+      "area": "Turmas",
+      "title": "Lista apenas turmas da escola",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 200,
+      "ids": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "API-034",
+      "area": "Turmas",
+      "title": "Cria turma vinculada ao período local",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 201,
+      "json": {
+        "nome": "7º A",
+        "codigo": "7A",
+        "periodo_id": 1,
+        "turno": "manha"
+      },
+      "equals": {
+        "data.escola_id": 1,
+        "data.periodo_id": 1
+      }
+    },
+    {
+      "id": "API-035",
+      "area": "Turmas",
+      "title": "Período de outra escola não pode receber turma",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 404,
+      "json": {
+        "nome": "Inválida",
+        "codigo": "CROSS",
+        "periodo_id": 2
+      },
+      "error": "not_found",
+      "db": [
+        {
+          "table": "turmas",
+          "where": {
+            "codigo": "CROSS"
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-036",
+      "area": "Turmas",
+      "title": "Código duplicado no mesmo período é rejeitado",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 409,
+      "json": {
+        "nome": "Duplicada",
+        "codigo": "6A",
+        "periodo_id": 1
+      },
+      "error": "duplicate_class_code"
+    },
+    {
+      "id": "API-037",
+      "area": "Turmas",
+      "title": "Arquivamento mantém matrículas históricas",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas/1/arquivar",
+      "status": 200,
+      "equals": {
+        "data.status": "arquivada"
+      },
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "turma_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-038",
+      "area": "Disciplinas",
+      "title": "Cria disciplina local",
+      "actor": "coordenacao_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/disciplinas",
+      "status": 201,
+      "json": {
+        "nome": "História",
+        "codigo": "HIS",
+        "carga_horaria": 80
+      },
+      "equals": {
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-039",
+      "area": "Disciplinas",
+      "title": "Oferta cruza apenas dados da mesma escola",
+      "actor": "coordenacao_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas",
+      "status": 404,
+      "json": {
+        "turma_id": 1,
+        "disciplina_id": 2,
+        "periodo_id": 1
+      },
+      "error": "not_found"
+    },
+    {
+      "id": "API-040",
+      "area": "Disciplinas",
+      "title": "Oferta válida é criada",
+      "actor": "coordenacao_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas",
+      "status": 201,
+      "json": {
+        "turma_id": 3,
+        "disciplina_id": 3,
+        "periodo_id": 1
+      },
+      "equals": {
+        "data.turma_id": 3,
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-041",
+      "area": "Matrículas",
+      "title": "Matricula aluno local em turma local",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": 201,
+      "json": {
+        "aluno_id": 3,
+        "turma_id": 3,
+        "periodo_id": 1
+      },
+      "equals": {
+        "data.status": "ativa"
+      },
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "aluno_id": 3,
+            "turma_id": 3,
+            "status": "ativa"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-042",
+      "area": "Matrículas",
+      "title": "Repetir matrícula não duplica registro",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": 409,
+      "json": {
+        "aluno_id": 1,
+        "turma_id": 1,
+        "periodo_id": 1
+      },
+      "error": "duplicate_enrollment",
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "aluno_id": 1,
+            "turma_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-043",
+      "area": "Matrículas",
+      "title": "Aluno externo não pode ser matriculado",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": 404,
+      "json": {
+        "aluno_id": 2,
+        "turma_id": 1,
+        "periodo_id": 1
+      },
+      "error": "not_found"
+    },
+    {
+      "id": "API-044",
+      "area": "Matrículas",
+      "title": "Turma arquivada não recebe matrícula",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": 409,
+      "json": {
+        "aluno_id": 3,
+        "turma_id": 3,
+        "periodo_id": 1
+      },
+      "mutate": {
+        "table": "turmas",
+        "where": {
+          "id": 3
+        },
+        "values": {
+          "status": "arquivada"
+        }
+      },
+      "error": "class_archived"
+    },
+    {
+      "id": "API-045",
+      "area": "Matrículas",
+      "title": "Período fechado bloqueia matrícula",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": 409,
+      "json": {
+        "aluno_id": 3,
+        "turma_id": 3,
+        "periodo_id": 1
+      },
+      "mutate": {
+        "table": "periodos_letivos",
+        "where": {
+          "id": 1
+        },
+        "values": {
+          "status": "fechado"
+        }
+      },
+      "error": "period_closed"
+    },
+    {
+      "id": "API-046",
+      "area": "Matrículas",
+      "title": "Transferência encerra vínculo antigo e mantém histórico",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas/1/transferir",
+      "status": 201,
+      "json": {
+        "turma_destino_id": 3,
+        "motivo": "Mudança de turno"
+      },
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "id": 1,
+            "status": "transferida"
+          },
+          "count": 1
+        },
+        {
+          "table": "matriculas",
+          "where": {
+            "aluno_id": 1,
+            "turma_id": 3,
+            "status": "ativa"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-047",
+      "area": "Matrículas",
+      "title": "Transferência para outra escola não altera origem",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas/1/transferir",
+      "status": 404,
+      "json": {
+        "turma_destino_id": 2,
+        "motivo": "Inválida"
+      },
+      "error": "not_found",
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "id": 1,
+            "status": "ativa"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-048",
+      "area": "Docência",
+      "title": "Coordenação atribui professor à oferta exata",
+      "actor": "coordenacao_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/atribuicoes",
+      "status": 201,
+      "json": {
+        "professor_id": 1,
+        "oferta_id": 3
+      },
+      "equals": {
+        "data.professor_id": 1,
+        "data.oferta_id": 3
+      }
+    },
+    {
+      "id": "API-049",
+      "area": "Docência",
+      "title": "Professor externo não recebe atribuição local",
+      "actor": "coordenacao_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/atribuicoes",
+      "status": 404,
+      "json": {
+        "professor_id": 2,
+        "oferta_id": 1
+      },
+      "error": "not_found"
+    },
+    {
+      "id": "API-050",
+      "area": "Docência",
+      "title": "Professor não se autoatribui",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/atribuicoes",
+      "status": 403,
+      "json": {
+        "professor_id": 1,
+        "oferta_id": 3
+      },
+      "error": "forbidden"
+    },
+    {
+      "id": "API-051",
+      "area": "Notas",
+      "title": "Professor lança nota apenas na própria oferta",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/1/notas",
+      "status": 201,
+      "json": {
+        "aluno_id": 1,
+        "nota": 8.5
+      },
+      "equals": {
+        "data.oferta_id": 1,
+        "data.nota": 8.5
+      }
+    },
+    {
+      "id": "API-052",
+      "area": "Notas",
+      "title": "Mesmo professor em pares separados não autoriza outra oferta",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/3/notas",
+      "status": 403,
+      "json": {
+        "aluno_id": 3,
+        "nota": 8.5
+      },
+      "error": "assignment_required"
+    },
+    {
+      "id": "API-053",
+      "area": "Notas",
+      "title": "Revogação docente bloqueia token existente",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/1/notas",
+      "status": 403,
+      "json": {
+        "aluno_id": 1,
+        "nota": 8.5
+      },
+      "mutate": {
+        "table": "atribuicoes_docentes",
+        "where": {
+          "id": 1
+        },
+        "values": {
+          "ativo": false
+        }
+      },
+      "error": "assignment_required"
+    },
+    {
+      "id": "API-054",
+      "area": "Notas",
+      "title": "Nota fora da escala não é gravada",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/1/notas",
+      "status": 422,
+      "json": {
+        "aluno_id": 1,
+        "nota": 11
+      },
+      "error": "invalid_grade"
+    },
+    {
+      "id": "API-055",
+      "area": "Atividades",
+      "title": "Professor cria atividade na oferta atribuída",
+      "actor": "professor_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/1/atividades",
+      "status": 201,
+      "json": {
+        "titulo": "Exercício",
+        "descricao": "Dados fictícios",
+        "data_entrega": "2099-11-15"
+      },
+      "equals": {
+        "data.escola_id": 1,
+        "data.oferta_id": 1
+      }
+    },
+    {
+      "id": "API-056",
+      "area": "Atividades",
+      "title": "Aluno não cria atividade",
+      "actor": "aluno_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/ofertas/1/atividades",
+      "status": 403,
+      "json": {
+        "titulo": "Indevida"
+      },
+      "error": "forbidden"
+    },
+    {
+      "id": "API-057",
+      "area": "Documentos",
+      "title": "Secretaria solicita documento de aluno local",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/solicitacoes-documentos",
+      "status": 201,
+      "json": {
+        "aluno_id": 1,
+        "titulo": "Comprovante"
+      },
+      "equals": {
+        "data.status": "pendente",
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-058",
+      "area": "Documentos",
+      "title": "Aluno envia arquivo da própria solicitação",
+      "actor": "aluno_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/solicitacoes-documentos/1/arquivo",
+      "status": 201,
+      "upload": {
+        "filename": "comprovante.pdf",
+        "content_type": "application/pdf",
+        "content": "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 100] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 12 Tf 20 40 Td (COMPROVANTE-CI) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000241 00000 n \n0000000335 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n405\n%%EOF\n"
+      },
+      "followup": {
+        "method": "GET",
+        "path": "/api/v1/escolas/1/documentos/{data.id}/arquivo",
+        "status": 200,
+        "body_contains": "COMPROVANTE-CI"
+      },
+      "db": [
+        {
+          "table": "solicitacoes_documentos",
+          "where": {
+            "id": 1,
+            "status": "enviado"
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-059",
+      "area": "Documentos",
+      "title": "Documento de outra escola não é baixado",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/documentos/2/arquivo",
+      "status": 404,
+      "error": "not_found",
+      "absent": [
+        "DOCUMENTO-BETA"
+      ]
+    },
+    {
+      "id": "API-060",
+      "area": "Documentos",
+      "title": "Aluno não envia documento de colega",
+      "actor": "aluno_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/solicitacoes-documentos/3/arquivo",
+      "status": 404,
+      "upload": {
+        "filename": "comprovante.pdf",
+        "content_type": "application/pdf",
+        "content": "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 100] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 12 Tf 20 40 Td (COMPROVANTE-CI) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000241 00000 n \n0000000335 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n405\n%%EOF\n"
+      },
+      "error": "not_found"
+    },
+    {
+      "id": "API-061",
+      "area": "Documentos",
+      "title": "Executável disfarçado não é aceito",
+      "actor": "aluno_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/solicitacoes-documentos/1/arquivo",
+      "status": 422,
+      "upload": {
+        "filename": "documento.pdf",
+        "content_type": "application/pdf",
+        "content": "MZ-not-a-pdf"
+      },
+      "error": "invalid_file"
+    },
+    {
+      "id": "API-062",
+      "area": "Documentos",
+      "title": "Arquivo acima de 16 MiB é recusado",
+      "actor": "aluno_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/solicitacoes-documentos/1/arquivo",
+      "status": 413,
+      "upload": {
+        "filename": "grande.pdf",
+        "content_type": "application/pdf",
+        "size": 16777217
+      },
+      "error": "payload_too_large"
+    },
+    {
+      "id": "API-063",
+      "area": "Documentos",
+      "title": "Download autorizado entrega bytes e anexo",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/documentos/1/arquivo",
+      "status": 200,
+      "body_contains": "DOCUMENTO-ALFA",
+      "headers_contains": {
+        "Content-Disposition": "attachment"
+      }
+    },
+    {
+      "id": "API-064",
+      "area": "Documentos",
+      "title": "Foto de perfil externa também exige escopo",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/2/foto",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-065",
+      "area": "Comunicação",
+      "title": "Comunicado é criado na escola local",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/comunicados",
+      "status": 201,
+      "json": {
+        "titulo": "Reunião",
+        "mensagem": "Comunicado de teste",
+        "destinatario": "alunos"
+      },
+      "equals": {
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-066",
+      "area": "Comunicação",
+      "title": "Aluno não lê comunicado restrito à equipe",
+      "actor": "aluno_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/comunicados/3",
+      "status": 404,
+      "error": "not_found"
+    },
+    {
+      "id": "API-067",
+      "area": "Comunicação",
+      "title": "Listagem não revela comunicado da escola B",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/comunicados",
+      "status": 200,
+      "ids": [
+        1,
+        3
+      ],
+      "absent": [
+        "Comunicado Beta"
+      ]
+    },
+    {
+      "id": "API-068",
+      "area": "Painel",
+      "title": "Indicadores contam apenas a escola local",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/painel",
+      "status": 200,
+      "equals": {
+        "data.alunos": 2,
+        "data.turmas": 2,
+        "data.professores": 1,
+        "data.escola_id": 1
+      }
+    },
+    {
+      "id": "API-069",
+      "area": "Painel",
+      "title": "Paginação é executada no servidor",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos?page=1&per_page=1",
+      "status": 200,
+      "ids": [
+        1
+      ],
+      "equals": {
+        "meta.total": 2,
+        "meta.page": 1,
+        "meta.per_page": 1
+      }
+    },
+    {
+      "id": "API-070",
+      "area": "Painel",
+      "title": "Página inválida recebe erro de validação",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos?page=0",
+      "status": 422,
+      "error": "invalid_pagination"
+    },
+    {
+      "id": "API-071",
+      "area": "Exportação",
+      "title": "Exportação não inclui dados externos",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/api/v1/escolas/1/alunos/exportacao",
+      "status": 200,
+      "body_contains": "Aluno Alfa",
+      "absent": [
+        "Aluno Beta"
+      ],
+      "headers_contains": {
+        "Content-Disposition": "attachment",
+        "Content-Type": "text/csv"
+      }
+    },
+    {
+      "id": "API-072",
+      "area": "Auditoria",
+      "title": "Ação administrativa registra ator e escola",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas/1/arquivar",
+      "status": 200,
+      "db": [
+        {
+          "table": "eventos_auditoria",
+          "where": {
+            "escola_id": 1,
+            "ator_id": 3,
+            "acao": "turma.arquivada",
+            "recurso_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-073",
+      "area": "Compatibilidade",
+      "title": "Rota antiga de detalhe não ignora isolamento",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/admin/alunos/2",
+      "status": 404,
+      "absent": [
+        "Aluno Beta"
+      ]
+    },
+    {
+      "id": "API-074",
+      "area": "Compatibilidade",
+      "title": "Busca antiga também aplica contexto da escola",
+      "actor": "professor_a",
+      "method": "GET",
+      "path": "/alunos/busca?termo=Aluno",
+      "status": 200,
+      "absent": [
+        "Aluno Beta"
+      ]
+    },
+    {
+      "id": "API-075",
+      "area": "Compatibilidade",
+      "title": "Arquivo antigo não fica público pelo nome",
+      "actor": null,
+      "method": "GET",
+      "path": "/arquivos/download/documento-beta.pdf",
+      "status": 401,
+      "absent": [
+        "DOCUMENTO-BETA"
+      ]
+    },
+    {
+      "id": "API-076",
+      "area": "Compatibilidade",
+      "title": "Cadastro público não aceita papel privilegiado",
+      "actor": null,
+      "method": "POST",
+      "path": "/cadastro",
+      "status": 400,
+      "json": {
+        "email": "invasor@example.test",
+        "senha": "Senha-ci-123456",
+        "nome": "Teste",
+        "tipo": "gestor",
+        "escola_id": 2
+      },
+      "db": [
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "escola_id": 2
+          },
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "API-077",
+      "area": "Cache",
+      "title": "Alternar escola não reaproveita painel privado anterior",
+      "actor": "dupla",
+      "method": "GET",
+      "path": "/api/v1/escolas/2/painel",
+      "status": 403,
+      "before": [
+        {
+          "method": "GET",
+          "path": "/api/v1/escolas/1/painel",
+          "status": 200
+        }
+      ],
+      "error": "forbidden"
+    },
+    {
+      "id": "API-078",
+      "area": "Matrículas",
+      "title": "Duas requisições concorrentes criam apenas uma matrícula",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/matriculas",
+      "status": [
+        201,
+        409
+      ],
+      "json": {
+        "aluno_id": 3,
+        "turma_id": 3,
+        "periodo_id": 1
+      },
+      "concurrent": 2,
+      "backends": [
+        "mysql"
+      ],
+      "conflict_error": "duplicate_enrollment",
+      "db": [
+        {
+          "table": "matriculas",
+          "where": {
+            "aluno_id": 3,
+            "turma_id": 3
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-079",
+      "area": "Convites",
+      "title": "Dois aceites concorrentes não duplicam participação",
+      "actor": "convidado",
+      "method": "POST",
+      "path": "/api/v1/convites/aceitar",
+      "status": [
+        200,
+        409
+      ],
+      "json": {
+        "token": "convite-ci-valido"
+      },
+      "concurrent": 2,
+      "backends": [
+        "mysql"
+      ],
+      "conflict_error": "invitation_used",
+      "db": [
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "usuario_id": 11,
+            "escola_id": 1
+          },
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "API-080",
+      "area": "Compatibilidade",
+      "title": "Foto antiga não fica pública pelo nome",
+      "actor": null,
+      "method": "GET",
+      "path": "/arquivos/perfil/perfil_beta.png",
+      "status": 401,
+      "absent": [
+        "FOTO-BETA"
+      ]
+    },
+    {
+      "id": "API-081",
+      "area": "Compatibilidade",
+      "title": "Download antigo autenticado não ignora escola",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/arquivos/download/documento-beta.pdf",
+      "status": 404,
+      "absent": [
+        "DOCUMENTO-BETA"
+      ]
+    },
+    {
+      "id": "API-082",
+      "area": "Compatibilidade",
+      "title": "Foto antiga autenticada não ignora escola",
+      "actor": "secretaria_a",
+      "method": "GET",
+      "path": "/arquivos/perfil/perfil_beta.png",
+      "status": 404,
+      "absent": [
+        "FOTO-BETA"
+      ]
+    },
+    {
+      "id": "API-083",
+      "area": "Pessoas",
+      "title": "Secretaria cadastra professor apenas na escola local",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/professores",
+      "status": 201,
+      "json": {
+        "nome": "Docente Novo",
+        "email": "docente.novo@example.test",
+        "cpf": "12345000350"
+      },
+      "equals": {
+        "data.escola_id": 1
+      },
+      "db": [
+        {
+          "table": "professores",
+          "where": {
+            "escola_id": 1,
+            "cpf": "12345000350"
+          },
+          "count": 1
+        },
+        {
+          "table": "professores",
+          "where": {
+            "escola_id": 2,
+            "cpf": "12345000350"
+          },
+          "count": 0
+        }
+      ]
+    },
+    {
+      "id": "API-084",
+      "area": "Compatibilidade",
+      "title": "Cadastro público de aluno não cria vínculo na escola informada",
+      "actor": null,
+      "method": "POST",
+      "path": "/cadastro",
+      "status": 403,
+      "json": {
+        "email": "publico@example.test",
+        "senha": "Senha-ci-123456",
+        "nome": "Teste",
+        "tipo": "aluno",
+        "escola_id": 2,
+        "matricula": "PUBLICA"
+      },
+      "db": [
+        {
+          "table": "alunos",
+          "where": {
+            "matricula": "PUBLICA"
+          },
+          "count": 0
+        },
+        {
+          "table": "participacoes_escolas",
+          "where": {
+            "escola_id": 2
+          },
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "API-085",
+      "area": "Escolas",
+      "title": "Redução de papel bloqueia token emitido antes da mudança",
+      "actor": "secretaria_a",
+      "method": "POST",
+      "path": "/api/v1/escolas/1/turmas",
+      "status": 403,
+      "json": {
+        "nome": "Negada",
+        "codigo": "NEGADA",
+        "periodo_id": 1
+      },
+      "error": "forbidden",
+      "mutate": {
+        "table": "participacoes_escolas",
+        "where": {
+          "usuario_id": 3,
+          "escola_id": 1
+        },
+        "values": {
+          "papel": "aluno"
+        }
+      }
+    }
+  ],
+  "unit": [
+    {
+      "id": "UNIT-001",
+      "area": "Permissões",
+      "title": "Secretaria consulta recurso local",
+      "function": "authorize",
+      "arguments": {
+        "member": {
+          "usuario_id": 3,
+          "escola_id": 1,
+          "papel": "secretaria",
+          "status": "ativa"
+        },
+        "resource": {
+          "escola_id": 1,
+          "tipo": "aluno"
+        },
+        "action": "read"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-002",
+      "area": "Permissões",
+      "title": "Mesmo papel não permite recurso externo",
+      "function": "authorize",
+      "arguments": {
+        "member": {
+          "usuario_id": 3,
+          "escola_id": 1,
+          "papel": "secretaria",
+          "status": "ativa"
+        },
+        "resource": {
+          "escola_id": 2,
+          "tipo": "aluno"
+        },
+        "action": "read"
+      },
+      "error": "not_found",
+      "status": 404
+    },
+    {
+      "id": "UNIT-003",
+      "area": "Permissões",
+      "title": "Vínculo revogado bloqueia acesso",
+      "function": "authorize",
+      "arguments": {
+        "member": {
+          "usuario_id": 3,
+          "escola_id": 1,
+          "papel": "secretaria",
+          "status": "revogada"
+        },
+        "resource": {
+          "escola_id": 1,
+          "tipo": "aluno"
+        },
+        "action": "read"
+      },
+      "error": "membership_inactive",
+      "status": 403
+    },
+    {
+      "id": "UNIT-004",
+      "area": "Permissões",
+      "title": "Aluno só consulta seu próprio cadastro",
+      "function": "authorize",
+      "arguments": {
+        "member": {
+          "usuario_id": 6,
+          "escola_id": 1,
+          "papel": "aluno",
+          "status": "ativa"
+        },
+        "resource": {
+          "escola_id": 1,
+          "tipo": "aluno",
+          "usuario_id": 7
+        },
+        "action": "read"
+      },
+      "error": "not_found",
+      "status": 404
+    },
+    {
+      "id": "UNIT-005",
+      "area": "Permissões",
+      "title": "Aluno não cria turma",
+      "function": "authorize",
+      "arguments": {
+        "member": {
+          "usuario_id": 3,
+          "escola_id": 1,
+          "papel": "aluno",
+          "status": "ativa"
+        },
+        "resource": {
+          "escola_id": 1,
+          "tipo": "turma"
+        },
+        "action": "create"
+      },
+      "error": "forbidden",
+      "status": 403
+    },
+    {
+      "id": "UNIT-006",
+      "area": "Permissões",
+      "title": "Sem participação não há acesso institucional",
+      "function": "authorize",
+      "arguments": {
+        "member": null,
+        "resource": {
+          "escola_id": 1,
+          "tipo": "aluno"
+        },
+        "action": "read"
+      },
+      "error": "not_found",
+      "status": 404
+    },
+    {
+      "id": "UNIT-007",
+      "area": "Períodos",
+      "title": "Intervalo letivo válido",
+      "function": "validate_period",
+      "arguments": {
+        "inicio": "2027-02-01",
+        "fim": "2027-12-15"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-008",
+      "area": "Períodos",
+      "title": "Datas invertidas são inválidas",
+      "function": "validate_period",
+      "arguments": {
+        "inicio": "2027-12-15",
+        "fim": "2027-02-01"
+      },
+      "error": "invalid_period",
+      "status": 422
+    },
+    {
+      "id": "UNIT-009",
+      "area": "Períodos",
+      "title": "Data inexistente é inválida",
+      "function": "validate_period",
+      "arguments": {
+        "inicio": "2027-02-30",
+        "fim": "2027-12-15"
+      },
+      "error": "invalid_period",
+      "status": 422
+    },
+    {
+      "id": "UNIT-010",
+      "area": "Períodos",
+      "title": "Período de um dia é aceito",
+      "function": "validate_period",
+      "arguments": {
+        "inicio": "2027-02-01",
+        "fim": "2027-02-01"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-011",
+      "area": "Matrículas",
+      "title": "Transição ativa → transferida",
+      "function": "validate_enrollment_transition",
+      "arguments": {
+        "current": "ativa",
+        "target": "transferida",
+        "period_status": "aberto"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-012",
+      "area": "Matrículas",
+      "title": "Transição ativa → cancelada",
+      "function": "validate_enrollment_transition",
+      "arguments": {
+        "current": "ativa",
+        "target": "cancelada",
+        "period_status": "aberto"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-013",
+      "area": "Matrículas",
+      "title": "Transição transferida → ativa",
+      "function": "validate_enrollment_transition",
+      "arguments": {
+        "current": "transferida",
+        "target": "ativa",
+        "period_status": "aberto"
+      },
+      "error": "invalid_enrollment_transition",
+      "status": 409
+    },
+    {
+      "id": "UNIT-014",
+      "area": "Matrículas",
+      "title": "Transição cancelada → ativa",
+      "function": "validate_enrollment_transition",
+      "arguments": {
+        "current": "cancelada",
+        "target": "ativa",
+        "period_status": "aberto"
+      },
+      "error": "invalid_enrollment_transition",
+      "status": 409
+    },
+    {
+      "id": "UNIT-015",
+      "area": "Matrículas",
+      "title": "Período fechado bloqueia alteração",
+      "function": "validate_enrollment_transition",
+      "arguments": {
+        "current": "ativa",
+        "target": "transferida",
+        "period_status": "fechado"
+      },
+      "error": "period_closed",
+      "status": 409
+    },
+    {
+      "id": "UNIT-016",
+      "area": "Integridade",
+      "title": "Relações locais são válidas",
+      "function": "validate_scope",
+      "arguments": {
+        "escola_id": 1,
+        "resources": [
+          {
+            "escola_id": 1
+          },
+          {
+            "escola_id": 1
+          }
+        ]
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-017",
+      "area": "Integridade",
+      "title": "Uma relação externa invalida a operação inteira",
+      "function": "validate_scope",
+      "arguments": {
+        "escola_id": 1,
+        "resources": [
+          {
+            "escola_id": 1
+          },
+          {
+            "escola_id": 2
+          }
+        ]
+      },
+      "error": "not_found",
+      "status": 404
+    },
+    {
+      "id": "UNIT-018",
+      "area": "Docência",
+      "title": "Oferta exata permite docência",
+      "function": "teacher_can_access",
+      "arguments": {
+        "assignments": [
+          {
+            "escola_id": 1,
+            "professor_id": 1,
+            "oferta_id": 1,
+            "ativo": true
+          }
+        ],
+        "escola_id": 1,
+        "professor_id": 1,
+        "oferta_id": 1
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-019",
+      "area": "Docência",
+      "title": "Outra oferta não é inferida por cruzamento",
+      "function": "teacher_can_access",
+      "arguments": {
+        "assignments": [
+          {
+            "escola_id": 1,
+            "professor_id": 1,
+            "oferta_id": 1,
+            "ativo": true
+          }
+        ],
+        "escola_id": 1,
+        "professor_id": 1,
+        "oferta_id": 3
+      },
+      "result": false
+    },
+    {
+      "id": "UNIT-020",
+      "area": "Docência",
+      "title": "Outra escola não permite docência",
+      "function": "teacher_can_access",
+      "arguments": {
+        "assignments": [
+          {
+            "escola_id": 1,
+            "professor_id": 1,
+            "oferta_id": 1,
+            "ativo": true
+          }
+        ],
+        "escola_id": 2,
+        "professor_id": 1,
+        "oferta_id": 1
+      },
+      "result": false
+    },
+    {
+      "id": "UNIT-021",
+      "area": "Docência",
+      "title": "Outro professor não recebe acesso",
+      "function": "teacher_can_access",
+      "arguments": {
+        "assignments": [
+          {
+            "escola_id": 1,
+            "professor_id": 1,
+            "oferta_id": 1,
+            "ativo": true
+          }
+        ],
+        "escola_id": 1,
+        "professor_id": 2,
+        "oferta_id": 1
+      },
+      "result": false
+    },
+    {
+      "id": "UNIT-022",
+      "area": "Docência",
+      "title": "Atribuição inativa é rejeitada",
+      "function": "teacher_can_access",
+      "arguments": {
+        "assignments": [
+          {
+            "escola_id": 1,
+            "professor_id": 1,
+            "oferta_id": 1,
+            "ativo": false
+          }
+        ],
+        "escola_id": 1,
+        "professor_id": 1,
+        "oferta_id": 1
+      },
+      "result": false
+    },
+    {
+      "id": "UNIT-023",
+      "area": "Notas",
+      "title": "Nota 0",
+      "function": "validate_grade",
+      "arguments": {
+        "value": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-024",
+      "area": "Notas",
+      "title": "Nota 10",
+      "function": "validate_grade",
+      "arguments": {
+        "value": 10,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-025",
+      "area": "Notas",
+      "title": "Nota 8.5",
+      "function": "validate_grade",
+      "arguments": {
+        "value": 8.5,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-026",
+      "area": "Notas",
+      "title": "Nota -1",
+      "function": "validate_grade",
+      "arguments": {
+        "value": -1,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "error": "invalid_grade",
+      "status": 422
+    },
+    {
+      "id": "UNIT-027",
+      "area": "Notas",
+      "title": "Nota 11",
+      "function": "validate_grade",
+      "arguments": {
+        "value": 11,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "error": "invalid_grade",
+      "status": 422
+    },
+    {
+      "id": "UNIT-028",
+      "area": "Notas",
+      "title": "Nota NaN",
+      "function": "validate_grade",
+      "arguments": {
+        "value": "NaN",
+        "minimum": 0,
+        "maximum": 10
+      },
+      "error": "invalid_grade",
+      "status": 422
+    },
+    {
+      "id": "UNIT-029",
+      "area": "Convites",
+      "title": "Convite válido para o destinatário",
+      "function": "validate_invitation",
+      "arguments": {
+        "invitation": {
+          "email": "nova@example.test",
+          "status": "pendente",
+          "expires_at": "2026-11-01T12:00:00Z"
+        },
+        "email": "nova@example.test",
+        "now": "2026-11-01T11:59:59Z"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-030",
+      "area": "Convites",
+      "title": "Expiração é inclusiva no instante limite",
+      "function": "validate_invitation",
+      "arguments": {
+        "invitation": {
+          "email": "nova@example.test",
+          "status": "pendente",
+          "expires_at": "2026-11-01T12:00:00Z"
+        },
+        "email": "nova@example.test",
+        "now": "2026-11-01T12:00:00Z"
+      },
+      "error": "invitation_expired",
+      "status": 410
+    },
+    {
+      "id": "UNIT-031",
+      "area": "Convites",
+      "title": "Convite utilizado não pode ser reusado",
+      "function": "validate_invitation",
+      "arguments": {
+        "invitation": {
+          "email": "nova@example.test",
+          "status": "aceito",
+          "expires_at": "2026-11-01T12:00:00Z"
+        },
+        "email": "nova@example.test",
+        "now": "2026-11-01T11:00:00Z"
+      },
+      "error": "invitation_used",
+      "status": 409
+    },
+    {
+      "id": "UNIT-032",
+      "area": "Convites",
+      "title": "Email diferente não pode aceitar",
+      "function": "validate_invitation",
+      "arguments": {
+        "invitation": {
+          "email": "nova@example.test",
+          "status": "pendente",
+          "expires_at": "2026-11-01T12:00:00Z"
+        },
+        "email": "outra@example.test",
+        "now": "2026-11-01T11:00:00Z"
+      },
+      "error": "invitation_recipient_mismatch",
+      "status": 403
+    },
+    {
+      "id": "UNIT-033",
+      "area": "Paginação",
+      "title": "Página padrão limita a 25 registros",
+      "function": "pagination",
+      "arguments": {
+        "page": null,
+        "per_page": null
+      },
+      "result": {
+        "page": 1,
+        "per_page": 25
+      }
+    },
+    {
+      "id": "UNIT-034",
+      "area": "Paginação",
+      "title": "Pedido excessivo limita a 100 registros",
+      "function": "pagination",
+      "arguments": {
+        "page": 1,
+        "per_page": 10000
+      },
+      "result": {
+        "page": 1,
+        "per_page": 100
+      }
+    },
+    {
+      "id": "UNIT-035",
+      "area": "Paginação",
+      "title": "Página zero é inválida",
+      "function": "pagination",
+      "arguments": {
+        "page": 0,
+        "per_page": 25
+      },
+      "error": "invalid_pagination",
+      "status": 422
+    },
+    {
+      "id": "UNIT-036",
+      "area": "Paginação",
+      "title": "Texto arbitrário não vira página válida",
+      "function": "pagination",
+      "arguments": {
+        "page": "abc",
+        "per_page": 25
+      },
+      "error": "invalid_pagination",
+      "status": 422
+    },
+    {
+      "id": "UNIT-037",
+      "area": "Arquivos",
+      "title": "PDF dentro do limite é permitido",
+      "function": "validate_upload_metadata",
+      "arguments": {
+        "filename": "documento.pdf",
+        "size": 1024
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-038",
+      "area": "Arquivos",
+      "title": "Extensão executável é rejeitada",
+      "function": "validate_upload_metadata",
+      "arguments": {
+        "filename": "arquivo.exe",
+        "size": 1024
+      },
+      "error": "invalid_file",
+      "status": 422
+    },
+    {
+      "id": "UNIT-039",
+      "area": "Arquivos",
+      "title": "Arquivo vazio é rejeitado",
+      "function": "validate_upload_metadata",
+      "arguments": {
+        "filename": "documento.pdf",
+        "size": 0
+      },
+      "error": "invalid_file",
+      "status": 422
+    },
+    {
+      "id": "UNIT-040",
+      "area": "Arquivos",
+      "title": "Tamanho acima de 16 MiB é rejeitado",
+      "function": "validate_upload_metadata",
+      "arguments": {
+        "filename": "documento.pdf",
+        "size": 16777217
+      },
+      "error": "payload_too_large",
+      "status": 413
+    },
+    {
+      "id": "UNIT-041",
+      "area": "Cache",
+      "title": "Cache separa escolas",
+      "function": "private_cache_key",
+      "arguments": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      },
+      "different_from": {
+        "escola_id": 2,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      }
+    },
+    {
+      "id": "UNIT-042",
+      "area": "Cache",
+      "title": "Cache separa usuários",
+      "function": "private_cache_key",
+      "arguments": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      },
+      "different_from": {
+        "escola_id": 1,
+        "usuario_id": 8,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      }
+    },
+    {
+      "id": "UNIT-043",
+      "area": "Cache",
+      "title": "Cache invalida mudança de permissão",
+      "function": "private_cache_key",
+      "arguments": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      },
+      "different_from": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 2,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      }
+    },
+    {
+      "id": "UNIT-044",
+      "area": "Cache",
+      "title": "Cache separa filtros de período",
+      "function": "private_cache_key",
+      "arguments": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 1
+        }
+      },
+      "different_from": {
+        "escola_id": 1,
+        "usuario_id": 7,
+        "permissions_version": 1,
+        "resource": "painel",
+        "params": {
+          "periodo_id": 2
+        }
+      }
+    },
+    {
+      "id": "UNIT-045",
+      "area": "Comunicação",
+      "title": "Aluno recebe comunicado para alunos",
+      "function": "can_read_notice",
+      "arguments": {
+        "role": "aluno",
+        "audience": "alunos"
+      },
+      "result": true
+    },
+    {
+      "id": "UNIT-046",
+      "area": "Comunicação",
+      "title": "Aluno não recebe comunicado restrito à equipe",
+      "function": "can_read_notice",
+      "arguments": {
+        "role": "aluno",
+        "audience": "equipe"
+      },
+      "result": false
+    },
+    {
+      "id": "UNIT-047",
+      "area": "Comunicação",
+      "title": "Professor recebe comunicado para equipe",
+      "function": "can_read_notice",
+      "arguments": {
+        "role": "professor",
+        "audience": "equipe"
+      },
+      "result": true
+    }
+  ]
+}

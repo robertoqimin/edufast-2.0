@@ -35,6 +35,8 @@ jobs:
       - name: Executar o mesmo CI local e remoto
         shell: bash
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
+      - name: Conferir infraestrutura e contratos TDD sem executar funcionalidades futuras
+        run: python .github/cicd/next_stage.py --check
       - name: Publicar a mesma imagem testada
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:

@@ -4,6 +4,12 @@ Esta é a fonte de verdade da automação. Os dois pontos de entrada em [workflo
 
 [Relatório da validação local](VALIDACAO.md)
 
+## Próxima etapa: testes antes da implementação
+
+O [pacote de revisão TDD](../../Documentos/testes/proxima-versao/README.md) define os contratos futuros de várias escolas e gestão acadêmica. Seu código fica em `next/`, o ambiente em `compose.next.yml` e o executor em `next_stage.py`. Não altera o código da aplicação.
+
+O CI normal confere somente a infraestrutura e a sincronização dos documentos desse pacote. A suíte futura é estrita e tem workflow manual separado em `tdd.yml`: continua RED até a implementação cumprir os contratos. Essa falha não é convertida em aprovação nem usada para publicar uma imagem.
+
 ## Estrutura e conectividade
 
 ```text
