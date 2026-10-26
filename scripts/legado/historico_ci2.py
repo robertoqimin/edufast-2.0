@@ -56,5 +56,5 @@ O CI do GitHub repete as verificações em um runner Linux e publica evidências
 
 Não há servidor configurado, domínio de produção ou secrets de implantação. O CD está preparado para o futuro e exige provisionamento, credenciais e plano de backup. Nenhuma produção real foi implantada.
 '''
-Path('ci2/Documentos/testes/RELATORIO_EDUFAST_2.md').write_text(report,encoding='utf-8')
+Path(__file__).resolve().parents[2].joinpath('Documentos/arquivo/ci2/Documentos/testes/RELATORIO_EDUFAST_2.md').write_text(report,encoding='utf-8')
 print('\n'.join(rows))

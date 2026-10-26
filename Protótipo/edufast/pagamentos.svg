@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+<title id="title">EduFast — Pagamentos — protótipo</title>
+<desc id="desc">Prancha conceitual estática com dados fictícios. Não representa uma tela funcional.</desc>
+<g font-family="Segoe UI, Arial, sans-serif">
+<rect x="0" y="0" width="1200" height="760" rx="0" fill="#f3f7f6" stroke="none"/>
+<rect x="0" y="0" width="228" height="760" rx="0" fill="#102e32" stroke="none"/>
+<rect x="24" y="28" width="36" height="36" rx="10" fill="#6fe1b8" stroke="none"/>
+<text x="34" y="53" font-size="24" fill="#102e32" font-weight="800">E</text>
+<text x="72" y="53" font-size="25" fill="#ffffff" font-weight="700">EduFast</text>
+<text x="26" y="92" font-size="11" fill="#b1c9ca" font-weight="600">GESTÃO ESCOLAR</text>
+<text x="26" y="137" font-size="10" fill="#a5c3c4" font-weight="600">ESPAÇO DE TRABALHO</text>
+<rect x="30" y="171" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="185" font-size="13" fill="#bed2d3" font-weight="400">Visão geral</text>
+<rect x="30" y="220" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="234" font-size="13" fill="#bed2d3" font-weight="400">Turmas</text>
+<rect x="30" y="269" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="283" font-size="13" fill="#bed2d3" font-weight="400">Alunos e professores</text>
+<rect x="30" y="318" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="332" font-size="13" fill="#bed2d3" font-weight="400">Disciplinas</text>
+<rect x="30" y="367" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="381" font-size="13" fill="#bed2d3" font-weight="400">Documentos</text>
+<rect x="30" y="416" width="13" height="13" rx="4" fill="#6d9698" stroke="none"/>
+<text x="55" y="430" font-size="13" fill="#bed2d3" font-weight="400">Folha de ponto</text>
+<rect x="16" y="453" width="196" height="39" rx="9" fill="#25564f" stroke="none"/>
+<rect x="30" y="465" width="13" height="13" rx="4" fill="#6fe1b8" stroke="none"/>
+<text x="55" y="479" font-size="13" fill="#ffffff" font-weight="600">Pagamentos</text>
+<text x="26" y="677" font-size="14" fill="#ffffff" font-weight="600">Escola Horizonte</text>
+<text x="26" y="699" font-size="12" fill="#bed2d3" font-weight="400">Instituição fictícia</text>
+<rect x="228" y="0" width="972" height="70" rx="0" fill="#ffffff" stroke="none"/>
+<text x="264" y="42" font-size="13" fill="#526b72" font-weight="400">Escola Horizonte  /  Pagamentos</text>
+<rect x="947" y="21" width="225" height="28" rx="14" fill="#edf4f1" stroke="none"/><text x="959" y="40" font-size="12" fill="#28574b" font-weight="600">MÓDULO PLANEJADO</text>
+<text x="264" y="119" font-size="30" fill="#162f35" font-weight="700">Pagamentos sob controle.</text>
+<text x="264" y="149" font-size="14" fill="#526b72" font-weight="400">Obrigações da escola com revisão e acompanhamento por competência.</text>
+<text x="264" y="177" font-size="10" fill="#526b72" font-weight="600">APRESENTAÇÃO DO PRODUTO · DADOS FICTÍCIOS</text>
+<rect x="264" y="196" width="212" height="112" rx="14" fill="#ffffff" stroke="#dce6e5"/><text x="282" y="225" font-size="13" fill="#526b72" font-weight="400">Folha prevista</text><text x="282" y="262" font-size="29" fill="#162f35" font-weight="700">R$ 84 mil</text><text x="282" y="287" font-size="12" fill="#526b72" font-weight="400">Exemplo · colaboradores</text>
+<rect x="494" y="196" width="212" height="112" rx="14" fill="#ffffff" stroke="#dce6e5"/><text x="512" y="225" font-size="13" fill="#526b72" font-weight="400">Contas a pagar</text><text x="512" y="262" font-size="29" fill="#162f35" font-weight="700">R$ 12 mil</text><text x="512" y="287" font-size="12" fill="#526b72" font-weight="400">Exemplo · fornecedores</text>
+<rect x="724" y="196" width="212" height="112" rx="14" fill="#ffffff" stroke="#dce6e5"/><text x="742" y="225" font-size="13" fill="#526b72" font-weight="400">Recebimentos</text><text x="742" y="262" font-size="29" fill="#162f35" font-weight="700">R$ 96 mil</text><text x="742" y="287" font-size="12" fill="#526b72" font-weight="400">Exemplo · financeiro escolar</text>
+<rect x="954" y="196" width="212" height="112" rx="14" fill="#ffffff" stroke="#dce6e5"/><text x="972" y="225" font-size="13" fill="#526b72" font-weight="400">Em revisão</text><text x="972" y="262" font-size="29" fill="#162f35" font-weight="700">03</text><text x="972" y="287" font-size="12" fill="#526b72" font-weight="400">Sem pagamento automático</text>
+<rect x="264" y="330" width="580" height="337" rx="14" fill="#ffffff" stroke="#dce6e5"/>
+<text x="284" y="361" font-size="16" fill="#162f35" font-weight="600">Obrigações · dados fictícios</text>
+<rect x="284" y="379" width="374" height="34" rx="7" fill="#f3f7f6" stroke="none"/>
+<text x="296" y="401" font-size="12" fill="#526b72" font-weight="400">Buscar por nome ou identificação…</text>
+<rect x="672" y="382" width="150" height="28" rx="14" fill="#e2f3ed" stroke="none"/><text x="684" y="401" font-size="12" fill="#18624d" font-weight="600">Filtrar</text>
+<rect x="284" y="429" width="540" height="31" rx="4" fill="#f3f7f6" stroke="none"/>
+<text x="296" y="450" font-size="10" fill="#526b72" font-weight="600">DESCRIÇÃO</text>
+<text x="551" y="450" font-size="10" fill="#526b72" font-weight="600">VALOR PREVISTO</text>
+<text x="702" y="450" font-size="10" fill="#526b72" font-weight="600">SITUAÇÃO</text>
+<text x="296" y="484" font-size="12" fill="#162f35" font-weight="500">Folha · equipe pedagógica</text>
+<text x="551" y="484" font-size="12" fill="#526b72" font-weight="400">R$ 62.000,00</text>
+<rect x="693" y="464" width="124" height="28" rx="14" fill="#fff1d9" stroke="none"/><text x="705" y="483" font-size="12" fill="#7b5510" font-weight="600">A revisar</text>
+<path d="M284 499 H824" stroke="#edf1f0"/>
+<text x="296" y="533" font-size="12" fill="#162f35" font-weight="500">Folha · equipe administrativa</text>
+<text x="551" y="533" font-size="12" fill="#526b72" font-weight="400">R$ 22.000,00</text>
+<rect x="693" y="513" width="124" height="28" rx="14" fill="#fff1d9" stroke="none"/><text x="705" y="532" font-size="12" fill="#7b5510" font-weight="600">Rascunho</text>
+<path d="M284 548 H824" stroke="#edf1f0"/>
+<text x="296" y="582" font-size="12" fill="#162f35" font-weight="500">Serviços e fornecedores</text>
+<text x="551" y="582" font-size="12" fill="#526b72" font-weight="400">R$ 12.000,00</text>
+<rect x="693" y="562" width="124" height="28" rx="14" fill="#fff1d9" stroke="none"/><text x="705" y="581" font-size="12" fill="#7b5510" font-weight="600">A revisar</text>
+<path d="M284 597 H824" stroke="#edf1f0"/>
+<text x="296" y="631" font-size="12" fill="#162f35" font-weight="500">Demonstrativos da competência</text>
+<text x="551" y="631" font-size="12" fill="#526b72" font-weight="400">Consulta</text>
+<rect x="693" y="611" width="124" height="28" rx="14" fill="#fff1d9" stroke="none"/><text x="705" y="630" font-size="12" fill="#7b5510" font-weight="600">Planejado</text>
+<path d="M284 646 H824" stroke="#edf1f0"/>
+<rect x="862" y="330" width="304" height="337" rx="14" fill="#ffffff" stroke="#dce6e5"/>
+<text x="882" y="361" font-size="16" fill="#162f35" font-weight="600">Do cálculo à confirmação</text>
+<rect x="882" y="384" width="37" height="28" rx="14" fill="#e2f3ed" stroke="none"/><text x="894" y="403" font-size="12" fill="#18624d" font-weight="600">01</text>
+<text x="931" y="401" font-size="13" fill="#162f35" font-weight="600">Preparar e conferir</text>
+<text x="882" y="427" font-size="12" fill="#526b72" font-weight="400">Revise eventos e valores.</text>
+<rect x="882" y="456" width="37" height="28" rx="14" fill="#e2f3ed" stroke="none"/><text x="894" y="475" font-size="12" fill="#18624d" font-weight="600">02</text>
+<text x="931" y="473" font-size="13" fill="#162f35" font-weight="600">Aprovar o fechamento</text>
+<text x="882" y="499" font-size="12" fill="#526b72" font-weight="400">Separe revisão e autorização.</text>
+<rect x="882" y="528" width="37" height="28" rx="14" fill="#e2f3ed" stroke="none"/><text x="894" y="547" font-size="12" fill="#18624d" font-weight="600">03</text>
+<text x="931" y="545" font-size="13" fill="#162f35" font-weight="600">Confirmar a transação</text>
+<text x="882" y="571" font-size="12" fill="#526b72" font-weight="400">Concilie com o pagamento real.</text>
+<rect x="882" y="613" width="264" height="35" rx="8" fill="#18624d" stroke="none"/>
+<text x="900" y="636" font-size="13" fill="#ffffff" font-weight="600">Ver competência</text>
+<text x="264" y="706" font-size="12" fill="#526b72" font-weight="400">Protótipo conceitual · As ações ilustradas não executam operações.</text>
+<text x="264" y="729" font-size="12" fill="#526b72" font-weight="400">Direção de UX/UI: menos etapas, contexto visível e feedback claro.</text>
+<text x="1041" y="729" font-size="11" fill="#18624d" font-weight="700">EDUFAST 2.0</text>
+</g></svg>
