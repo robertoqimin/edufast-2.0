@@ -1,0 +1,74 @@
+name: CI e imagem de produção
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Regressão, API, baseline e TLS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Códigos/requirements.txt
+      - name: Instalar dependências dos executores
+        run: python -m pip install -r Códigos/requirements.txt
+      - name: Executar CI em bancos descartáveis
+        run: bash scripts/ci.sh
+      - name: Preservar evidências mesmo em caso de falha
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: validacao-${{ github.sha }}
+          path: Documentos/testes/resultados/ci/
+          if-no-files-found: warn
+          retention-days: 14
+
+  publicar:
+    name: Publicar imagem validada no GHCR
+    needs: validar
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Autenticar no registro do GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Construir e publicar por commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "$image:sha-$GITHUB_SHA" Códigos
+          docker push "$image:sha-$GITHUB_SHA"
+          ref="$(docker inspect --format '{{index .RepoDigests 0}}' "$image:sha-$GITHUB_SHA")"
+          printf 'Imagem publicada: `%s`\n' "$ref" >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' "$ref" > imagem-publicada.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: imagem-${{ github.sha }}
+          path: imagem-publicada.txt
+          retention-days: 30
