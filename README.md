@@ -8,6 +8,10 @@ O **EduFast** é um software de gestão escolar com foco em **agilidade, experi�
 
 [Arquitetura](Documentos/arquitetura/ARQUITETURA.md) · [Telas e UX/UI](Documentos/produto/TELAS_E_UX.md) · [Roadmap](Documentos/planejamento/ROADMAP.md) · [Execução](Documentos/operacao/EXECUCAO.md) · [Documentação](Documentos/README.md)
 
+[![CI - EduFast](https://github.com/Samucau1/edufast-2.0/actions/workflows/ci.yml/badge.svg)](https://github.com/Samucau1/edufast-2.0/actions/workflows/ci.yml)
+
+**CI/CD:** [configuração central e guia de produção](.github/cicd/README.md). Os workflows em `.github/workflows` executam testes isolados, publicam a mesma imagem validada e oferecem implantação manual por SSH após provisionamento do servidor.
+
 ## Por que o EduFast existe?
 
 Escolas lidam diariamente com cadastros, turmas, documentos, notas, comunicação e rotinas de equipe. Quando as informações ficam espalhadas, tarefas simples exigem consultas repetidas e retrabalho.
@@ -98,6 +102,9 @@ O [documento de arquitetura](Documentos/arquitetura/ARQUITETURA.md) detalha resp
 
 ```text
 Teste-de-software/
+├── .github/
+│   ├── workflows/                # Entradas obrigatórias do GitHub Actions
+│   └── cicd/                     # CI/CD, testes e configuração de produção
 ├── Códigos/                       # Aplicação executável
 │   ├── app/
 │   │   ├── controllers/           # Operações da aplicação
@@ -128,7 +135,7 @@ Teste-de-software/
 └── LICENSE
 ```
 
-Os PDFs e DOCX originais foram preservados em `Documentos/`. O pacote `arquivo/ci2` contém referências a arquivos e testes de outra base: não é a aplicação ativa nem um pipeline CI instalado neste repositório.
+Os PDFs e DOCX originais foram preservados em `Documentos/`. O pacote `arquivo/ci2` mantém relatórios históricos de outra base. A automação antiga foi substituída pelo CI/CD ativo em `.github/`.
 
 ## Executar localmente
 
@@ -178,7 +185,7 @@ Mais comandos, configuração e solução de problemas: [guia de execução](Doc
 4. Implementar RH e ponto com revisão e trilha de alterações.
 5. Evoluir folha e financeiro com regras configuráveis e validação especializada.
 
-O [roadmap](Documentos/planejamento/ROADMAP.md) detalha dependências e critérios de entrega. Logs arquivados são evidências históricas; não comprovam testes da versão atual.
+O [roadmap](Documentos/planejamento/ROADMAP.md) detalha dependências e critérios de entrega. Logs arquivados são históricos; os testes atuais estão em `.github/cicd/` e os resultados remotos na aba Actions.
 
 ## Contribuir
 

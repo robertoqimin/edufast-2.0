@@ -22,3 +22,14 @@ env/
 # OS/editor cache
 .DS_Store
 Thumbs.db
+
+# Runtime and CI evidence
+.ci-results/
+ci-local.log
+uploads/
+*.sqlite
+*.sqlite3
+*.db
+backups/
+*.key
+*.pem

@@ -1,3 +1,5 @@
+> Documento historico de outra base. Use o [CI/CD atual](../../../../../.github/cicd/README.md) como procedimento operacional.
+
 # EduFast 2.0 — CI/CD e preparação de produção
 
 Repositório privado: https://github.com/Samucau1/edufast-2.0. A aplicação continua sendo EducaFast. Esta entrega prepara automação e imagem; **não existe servidor de produção configurado nem implantação real executada**.

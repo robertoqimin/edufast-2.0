@@ -1,12 +1,7 @@
-# Utilitários históricos
+﻿# Utilitário histórico GitHub
 
-Estes scripts foram movidos da raiz e não fazem parte da instalação do EduFast.
+`github_edufast.py` foi preservado como utilitário de operações GitHub com credencial local. Não faz parte da instalação, do CI ou do deploy.
 
-| Script | Finalidade histórica |
-| --- | --- |
-| `aplicar_ci2.py` | Copiar o pacote CI2 para outro projeto local |
-| `fixar_actions.py` | Consultar o GitHub e fixar referências de Actions no pacote arquivado |
-| `github_edufast.py` | Operações GitHub com credencial local; possui opção de criação de repositório |
-| `historico_ci2.py` | Gerar relatório com commits e resultados de outra base |
+Os antigos scripts de cópia, fixação de Actions e geração de relatório foram retirados para evitar alterações na automação obsoleta. Suas versões anteriores permanecem no histórico Git.
 
-Os scripts de cópia e relatório ainda dependem de caminhos externos específicos. Não os execute para iniciar ou testar esta aplicação. Os caminhos do pacote CI2 foram ajustados para sua localização em `Documentos/arquivo/ci2`; as referências à outra base foram preservadas como contexto histórico.
+A fonte de verdade da automação é [.github/cicd](../../.github/cicd/README.md).

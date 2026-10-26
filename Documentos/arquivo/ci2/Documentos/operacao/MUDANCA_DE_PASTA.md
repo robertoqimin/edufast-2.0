@@ -1,3 +1,5 @@
+> Documento historico de outra base. Use o [CI/CD atual](../../../../../.github/cicd/README.md) como procedimento operacional.
+
 # Pasta local e repositório — EduFast 2.0
 
 Pasta principal: `C:\Users\SGFer\Documents\ProjetoMk1\SamusChat\Educafast`.

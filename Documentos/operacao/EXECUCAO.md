@@ -51,7 +51,7 @@ O seed atual executa `session.query(UsuarioModel).delete()` antes de inserir o a
 docker compose exec app python -m app.seed
 ```
 
-Credenciais de demonstração: `admin@admin.com` / `123`. Substitua a senha antes de expor o ambiente. Um provisionamento não destrutivo de administrador deve ser implementado antes do uso operacional.
+Credenciais do seed de demonstração: `admin@admin.com` / `123`. Para criar um administrador sem apagar usuários, use `docker compose exec app flask --app 'app:create_app()' create-admin`. O comando pede email e senha e recusa sobrescrever contas existentes.
 
 ## Comandos úteis
 
@@ -76,6 +76,6 @@ docker compose down
 
 ## Estado de validação
 
-Os logs preservados em `Documentos/testes/logs-historicos/` e os relatórios em `Documentos/arquivo/ci2/` pertencem a execuções anteriores e a outra base. Não há declaração de regressão aprovada da aplicação atual. Não execute os scripts de `scripts/legado/` como parte da instalação.
+Os logs em `Documentos/testes/logs-historicos/` são históricos. O [CI/CD atual](../../.github/cicd/README.md) executa testes novos em ambiente descartável; os resultados ficam em `.ci-results` localmente e nos artefatos do Actions. Não execute utilitários de legado como parte da instalação.
 
-O servidor atual é de desenvolvimento. Implantação real requer configuração própria de servidor, HTTPS, segredos, acesso ao banco, backups, observabilidade e validação dos fluxos.
+O Compose de `Códigos` é de desenvolvimento. A [configuração de produção](../../.github/cicd/README.md) usa Gunicorn e Caddy com HTTPS e exige provisionamento, segredos, backups externos e homologação no servidor real.

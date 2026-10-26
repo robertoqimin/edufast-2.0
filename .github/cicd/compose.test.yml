@@ -1,0 +1,16 @@
+# Override exclusivo do CI. Portas aleatórias e volumes descartáveis por execução.
+services:
+  proxy:
+    ports: !override ["127.0.0.1::443"]
+    volumes:
+      - ./Caddyfile.test:/etc/caddy/Caddyfile:ro
+  tests:
+    image: ${EDUFAST_IMAGE}
+    profiles: [test]
+    environment:
+      DB_URL: mysql+pymysql://edufast:ci-database-only@db:3306/edufast
+      SECRET_KEY: ci-only-secret-key-with-at-least-32-characters
+    volumes:
+      - ./tests:/tests:ro
+    networks: [backend]
+    entrypoint: ["python", "-m", "unittest", "discover", "-s", "/tests", "-v"]

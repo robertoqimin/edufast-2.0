@@ -7,6 +7,7 @@
 | [Arquitetura](arquitetura/ARQUITETURA.md) | Camadas, dados, requisições e evolução |
 | [Telas e UX/UI](produto/TELAS_E_UX.md) | Telas existentes, protótipos e critérios de experiência |
 | [Execução](operacao/EXECUCAO.md) | Ambiente, configuração, comandos e persistência |
+| [CI/CD e produção](../.github/cicd/README.md) | Testes, imagem, deploy e recuperação |
 | [Roadmap](planejamento/ROADMAP.md) | Etapas, dependências e critérios de entrega |
 | [Planejamento anterior](planejamento/PLANEJAMENTO_EDUCAFAST.md) | Proposta histórica de cursos e gestão acadêmica |
 | [Histórico de testes](testes/README.md) | Origem e limites dos logs preservados |

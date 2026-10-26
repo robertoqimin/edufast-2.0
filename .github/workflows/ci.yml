@@ -1,0 +1,74 @@
+name: CI - EduFast
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Testar, validar produção e publicar imagem
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Validar workflows
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
+          docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck rhysd/actionlint:1.7.7 .github/cicd/deploy.sh .github/cicd/remote.sh
+      - name: Executar o mesmo CI local e remoto
+        shell: bash
+        run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
+      - name: Publicar a mesma imagem testada
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          tested="$(cat .ci-results/image.txt)"
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag "$tested" "$image:sha-$GITHUB_SHA"
+          docker push "$image:sha-$GITHUB_SHA"
+          ref="$(docker inspect --format '{{index .RepoDigests 0}}' "$image:sha-$GITHUB_SHA")"
+          digest="${ref##*@}"
+          export RELEASE_IMAGE="$image" RELEASE_DIGEST="$digest"
+          python -c 'import json,os; from pathlib import Path; Path(".ci-results/release.json").write_text(json.dumps({"image":os.environ["RELEASE_IMAGE"],"digest":os.environ["RELEASE_DIGEST"],"commit":os.environ["GITHUB_SHA"]}))'
+          printf 'Imagem testada: %s\n' "$ref" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preservar release para o CD
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ github.run_id }}
+          path: .ci-results/release.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preservar evidências inclusive em falhas
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ci-${{ github.run_id }}
+          path: |
+            .ci-results/
+            ci-run.log
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

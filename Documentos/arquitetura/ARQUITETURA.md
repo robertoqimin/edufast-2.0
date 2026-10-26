@@ -98,7 +98,7 @@ flowchart TB
     Env --> DB
 ```
 
-O Compose atual é de desenvolvimento: monta o código local no container, publica o banco e executa o servidor Flask com debug na entrada. Não há servidor de produção configurado nesta base. Os arquivos arquivados de CI/CD não alteram esse estado.
+O Compose de `Códigos/` é de desenvolvimento. A configuração de produção está centralizada em [`.github/cicd`](../../.github/cicd/README.md): imagem Gunicorn sem root, proxy Caddy com HTTPS, banco sem porta publicada e volumes persistentes. `/healthz` verifica o banco e identifica a release. O servidor real ainda precisa ser provisionado.
 
 ## Evolução proposta
 
@@ -121,7 +121,7 @@ Para várias escolas na mesma instalação será necessário definir instituiç�
 ## Limites conhecidos
 
 - Não há implementação de ponto, folha ou financeiro nesta base.
-- O seed atual remove usuários antes de criar o administrador de demonstração.
-- Os testes e relatórios de `arquivo/ci2` dependem de arquivos de outra base; não comprovam a validação do código atual.
+- O seed antigo remove usuários. O novo comando `flask --app 'app:create_app()' create-admin` cria um administrador sem apagar contas e recusa sobrescrever usuários.
+- Os relatórios de `arquivo/ci2` são históricos; os testes ativos estão em `.github/cicd`.
 - Padronização de autorização, migrações, tratamento de arquivos e configuração de produção são etapas de evolução, não garantias já entregues.
 - Os protótipos ilustram a direção de produto e não alteram rotas ou entidades.

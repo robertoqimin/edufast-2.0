@@ -1,0 +1,68 @@
+name: edufast-production
+services:
+  proxy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?Defina DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Defina ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [frontend]
+    depends_on:
+      app:
+        condition: service_healthy
+  app:
+    image: ${EDUFAST_IMAGE:?Defina imagem por digest publicada pelo CI}
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY}
+      TRUSTED_HOSTS: ${DOMAIN:?Defina DOMAIN},localhost
+      RELEASE_ID: ${EDUFAST_IMAGE}
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-edufast}
+      DB_USER: ${DB_USER:-edufast}
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+      UPLOAD_FOLDER: /app/uploads
+    volumes: ["uploads_data:/app/uploads"]
+    networks: [frontend, backend]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 12
+      start_period: 30s
+    security_opt: ["no-new-privileges:true"]
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Defina MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-edufast}
+      MYSQL_USER: ${DB_USER:-edufast}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+    volumes: ["mysql_data:/var/lib/mysql"]
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=tcp -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+networks:
+  frontend: {}
+  backend:
+    internal: true
+volumes:
+  mysql_data:
+  uploads_data:
+  caddy_data:
+  caddy_config:
