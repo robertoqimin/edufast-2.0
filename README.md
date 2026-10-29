@@ -146,16 +146,31 @@ Requisitos: Git e Docker com Docker Compose. No Windows, mantenha o Docker Deskt
 ```powershell
 git clone https://github.com/Samucau1/edufast-2.0.git
 cd edufast-2.0
-Copy-Item 'Códigos/.env.example' 'Códigos/.env'
 ```
 
-Edite `Códigos/.env` e configure `SECRET_KEY`, `DB_PASSWORD` e `MYSQL_ROOT_PASSWORD`. Depois:
+Para **teste manual isolado no Windows**, basta executar (não precisa copiar o `.env`):
 
 ```powershell
-.\iniciar-educafast.ps1 -SemNavegador
+.\iniciar-educafast.ps1
 ```
 
-Ou, em qualquer sistema com Docker:
+O script gera segredos em `.ci-results/manual/.env`, prepara somente um banco novo
+vazio e usa volumes do projeto `edufast-manual`. Cria os logins
+`superadmin@teste.local`, `admin@teste.local`, `professor@teste.local` e
+`aluno@teste.local`, todos com senha inicial **`Teste-local-2026!`**.
+Professor e aluno ficam vinculados à turma e disciplina de teste. Essas credenciais
+são públicas e servem apenas para esse ambiente local, acessível por loopback.
+Reiniciar preserva senhas, permissões e dados. Banco existente não recebe migrations.
+Se a configuração já existir mas o banco ainda estiver vazio, use
+`.\iniciar-educafast.ps1 -PrepararBancoNovo` uma vez.
+Use `-Porta 5050` se a porta 5000 estiver ocupada; `-SemNavegador` evita abrir a janela.
+`-Acao Parar`, `-Acao Status` e `-Acao Logs` controlam somente esse ambiente.
+
+Para uma instalação própria, edite `Códigos/.env` e configure `SECRET_KEY`,
+`DB_PASSWORD` e `MYSQL_ROOT_PASSWORD`. Em qualquer sistema com Docker:
+
+Copie antes o modelo com `Copy-Item 'Códigos/.env.example' 'Códigos/.env'`
+(PowerShell) ou `cp Códigos/.env.example Códigos/.env` (Linux/macOS).
 
 ```bash
 cd Códigos
@@ -163,7 +178,8 @@ docker compose up -d --build
 docker compose logs -f app
 ```
 
-Acesse **http://localhost:5000** após a inicialização. A aplicação usa a porta 5000; o MySQL é publicado na porta 3306.
+Acesse **http://localhost:5000** após a inicialização. No modo manual, o MySQL não
+publica porta no computador. No Compose direto, sua porta fica restrita ao loopback.
 
 **Esquema e administrador:** esta versão não altera o banco ao iniciar. Revise o [procedimento de provisionamento e migração](Códigos/migrations/README.md) antes de usar um banco novo ou atualizar uma instalação. Depois, use `docker compose exec app flask --app 'app:create_app()' create-admin` para cadastrar um administrador com credenciais próprias. O seed destrutivo anterior foi desativado.
 

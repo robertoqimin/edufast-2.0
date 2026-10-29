@@ -1,0 +1,15 @@
+# Isolated manual test environment. Docker Compose >= 2.24.4.
+services:
+  app:
+    container_name: !reset null
+    ports: !override ["127.0.0.1:${EDUFAST_MANUAL_PORT:-5000}:5000"]
+    environment:
+      APP_ENV: development
+      FLASK_DEBUG: "0"
+      PYTHON_DOTENV_DISABLED: "1"
+      DB_URL: ""
+      DB_NAME: edufast_manual
+      EDUFAST_MANUAL_TEST: "1"
+  db:
+    container_name: !reset null
+    ports: !reset []
