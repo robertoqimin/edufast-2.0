@@ -3,6 +3,7 @@ from app.routes.home_routes import home_blueprint
 from app.routes.auth_routes import auth_bp
 from app.routes.professor_routes import professor_bp
 from app.routes.aluno_routes import aluno_bp
+from app.routes.aprovacoes_routes import aprovacoes_bp
 
 
 def register_routes(app):
@@ -11,3 +12,4 @@ def register_routes(app):
     app.register_blueprint(document_bp)
     app.register_blueprint(professor_bp)
     app.register_blueprint(aluno_bp)
+    app.register_blueprint(aprovacoes_bp)

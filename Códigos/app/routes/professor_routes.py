@@ -14,8 +14,8 @@ professor_bp = Blueprint("professor", __name__)
 @professor_bp.route("/professor", methods=["GET"])
 @professor_bp.route("/professor/dashboard", methods=["GET"])
 def dashboard():
-    teacher_required()
-    data = get_teacher_area_data(session.get("user_id"))
+    identity = teacher_required()
+    data = get_teacher_area_data(identity.id)
     if not data:
         abort(404)
 
@@ -24,8 +24,8 @@ def dashboard():
 
 @professor_bp.route("/professor/notas/salvar", methods=["POST"])
 def salvar_nota():
-    teacher_required()
-    response, status = save_student_grade(session.get("user_id"), request.form)
+    identity = teacher_required()
+    response, status = save_student_grade(identity.id, request.form)
     if 200 <= status < 300:
         return redirect(url_for("professor.dashboard"))
 
@@ -34,8 +34,8 @@ def salvar_nota():
 
 @professor_bp.route("/professor/atividades/lancar", methods=["POST"])
 def lancar_atividade():
-    teacher_required()
-    response, status = launch_activity(session.get("user_id"), request.form, request.files)
+    identity = teacher_required()
+    response, status = launch_activity(identity.id, request.form, request.files)
     if 200 <= status < 300:
         return redirect(url_for("professor.dashboard"))
 
@@ -44,9 +44,9 @@ def lancar_atividade():
 
 @professor_bp.route("/professor/documentos/upload", methods=["POST"])
 def upload_documento_professor():
-    teacher_required()
+    identity = teacher_required()
     response, status = upload_requested_document(
-        session.get("user_id"),
+        identity.id,
         request.form,
         request.files,
     )

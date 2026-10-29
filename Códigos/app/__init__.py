@@ -4,6 +4,10 @@ from sqlalchemy.orm.exc import StaleDataError
 from .concurrency import MutationConflict
 from sqlalchemy import text
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask import request, session
+from urllib.parse import urlsplit
+from secrets import token_urlsafe
+import hmac
 
 from config import Config
 from .database import init_db, engine
@@ -18,6 +22,11 @@ def create_app():
         static_folder="static",
     )
     app.config.from_object(Config)
+    if app.config["APP_ENV"] != "development" and app.config["DEBUG"]:
+        raise RuntimeError("Debug nao permitido neste ambiente.")
+    if (len(app.config["SECRET_KEY"]) < 32 or app.config["SECRET_KEY"] == "desenvolvimento-web-flask"
+            or app.config["SECRET_KEY"].lower().startswith(("troque-", "substitua_"))):
+        raise RuntimeError("SECRET_KEY propria com pelo menos 32 caracteres e obrigatoria em qualquer ambiente.")
     if app.config["APP_ENV"] == "production":
         if len(app.config["SECRET_KEY"]) < 32 or app.config["SECRET_KEY"] == "desenvolvimento-web-flask":
             raise RuntimeError("Produção exige SECRET_KEY própria com pelo menos 32 caracteres.")
@@ -37,7 +46,25 @@ def create_app():
 
     @app.context_processor
     def submission_context():
-        return {"submission_key": lambda: uuid4().hex}
+        if "csrf_token" not in session:
+            session["csrf_token"] = token_urlsafe(32)
+        return {"submission_key": lambda: uuid4().hex, "csrf_token": session["csrf_token"]}
+
+    @app.before_request
+    def browser_origin_protection():
+        if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+            return
+        origin = request.headers.get("Origin")
+        if origin:
+            expected, supplied = urlsplit(request.host_url), urlsplit(origin)
+            if (supplied.scheme, supplied.netloc) != (expected.scheme, expected.netloc):
+                return jsonify(erro="Origem nao autorizada"), 403
+            if session.get("user_id") and not request.headers.get("Authorization"):
+                supplied_token = request.headers.get("X-CSRF-Token") or request.form.get("csrf_token", "")
+                if not hmac.compare_digest(str(session.get("csrf_token", "")), supplied_token) or not supplied_token:
+                    return jsonify(erro="Token CSRF obrigatorio"), 403
+        if request.headers.get("Sec-Fetch-Site") == "cross-site":
+            return jsonify(erro="Origem nao autorizada"), 403
 
     register_routes(app)
 

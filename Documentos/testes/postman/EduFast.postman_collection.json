@@ -751,6 +751,10 @@
             {
               "key": "versao",
               "value": "0"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-nota0"
             }
           ]
         }
@@ -771,7 +775,7 @@
       ]
     },
     {
-      "name": "Rejeitar repeticao de nota",
+      "name": "Repetir proposta de nota",
       "request": {
         "method": "POST",
         "header": [],
@@ -798,6 +802,10 @@
             {
               "key": "versao",
               "value": "0"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-nota0"
             }
           ]
         }
@@ -811,14 +819,134 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
             ]
           }
         }
       ]
     },
     {
-      "name": "Editar nota versao 1",
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta salvar_nota",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'salvar_nota' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar salvar_nota",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Propor edicao nota versao 1",
       "request": {
         "method": "POST",
         "header": [],
@@ -845,6 +973,10 @@
             {
               "key": "versao",
               "value": "1"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-nota1"
             }
           ]
         }
@@ -859,6 +991,126 @@
             "type": "text/javascript",
             "exec": [
               "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta salvar_nota",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'salvar_nota' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar salvar_nota",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
             ]
           }
         }
@@ -983,6 +1235,11 @@
               "type": "text"
             },
             {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
               "key": "arquivo",
               "type": "file",
               "src": "Documentos/testes/postman/arquivo.txt"
@@ -1017,6 +1274,304 @@
             {
               "key": "solicitacao_id",
               "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta lancar_atividade",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'lancar_atividade' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar lancar_atividade",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta responder_documento",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'responder_documento' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar responder_documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta ja autorizada",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nova tentativa de responder documento concluido",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-outra-resposta-prof",
               "type": "text"
             },
             {

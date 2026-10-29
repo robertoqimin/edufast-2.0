@@ -1,25 +1,23 @@
-from flask import abort, jsonify, session
-
-from app.auth import normalize_role
+from flask import jsonify
+from app.concurrency import MutationConflict
+from app.services.identidade_service import ADMIN_ROLES, require_role
 
 
 def admin_required():
-    if normalize_role(session.get("user_role")) != "admin":
-        abort(403)
+    return require_role(*ADMIN_ROLES)
 
 
 def admin_json_required():
-    if normalize_role(session.get("user_role")) != "admin":
-        return jsonify({"erro": "Acesso permitido apenas para administradores"}), 403
-
+    try:
+        admin_required()
+    except MutationConflict as error:
+        return jsonify({"erro": error.message}), error.status
     return None
 
 
 def aluno_required():
-    if normalize_role(session.get("user_role")) != "aluno":
-        abort(403)
+    return require_role("aluno")
 
 
 def teacher_required():
-    if normalize_role(session.get("user_role")) != "professor":
-        abort(403)
+    return require_role("professor")

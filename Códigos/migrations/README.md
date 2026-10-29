@@ -1,5 +1,21 @@
 # Migração de concorrência — revisão pendente
 
+## Aprovações e permissões — 002 também pendente
+
+`002_aprovacoes_e_permissoes.sql` adiciona estado da conta, permissão limitada de
+revisor, versão de autenticação e solicitações auditáveis. Não foi executada no banco
+existente. Os testes criam apenas esquemas novos e descartáveis via metadata.
+
+O legado não prova quais professores foram admitidos por administrador: a proposta
+de SQL coloca professores existentes em revisão. Antes de executar, revisar com o
+responsável a lista de contas e evidências de aprovação. Não promover automaticamente,
+não apagar usuários e não conceder superadmin por compatibilidade. Fazer backup e
+ensaiar restauração de banco e uploads; DDL MySQL não oferece rollback transacional.
+
+Superadmin novo: `flask --app 'app:create_app()' create-admin --super-admin`.
+Só um operador com acesso ao servidor pode executar esse provisionamento; não há
+autoinscrição de admin ou superadmin. Admin existente continua com seu papel.
+
 `001_concorrencia.sql` é uma proposta para revisão, não executada no banco existente.
 O aplicativo deixou de executar `CREATE/ALTER TABLE` ao iniciar. Não implantar esta
 versão sobre o esquema antigo antes de aprovar e aplicar a mudança explicitamente.

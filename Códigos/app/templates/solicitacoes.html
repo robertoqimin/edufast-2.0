@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solicitações — EduFast</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:auto;padding:24px;background:#0f172a;color:#e2e8f0}a{color:#67e8f9}article,fieldset{padding:20px;border:1px solid #475569;border-radius:12px;margin:20px 0}input,select,button{font:inherit;padding:8px;margin:6px;max-width:90%}label{display:block}button:disabled{opacity:.5}dt{font-weight:bold}dd{margin:4px 0 12px;overflow-wrap:anywhere}</style></head>
+<body><a href="{{ url_for('home.home') }}">Voltar ao painel</a><h1>Solicitações e aprovações</h1>
+<p>Uma proposta pendente não altera os registros da escola. A decisão identifica o responsável e só pode ser aplicada uma vez.</p>
+{% if identity.papel == 'professor' %}
+<fieldset><legend>Propor nova turma</legend><form method="post" action="{{ url_for('aprovacoes.alteracoes') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<input type="hidden" name="tipo" value="criar_turma"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+<label>Nome <input name="nome" required maxlength="120"></label><label>Código <input name="codigo" required maxlength="30"></label><label>Ano letivo <input name="ano_letivo" type="number" min="2000" required></label><label>Turno <select name="turno"><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></label><button>Enviar para administração</button></form></fieldset>
+<fieldset><legend>Propor nova disciplina</legend><form method="post" action="{{ url_for('aprovacoes.alteracoes') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<input type="hidden" name="tipo" value="criar_disciplina"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+<label>Nome <input name="nome" required maxlength="120"></label><label>Código <input name="codigo" required maxlength="30"></label><label>Carga horária <input name="carga_horaria" type="number" min="0" required></label><button>Enviar para administração</button></form></fieldset>
+<fieldset><legend>Propor alteração de aluno da sua turma</legend><form method="post" id="aluno-proposta" action="{{ url_for('aprovacoes.alteracoes') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<input type="hidden" name="tipo" value="editar_aluno"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="versao" value="{{ alunos[0].versao if alunos else 0 }}">
+<label>Aluno <select name="aluno_id" required>{% for aluno in alunos %}<option value="{{ aluno.id }}" data-nome="{{ aluno.nome }}" data-curso="{{ aluno.curso }}" data-versao="{{ aluno.versao }}">{{ aluno.nome }} — {{ aluno.matricula }}</option>{% endfor %}</select></label>
+<label>Nome proposto <input name="nome" maxlength="120" required value="{{ alunos[0].nome if alunos else '' }}"></label><label>Curso/série proposto <input name="curso_serie" maxlength="80" value="{{ alunos[0].curso if alunos else '' }}"></label><button {% if not alunos %}disabled{% endif %}>Enviar para administração</button></form></fieldset>
+<p>Atividades, notas e documentos enviados pelos fluxos do professor também ficam pendentes de aprovação. Alterações em aluno só são aceitas dentro das suas turmas.</p>
+<script>document.getElementById('aluno-proposta').aluno_id.addEventListener('change',function(){const option=this.selectedOptions[0],form=this.form;form.nome.value=option.dataset.nome;form.curso_serie.value=option.dataset.curso;form.versao.value=option.dataset.versao;});</script>
+{% endif %}
+{% if identity.admin %}
+<fieldset><legend>Nomear responsável por materiais</legend><form id="permissoes-form"><label>ID da conta docente <input type="number" name="usuario_id" min="1" required></label><label><input type="checkbox" name="revisor">Permitir revisão de materiais</label><button>Salvar permissão</button><p id="resultado" role="status"></p></form></fieldset>
+{% endif %}
+{% for item in solicitacoes %}
+<article><h2>Solicitação {{ item.id }} — {{ item.tipo|replace('_',' ') }}</h2><p>Estado: <strong>{{ item.estado }}</strong> · Solicitante: {{ item.solicitante_id }}</p>
+{% if item.candidato is defined %}<p>Candidato: {{ item.candidato.nome }} — {{ item.candidato.email }} · CPF: {{ item.candidato.cpf or 'Não informado' }}</p>{% endif %}
+<dl>{% for campo, valor in item.payload.items() %}<dt>{{ campo|replace('_',' ') }}</dt><dd>{{ valor if valor is not none else 'Não informado' }}</dd>{% endfor %}</dl>
+{% if item.tem_arquivo %}<p><a href="{{ url_for('aprovacoes.arquivo', proposal_id=item.id) }}">Consultar arquivo da solicitação</a></p>{% endif %}
+{% if item.pode_decidir %}<form method="post" action="{{ url_for('aprovacoes.decidir', proposal_id=item.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Justificativa <input name="justificativa" maxlength="500"></label><button name="decisao" value="aprovar">Aprovar e aplicar</button><button name="decisao" value="rejeitar">Rejeitar</button></form>{% else %}<p>Decisão: {{ item.decidido_por or 'Aguardando responsável autorizado' }}. {{ item.justificativa or '' }}</p>{% endif %}
+</article>{% else %}<p>Nenhuma solicitação disponível.</p>{% endfor %}
+<script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
+{% if identity.admin %}<script>
+document.getElementById('permissoes-form').addEventListener('submit',async function(e){e.preventDefault();const form=e.currentTarget;if(form.dataset.sending==='true')return;form.dataset.sending='true';const button=form.querySelector('button');button.disabled=true;try{const result=await fetch('/admin/usuarios/'+Number(form.usuario_id.value)+'/permissoes',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':{{ csrf_token|tojson }}},body:JSON.stringify({revisor_materiais:form.revisor.checked})});const data=await result.json();document.getElementById('resultado').textContent=result.ok?'Permissão atualizada. O professor precisa entrar novamente.':data.erro;}catch(error){document.getElementById('resultado').textContent='Falha ao salvar; confira o estado antes de repetir.';}finally{delete form.dataset.sending;button.disabled=false;}});
+</script>{% endif %}</body></html>

@@ -24,7 +24,7 @@ def main():
         from test_concurrency import MutationApiTests
         from app.database import engine
         from app.models import (ComunicadoModel, AtividadeModel, DocumentoModel,
-                                SolicitacaoDocumentoModel)
+                                SolicitacaoDocumentoModel, SolicitacaoAlteracaoModel, NotaModel)
         from app.database import get_session
         from werkzeug.serving import make_server
         MutationApiTests.setUpClass()
@@ -54,6 +54,9 @@ def main():
                 for model, expected in [(ComunicadoModel, 1), (AtividadeModel, 1),
                                         (DocumentoModel, 4), (SolicitacaoDocumentoModel, 4)]:
                     assert db.query(model).count() == expected, model.__tablename__
+                proposals = db.query(SolicitacaoAlteracaoModel).all()
+                assert len(proposals) == 4 and all(row.estado == 'aprovada' for row in proposals)
+                assert float(db.query(NotaModel).one().nota) == 9
             assert len(list(Path(fixture.folder.name).iterdir())) == 5
             print("Postman: persisted records and physical files verified")
             return 0

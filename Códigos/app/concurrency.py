@@ -53,7 +53,8 @@ def begin_submission(db, operation, actor=None):
     if not actor:
         raise MutationConflict("Autenticacao obrigatoria", 401)
     payload = {"form": sorted((k, request.form.getlist(k)) for k in request.form
-                              if k != "idempotency_key"), "files": []}
+                              if k not in {"idempotency_key", "csrf_token"}), "files": []}
+    payload["json"] = request.get_json(silent=True) if request.is_json else None
     for name, files in sorted(request.files.lists()):
         for file in files:
             position = file.stream.tell()

@@ -28,11 +28,18 @@ home_blueprint = Blueprint("home", __name__)
 
 @home_blueprint.route("/", methods=["GET"])
 def home():
-    if normalize_role(session.get("user_role")) == "admin":
+    from app.services.identidade_service import current_identity
+    from app.concurrency import MutationConflict
+    try:
+        identity = current_identity(required=False)
+    except MutationConflict:
+        session.clear()
+        identity = None
+    if identity and identity.admin:
         return redirect(url_for("home.admin_dashboard"))
-    if normalize_role(session.get("user_role")) == "aluno":
+    if identity and identity.papel == "aluno":
         return redirect(url_for("aluno.dashboard"))
-    if normalize_role(session.get("user_role")) == "professor":
+    if identity and identity.papel == "professor":
         return redirect(url_for("professor.dashboard"))
 
     context = {"title": "Secretaria Escolar DF"}

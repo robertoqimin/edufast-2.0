@@ -25,7 +25,8 @@
         fetch(new URL("/login", window.location.origin), {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-CSRF-Token": form.elements.namedItem("csrf_token").value
             },
             body: JSON.stringify({
                 email: form.email.value,
@@ -54,6 +55,7 @@
     function redirecionarPorPerfil(data) {
         const destinos = {
             ADMIN: "/admin/dashboard",
+            SUPER_ADMIN: "/admin/dashboard",
             ALUNO: "/aluno",
             PROFESSOR: "/professor"
         };

@@ -7,7 +7,9 @@ load_dotenv()
 
 class Config:
     APP_ENV = os.getenv("APP_ENV", "development")
-    SECRET_KEY = os.getenv("SECRET_KEY", "desenvolvimento-web-flask")
+    SECRET_KEY = os.getenv("SECRET_KEY", "")
+    DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
+    BIND_HOST = os.getenv("FLASK_BIND_HOST", "127.0.0.1")
     JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "8"))
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
     DB_HOST = os.getenv("DB_HOST", "localhost")

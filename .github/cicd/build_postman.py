@@ -37,6 +37,17 @@ def login(role, reset=False):
                    pre=["pm.collectionVariables.set('run_key', pm.variables.replaceIn('{{$guid}}')); "] if reset else None)
 
 
+def approve(kind):
+    return [login("admin"), request("Localizar proposta " + kind, "GET", "/solicitacoes/alteracoes", 200, script=[
+        "const body = pm.response.json();",
+        "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+        f"const row = rows.find(r => r.tipo === '{kind}' && r.estado === 'pendente');",
+        "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+        "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"]),
+        request("Autorizar " + kind, "POST", "/solicitacoes/alteracoes/{{proposal_id}}/decidir", 200,
+                raw={"decisao": "aprovar"})]
+
+
 def build():
     items = [request("Saude", "GET", "/healthz", 200), login("admin", reset=True)]
     comunicado = {"titulo": "Aviso de teste", "mensagem": "Mensagem sintetica", "idempotency_key": "{{run_key}}-aviso"}
@@ -63,16 +74,23 @@ def build():
         items.append(request(label, "POST", "/aluno/documentos/upload", status,
                              form={"solicitacao_id": "{{aluno_request_id}}"}, file=True))
     items.append(login("professor"))
-    grade = {"aluno_id": "{{aluno_id}}", "turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "nota": "8", "versao": "0"}
+    grade = {"aluno_id": "{{aluno_id}}", "turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "nota": "8", "versao": "0", "idempotency_key": "{{run_key}}-nota0"}
     items += [request("Criar nota", "POST", "/professor/notas/salvar", 302, form=grade),
-              request("Rejeitar repeticao de nota", "POST", "/professor/notas/salvar", 409, form=grade),
-              request("Editar nota versao 1", "POST", "/professor/notas/salvar", 302, form={**grade, "nota": "9", "versao": "1"})]
+              request("Repetir proposta de nota", "POST", "/professor/notas/salvar", 302, form=grade)]
+    items += approve("salvar_nota") + [login("professor"),
+              request("Propor edicao nota versao 1", "POST", "/professor/notas/salvar", 302, form={**grade, "nota": "9", "versao": "1", "idempotency_key": "{{run_key}}-nota1"})]
+    items += approve("salvar_nota") + [login("professor")]
     activity = {"turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "titulo": "Atividade sintetica", "idempotency_key": "{{run_key}}-atividade"}
     for label in ["Criar atividade", "Repetir atividade"]:
         items.append(request(label, "POST", "/professor/atividades/lancar", 302, form=activity, file=True))
-    for label, status in [("Responder solicitacao professor", 302), ("Repetir resposta professor", 409)]:
+    for label, status in [("Responder solicitacao professor", 302), ("Repetir resposta professor", 302)]:
         items.append(request(label, "POST", "/professor/documentos/upload", status,
-                             form={"solicitacao_id": "{{professor_request_id}}"}, file=True))
+                             form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-resposta-prof"}, file=True))
+    items += approve("lancar_atividade") + approve("responder_documento")
+    items += [login("professor"), request("Repetir resposta ja autorizada", "POST", "/professor/documentos/upload", 302,
+        form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-resposta-prof"}, file=True),
+        request("Nova tentativa de responder documento concluido", "POST", "/professor/documentos/upload", 409,
+        form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-outra-resposta-prof"}, file=True)]
     items.append(login("admin"))
     for owner, path, data in [("aluno", "/arquivos/upload", {"aluno_id": "{{aluno_id}}"}),
                               ("professor", "/professores/{{professor_id}}/arquivos/upload", {})]:

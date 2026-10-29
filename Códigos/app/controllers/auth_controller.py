@@ -1,3 +1,5 @@
+from app.services.arquivos_service import _save_profile_photo, _remove_saved_file
+import json
 import os
 from datetime import datetime
 from uuid import uuid4
@@ -10,7 +12,7 @@ from werkzeug.utils import secure_filename
 
 from app.auth import generate_token, normalize_role
 from app.database import get_session
-from app.models import AlunoModel, ProfessorModel, UsuarioModel
+from app.models import AlunoModel, ProfessorModel, UsuarioModel, SolicitacaoAlteracaoModel
 
 
 PROFILE_PHOTO_EXTENSIONS = {"jpg", "jpeg", "png"}
@@ -39,6 +41,9 @@ def login_usuario(data):
     if not check_password_hash(user.senha, senha):
         return {"erro": "Senha invalida"}, 401
 
+    if user.estado != "ativo":
+        return {"erro": "Cadastro pendente de aprovacao ou acesso inativo"}, 403
+
     role = normalize_role(user.tipo)
 
     return {
@@ -46,6 +51,7 @@ def login_usuario(data):
         "email": user.email,
         "tipo": role.upper(),
         "role": role,
+        "auth_version": user.auth_version,
         # O JWT tambem inclui a role para o front enviar nas proximas chamadas protegidas.
         "token": generate_token(user),
     }, 200
@@ -58,49 +64,11 @@ def _parse_date(value):
     return datetime.strptime(value, "%Y-%m-%d").date()
 
 
-def _save_profile_photo(files):
-    if not files or "foto_perfil" not in files:
-        return None, None
-
-    foto = files["foto_perfil"]
-    if not foto or not foto.filename:
-        return None, None
-
-    original_filename = secure_filename(foto.filename)
-    if not original_filename or "." not in original_filename:
-        return None, ({"erro": "Nome da foto invalido"}, 400)
-
-    extension = original_filename.rsplit(".", 1)[1].lower()
-    if extension not in PROFILE_PHOTO_EXTENSIONS:
-        return None, ({"erro": "A foto deve estar em JPG ou PNG"}, 400)
-
-    foto.stream.seek(0, os.SEEK_END)
-    file_size = foto.stream.tell()
-    foto.stream.seek(0)
-    if file_size > MAX_PROFILE_PHOTO_BYTES:
-        return None, ({"erro": "A foto deve ter no maximo 2MB"}, 400)
-
-    upload_folder = os.path.abspath(current_app.config["UPLOAD_FOLDER"])
-    os.makedirs(upload_folder, exist_ok=True)
-
-    filename = f"perfil_{uuid4().hex}_{original_filename}"
-    saved_path = os.path.join(upload_folder, filename)
-    foto.save(saved_path)
-    return filename, None
 
 
-def _remove_saved_file(filename):
-    if not filename:
-        return
-
-    path = os.path.join(os.path.abspath(current_app.config["UPLOAD_FOLDER"]), filename)
-    try:
-        os.remove(path)
-    except FileNotFoundError:
-        pass
 
 
-def cadastrar_usuario(data, files=None):
+def cadastrar_usuario(data, files=None, *, aprovado=False):
     if not data:
         return {"erro": "Dados nao informados"}, 400
 
@@ -114,6 +82,10 @@ def cadastrar_usuario(data, files=None):
 
     if not email or not senha or not nome:
         return {"erro": "E-mail, senha e nome sao obrigatorios"}, 400
+
+    if aprovado:
+        from app.services.identidade_service import ADMIN_ROLES, require_role
+        require_role(*ADMIN_ROLES)
 
     foto_perfil, upload_error = _save_profile_photo(files)
     if upload_error:
@@ -129,7 +101,9 @@ def cadastrar_usuario(data, files=None):
             email=email,
             senha=generate_password_hash(senha),
             # O cadastro agora grava a role do usuario para refletir professor/aluno no JWT.
-            tipo=tipo,
+            tipo=tipo if aprovado else "pendente",
+            estado="ativo" if aprovado else "pendente",
+            revisor_materiais=False,
         )
         session.add(usuario)
         session.flush()
@@ -172,18 +146,24 @@ def cadastrar_usuario(data, files=None):
                     matricula=matricula,
                     foto_perfil=foto_perfil,
                     curso_serie=data.get("curso_serie") or data.get("curso"),
-                    status_matricula=data.get("status_matricula") or data.get("status"),
+                    status_matricula=(data.get("status_matricula") or data.get("status")) if aprovado else "Pendente",
                     data_nascimento=_parse_date(data.get("data_nascimento")),
                 )
             )
 
+        if not aprovado:
+            session.add(SolicitacaoAlteracaoModel(
+                solicitante_id=usuario.id, tipo="cadastro", estado="pendente",
+                payload=json.dumps({"usuario_id": usuario.id, "papel_solicitado": tipo}),
+                recurso_pendente=f"cadastro:{usuario.id}"))
         session.commit()
         return {
             "id": usuario.id,
             "email": usuario.email,
-            "tipo": tipo.upper(),
-            "role": tipo,
-        }, 201
+            "tipo": tipo.upper() if aprovado else "PENDENTE",
+            "role": tipo if aprovado else "pendente",
+            "estado": usuario.estado,
+        }, 201 if aprovado else 202
     except ValueError:
         session.rollback()
         _remove_saved_file(foto_perfil)
@@ -201,36 +181,21 @@ def cadastrar_usuario(data, files=None):
 
 
 def buscar_alunos(termo):
+    from app.services.identidade_service import current_identity
+    from app.repositories.pessoas_repository import search_students
+    identity = current_identity()
+    if identity.papel not in {"professor", "admin", "super_admin"}:
+        return {"erro": "Acesso nao autorizado"}, 403
     termo = (termo or "").strip()
     if not termo:
         return {"erro": "Informe um termo de busca"}, 400
-
-    session = get_session()
-    try:
-        alunos = (
-            session.query(AlunoModel)
-            # Busca por nome parcial ou CPF exato/parcial para apoiar a tela do professor.
-            .filter(or_(AlunoModel.nome.ilike(f"%{termo}%"), AlunoModel.cpf.ilike(f"%{termo}%")))
-            .limit(20)
-            .all()
-        )
-
-        return {
-            "alunos": [
-                {
-                    "id": aluno.id,
-                    "usuario_id": aluno.usuario_id,
-                    "nome": aluno.nome,
-                    "cpf": aluno.cpf,
-                    "matricula": aluno.matricula,
-                    "data_nascimento": (
-                        aluno.data_nascimento.isoformat()
-                        if aluno.data_nascimento
-                        else None
-                    ),
-                }
-                for aluno in alunos
-            ]
-        }, 200
-    finally:
-        session.close()
+    with get_session() as db:
+        rows = search_students(db, identity, termo)
+        alunos = []
+        for aluno in rows:
+            data = {"id": aluno.id, "nome": aluno.nome, "matricula": aluno.matricula}
+            if identity.admin:
+                data["cpf"] = aluno.cpf
+                data["data_nascimento"] = aluno.data_nascimento.isoformat() if aluno.data_nascimento else None
+            alunos.append(data)
+        return {"alunos": alunos}, 200

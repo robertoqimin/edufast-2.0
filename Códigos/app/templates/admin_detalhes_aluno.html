@@ -85,6 +85,7 @@
                 <p class="text-gray-500 text-xs mt-1">{{ aluno.email }}</p>
 
                 <form action="{{ url_for('home.admin_editar_aluno', aluno_id=aluno.id) }}" method="post" enctype="multipart/form-data" class="aluno-edit-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <input type="hidden" name="versao" value="{{ aluno.versao }}">
                     <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                     <h3>Editar Dados</h3>
@@ -146,6 +147,7 @@
 
                 <div data-documento-panel="solicitacoes">
                     <form action="{{ url_for('home.admin_solicitar_documento_aluno', aluno_id=aluno.id) }}" method="post" class="documento-request-form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                         <label>
                             <span>Documento solicitado</span>
@@ -159,6 +161,7 @@
                     </form>
 
                     <form action="{{ url_for('document.upload_arquivo') }}" method="post" enctype="multipart/form-data" class="documento-request-form mt-8">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                         <input type="hidden" name="aluno_id" value="{{ aluno.id }}">
                         <input type="hidden" name="redirect_to" value="{{ url_for('home.admin_detalhes_aluno', aluno_id=aluno.id) }}">

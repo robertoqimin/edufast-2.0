@@ -72,6 +72,7 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-8">
             <form action="{{ url_for('home.admin_disciplinas') }}" method="post" class="glass-card discipline-card rounded-[32px] p-8">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                 <input type="hidden" name="action" value="create">
                 <h2 class="text-xl font-bold">Nova Disciplina</h2>
@@ -136,6 +137,7 @@
 
         <section class="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-8 mt-8">
             <form action="{{ url_for('home.admin_disciplinas') }}" method="post" class="glass-card discipline-card rounded-[32px] p-8">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                 <input type="hidden" name="action" value="associate_teacher">
                 <h2 class="text-xl font-bold">Associar Professor</h2>

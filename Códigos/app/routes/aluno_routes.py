@@ -13,8 +13,8 @@ aluno_bp = Blueprint("aluno", __name__)
 @aluno_bp.route("/aluno", methods=["GET"])
 @aluno_bp.route("/aluno/dashboard", methods=["GET"])
 def dashboard():
-    aluno_required()
-    data = get_aluno_area_data(session.get("user_id"))
+    identity = aluno_required()
+    data = get_aluno_area_data(identity.id)
     if not data:
         abort(404)
 
@@ -23,8 +23,8 @@ def dashboard():
 
 @aluno_bp.route("/aluno/disciplinas/<int:disciplina_id>", methods=["GET"])
 def disciplina_detail(disciplina_id):
-    aluno_required()
-    data = get_aluno_disciplina_detail(session.get("user_id"), disciplina_id)
+    identity = aluno_required()
+    data = get_aluno_disciplina_detail(identity.id, disciplina_id)
     if not data:
         abort(404)
 
@@ -33,8 +33,8 @@ def disciplina_detail(disciplina_id):
 
 @aluno_bp.route("/aluno/documentos/upload", methods=["POST"])
 def upload_documento_aluno():
-    aluno_required()
-    aluno = get_aluno_by_user_id(session.get("user_id"))
+    identity = aluno_required()
+    aluno = get_aluno_by_user_id(identity.id)
     if not aluno:
         return jsonify({"erro": "Aluno nao encontrado"}), 404
 

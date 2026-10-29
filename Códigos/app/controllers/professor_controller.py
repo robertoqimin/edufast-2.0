@@ -245,202 +245,27 @@ def get_teacher_area_data(user_id):
 
 
 def launch_activity(user_id, data, files=None):
-    turma_id = data.get("turma_id", type=int)
-    disciplina_id = data.get("disciplina_id", type=int)
-    titulo = (data.get("titulo") or "").strip()
-    descricao = (data.get("descricao") or "").strip()
-    data_entrega = (data.get("data_entrega") or "").strip()
-
-    if not turma_id or not disciplina_id or not titulo:
-        return {"erro": "Turma, disciplina e titulo sao obrigatorios"}, 400
-
-    arquivo = files.get("arquivo") if files else None
-    filename = None
-    saved_path = None
-    if arquivo and arquivo.filename:
-        original_filename = secure_filename(arquivo.filename)
-        if not original_filename:
-            return {"erro": "Nome do arquivo invalido"}, 400
-
-        upload_folder = get_upload_folder()
-        os.makedirs(upload_folder, exist_ok=True)
-        filename = f"atividade_{uuid4().hex}_{original_filename}"
-        saved_path = os.path.join(upload_folder, filename)
-
-    db = get_session()
-    try:
-        entry, replay = begin_submission(db, "atividade", actor=user_id)
-        if replay:
-            return replay
-        professor = (
-            db.query(ProfessorModel)
-            .filter(ProfessorModel.usuario_id == user_id)
-            .first()
-        )
-        if not professor:
-            return {"erro": "Professor nao encontrado"}, 404
-
-        professor_na_turma = (
-            db.query(ProfessorTurmaModel)
-            .filter(
-                ProfessorTurmaModel.professor_id == professor.id,
-                ProfessorTurmaModel.turma_id == turma_id,
-            )
-            .first()
-        )
-        professor_disciplina = (
-            db.query(ProfessorDisciplinaModel)
-            .filter(
-                ProfessorDisciplinaModel.professor_id == professor.id,
-                ProfessorDisciplinaModel.disciplina_id == disciplina_id,
-            )
-            .first()
-        )
-        turma_disciplina = (
-            db.query(TurmaDisciplinaModel)
-            .filter(
-                TurmaDisciplinaModel.turma_id == turma_id,
-                TurmaDisciplinaModel.disciplina_id == disciplina_id,
-            )
-            .first()
-        )
-
-        if not professor_na_turma:
-            return {"erro": "Professor nao pertence a esta turma"}, 403
-        if not professor_disciplina or not turma_disciplina:
-            return {"erro": "Disciplina nao disponivel para este professor nesta turma"}, 403
-
-        atividade = AtividadeModel(
-            professor_id=professor.id,
-            turma_id=turma_id,
-            disciplina_id=disciplina_id,
-            titulo=titulo[:150],
-            descricao=descricao or None,
-            data_entrega=data_entrega[:10] or None,
-            caminho_arquivo=filename,
-        )
-        if saved_path:
-            arquivo.save(saved_path)
-        db.add(atividade)
-        return finish_submission(db, entry, {"mensagem": "Atividade lancada"}, 201)
-    except Exception:
-        db.rollback()
-        if saved_path and os.path.exists(saved_path):
-            os.remove(saved_path)
-        raise
-    finally:
-        db.close()
+    from app.services.aprovacoes_service import submit_proposal
+    from app.services.identidade_service import current_identity
+    from app.concurrency import MutationConflict
+    if current_identity().id != user_id:
+        raise MutationConflict("Identidade divergente", 403)
+    return submit_proposal("lancar_atividade", data, files)
 
 
 def upload_requested_document(user_id, form, files):
-    from app.controllers.document_controller import upload_requested_document_for_owner
-    db = get_session()
-    try:
-        professor = db.query(ProfessorModel).filter_by(usuario_id=user_id).first()
-        if not professor:
-            return {"erro": "Professor nao encontrado"}, 404
-        professor_id = professor.id
-    finally:
-        db.close()
-    return upload_requested_document_for_owner(
-        "professor_id", professor_id, form.get("solicitacao_id", type=int), files)
+    from app.services.aprovacoes_service import submit_proposal
+    from app.services.identidade_service import current_identity
+    from app.concurrency import MutationConflict
+    if current_identity().id != user_id:
+        raise MutationConflict("Identidade divergente", 403)
+    return submit_proposal("responder_documento", form, files)
 
 
 def save_student_grade(user_id, data):
-    aluno_id = data.get("aluno_id", type=int)
-    turma_id = data.get("turma_id", type=int)
-    disciplina_id = data.get("disciplina_id", type=int)
-    nota_raw = (data.get("nota") or "").strip().replace(",", ".")
-    observacao = (data.get("observacao") or "").strip()
-
-    if not aluno_id or not turma_id or not disciplina_id or not nota_raw:
-        return {"erro": "Aluno, turma, disciplina e nota sao obrigatorios"}, 400
-
-    try:
-        nota_value = Decimal(nota_raw)
-    except InvalidOperation:
-        return {"erro": "Nota invalida"}, 400
-
-    if nota_value < 0 or nota_value > 10:
-        return {"erro": "Nota deve estar entre 0 e 10"}, 400
-
-    db = get_session()
-    try:
-        professor = (
-            db.query(ProfessorModel)
-            .filter(ProfessorModel.usuario_id == user_id)
-            .first()
-        )
-        if not professor:
-            return {"erro": "Professor nao encontrado"}, 404
-
-        aluno_na_turma = (
-            db.query(AlunoTurmaModel)
-            .filter(
-                AlunoTurmaModel.aluno_id == aluno_id,
-                AlunoTurmaModel.turma_id == turma_id,
-            )
-            .first()
-        )
-        professor_na_turma = (
-            db.query(ProfessorTurmaModel)
-            .filter(
-                ProfessorTurmaModel.professor_id == professor.id,
-                ProfessorTurmaModel.turma_id == turma_id,
-            )
-            .first()
-        )
-        professor_disciplina = (
-            db.query(ProfessorDisciplinaModel)
-            .filter(
-                ProfessorDisciplinaModel.professor_id == professor.id,
-                ProfessorDisciplinaModel.disciplina_id == disciplina_id,
-            )
-            .first()
-        )
-        turma_disciplina = (
-            db.query(TurmaDisciplinaModel)
-            .filter(
-                TurmaDisciplinaModel.turma_id == turma_id,
-                TurmaDisciplinaModel.disciplina_id == disciplina_id,
-            )
-            .first()
-        )
-
-        if not aluno_na_turma:
-            return {"erro": "Aluno nao pertence a esta turma"}, 403
-        if not professor_na_turma:
-            return {"erro": "Professor nao pertence a esta turma"}, 403
-        if not professor_disciplina or not turma_disciplina:
-            return {"erro": "Disciplina nao disponivel para este professor nesta turma"}, 403
-
-        nota = (
-            db.query(NotaModel)
-            .filter(
-                NotaModel.aluno_id == aluno_id,
-                NotaModel.disciplina_id == disciplina_id,
-            )
-            .first()
-        )
-        check_version(nota, data)
-        if nota:
-            nota.professor_id = professor.id
-            nota.nota = nota_value
-            nota.observacao = observacao[:255] or None
-        else:
-            nota = NotaModel(
-                aluno_id=aluno_id,
-                disciplina_id=disciplina_id,
-                professor_id=professor.id,
-                nota=nota_value,
-                observacao=observacao[:255] or None,
-            )
-            db.add(nota)
-
-        db.commit()
-        return {"mensagem": "Nota salva"}, 200
-    except IntegrityError:
-        db.rollback()
-        return {"erro": "Nao foi possivel salvar a nota"}, 409
-    finally:
-        db.close()
+    from app.services.aprovacoes_service import submit_proposal
+    from app.services.identidade_service import current_identity
+    from app.concurrency import MutationConflict
+    if current_identity().id != user_id:
+        raise MutationConflict("Identidade divergente", 403)
+    return submit_proposal("salvar_nota", data)

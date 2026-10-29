@@ -1,6 +1,7 @@
 """Models da aplicacao."""
 
 from .idempotencia_model import IdempotenciaModel
+from .solicitacao_alteracao_model import SolicitacaoAlteracaoModel
 from .aluno_model import AlunoModel
 from .aluno_disciplina_model import AlunoDisciplinaModel
 from .aluno_turma_model import AlunoTurmaModel

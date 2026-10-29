@@ -26,3 +26,9 @@ versões antigas. Os testes com duas requisições simultâneas estão em
 `.github/cicd/tests/test_concurrency.py` e precisam de MySQL descartável.
 
 Para regenerar os JSONs: `python .github/cicd/build_postman.py`.
+
+Os envios docentes agora criam propostas: a coleção entra como admin para
+autorizar notas, atividade e resposta documental antes de conferir seus efeitos.
+Repetir a mesma chave após aprovação não cria outro documento; outra chave para
+a solicitação documental já concluída recebe conflito. O executor confere quatro
+propostas aprovadas e a nota final, além das contagens anteriores.
