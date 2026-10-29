@@ -4,6 +4,22 @@ Esta é a fonte de verdade da automação. Os dois pontos de entrada em [workflo
 
 [Relatório da validação local](VALIDACAO.md)
 
+## Concorrência, regressão e Postman
+
+As [correções e evidências](../../Documentos/testes/CONCORRENCIA.md) abrangem
+solicitações de documentos, versões de cadastros/notas e idempotência dos envios.
+Os novos testes estão em `tests/test_concurrency.py`; a concorrência real exige MySQL.
+O CI os executa junto à regressão existente em bancos Docker descartáveis.
+
+`python .github/cicd/review_mutations.py` compara o código em HEAD com o diretório
+de trabalho, executa a nova suíte e só então roda a regressão existente em SQLite
+temporário. Para MySQL, definir `RACE_TEST_DB_URL` apontando para um banco vazio e
+descartável cujo nome comece com `race_ci_`, e acrescentar `--mysql`.
+
+A [coleção Postman](../../Documentos/testes/postman/README.md) tem executor HTTP
+isolado. A [migration](../../Códigos/migrations/README.md) continua sujeita à revisão
+humana: o CI cria esquemas novos para teste, não aplica o SQL ao banco existente.
+
 ## Próxima etapa: testes antes da implementação
 
 O [pacote de revisão TDD](../../Documentos/testes/proxima-versao/README.md) define os contratos futuros de várias escolas e gestão acadêmica. Seu código fica em `next/`, o ambiente em `compose.next.yml` e o executor em `next_stage.py`. Não altera o código da aplicação.

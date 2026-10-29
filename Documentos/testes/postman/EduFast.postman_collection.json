@@ -1,0 +1,1237 @@
+{
+  "info": {
+    "name": "EduFast - concorrencia e idempotencia",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite MySQL; este fluxo verifica contratos HTTP e repeticao sequencial."
+  },
+  "variable": [
+    {
+      "key": "run_key",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Saude",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/healthz"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('run_key', pm.variables.replaceIn('{{$guid}}')); "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar comunicado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Mensagem sintetica"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir comunicado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Mensagem sintetica"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mesma chave com conteudo diferente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Outra"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sem chave",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso"
+            },
+            {
+              "key": "mensagem",
+              "value": "Texto"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 428', function () { pm.expect(pm.response.code).to.eql(428); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ler versao aluno",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const match = pm.response.text().match(/name=\"versao\" value=\"(\\d+)\"/);",
+              "pm.test('Versao no formulario', function () { pm.expect(match).not.to.eql(null); });",
+              "if (match) pm.collectionVariables.set('aluno_version', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{aluno_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{aluno_version}}"
+            },
+            {
+              "key": "matricula",
+              "value": "M1"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar versao antiga aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{aluno_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{aluno_version}}"
+            },
+            {
+              "key": "matricula",
+              "value": "M1"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitar documento aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-aluno"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir solicitacao aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-aluno"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ler versao professor",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const match = pm.response.text().match(/name=\"versao\" value=\"(\\d+)\"/);",
+              "pm.test('Versao no formulario', function () { pm.expect(match).not.to.eql(null); });",
+              "if (match) pm.collectionVariables.set('professor_version', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{professor_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{professor_version}}"
+            },
+            {
+              "key": "cpf",
+              "value": "11111111111"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar versao antiga professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{professor_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{professor_version}}"
+            },
+            {
+              "key": "cpf",
+              "value": "11111111111"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitar documento professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-professor"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir solicitacao professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-professor"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login aluno",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{aluno_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responder solicitacao aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/aluno/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{aluno_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/aluno/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{aluno_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar nota",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/notas/salvar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}"
+            },
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}"
+            },
+            {
+              "key": "nota",
+              "value": "8"
+            },
+            {
+              "key": "versao",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar repeticao de nota",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/notas/salvar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}"
+            },
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}"
+            },
+            {
+              "key": "nota",
+              "value": "8"
+            },
+            {
+              "key": "versao",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar nota versao 1",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/notas/salvar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}"
+            },
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}"
+            },
+            {
+              "key": "nota",
+              "value": "9"
+            },
+            {
+              "key": "versao",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar atividade",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/atividades/lancar",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}",
+              "type": "text"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}",
+              "type": "text"
+            },
+            {
+              "key": "titulo",
+              "value": "Atividade sintetica",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-atividade",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir atividade",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/atividades/lancar",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}",
+              "type": "text"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}",
+              "type": "text"
+            },
+            {
+              "key": "titulo",
+              "value": "Atividade sintetica",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-atividade",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responder solicitacao professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload avulso aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-aluno",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });",
+              "pm.collectionVariables.set('document_id', String(pm.response.json().documento.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir upload avulso aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-aluno",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });",
+              "pm.test('Mesmo documento', function () { pm.expect(String(pm.response.json().documento.id)).to.eql(pm.collectionVariables.get('document_id')); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload avulso professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professores/{{professor_id}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-professor",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir upload avulso professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professores/{{professor_id}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-professor",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "Documentos/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

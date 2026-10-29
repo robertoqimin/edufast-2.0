@@ -9,6 +9,9 @@ from app.database import Base
 class AlunoModel(Base):
     __tablename__ = "alunos"
 
+    versao: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    __mapper_args__ = {"version_id_col": versao}
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     usuario_id: Mapped[int] = mapped_column(
         Integer,

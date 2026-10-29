@@ -36,6 +36,9 @@
         formulario.addEventListener("submit", function (event) {
             event.preventDefault();
 
+            if (formulario.dataset.sending === "true") return;
+            formulario.dataset.sending = "true";
+            window.EduFastSubmission.setBusy(formulario, true);
             fetch(config.endpoint, {
                 method: "POST",
                 body: new FormData(formulario)
@@ -51,10 +54,14 @@
                 })
                 .then(function () {
                     formulario.reset();
+                    window.EduFastSubmission.renewKey(formulario);
                     mostrarRetorno(retorno, config.mensagemSucesso, true);
                 })
                 .catch(function (erro) {
                     mostrarRetorno(retorno, erro.message || config.mensagemPadraoErro, false);
+                }).finally(function () {
+                    delete formulario.dataset.sending;
+                    window.EduFastSubmission.setBusy(formulario, false);
                 });
         });
     }

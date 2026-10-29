@@ -8,6 +8,9 @@ class NotaModel(Base):
     __tablename__ = "notas"
     __table_args__ = (UniqueConstraint("aluno_id", "disciplina_id", name="uq_nota_aluno_disciplina"),)
 
+    versao: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    __mapper_args__ = {"version_id_col": versao}
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     aluno_id: Mapped[int] = mapped_column(Integer, ForeignKey("alunos.id"), nullable=False)
     disciplina_id: Mapped[int] = mapped_column(Integer, ForeignKey("disciplinas.id"), nullable=False)

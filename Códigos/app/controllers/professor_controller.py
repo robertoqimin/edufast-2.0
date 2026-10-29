@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
@@ -9,6 +8,7 @@ from werkzeug.utils import secure_filename
 from app.controllers.admin_controller import format_created_at
 from app.controllers.document_controller import get_upload_folder
 from app.database import get_session
+from app.concurrency import check_version, begin_submission, finish_submission
 from app.models import (
     AlunoModel,
     AlunoTurmaModel,
@@ -56,17 +56,6 @@ def _format_nota(value):
         return ""
 
     return str(value).replace(".", ",")
-
-
-def _get_or_create_disciplina_geral(db):
-    disciplina = db.query(DisciplinaModel).filter(DisciplinaModel.codigo == "GERAL").first()
-    if disciplina:
-        return disciplina
-
-    disciplina = DisciplinaModel(nome="Geral", codigo="GERAL", carga_horaria=0)
-    db.add(disciplina)
-    db.flush()
-    return disciplina
 
 
 def get_teacher_area_data(user_id):
@@ -189,7 +178,14 @@ def get_teacher_area_data(user_id):
             .all()
         )
 
+        grade_versions = {
+            f"{n.aluno_id}:{n.disciplina_id}": n.versao
+            for n in db.query(NotaModel).filter(
+                NotaModel.aluno_id.in_([a["id"] for values in alunos_por_turma.values() for a in values])
+            ).all()
+        }
         return {
+            "grade_versions": grade_versions,
             "professor": {
                 "id": professor.id,
                 "nome": professor.nome,
@@ -273,6 +269,9 @@ def launch_activity(user_id, data, files=None):
 
     db = get_session()
     try:
+        entry, replay = begin_submission(db, "atividade", actor=user_id)
+        if replay:
+            return replay
         professor = (
             db.query(ProfessorModel)
             .filter(ProfessorModel.usuario_id == user_id)
@@ -323,8 +322,7 @@ def launch_activity(user_id, data, files=None):
         if saved_path:
             arquivo.save(saved_path)
         db.add(atividade)
-        db.commit()
-        return {"mensagem": "Atividade lancada"}, 201
+        return finish_submission(db, entry, {"mensagem": "Atividade lancada"}, 201)
     except Exception:
         db.rollback()
         if saved_path and os.path.exists(saved_path):
@@ -335,71 +333,17 @@ def launch_activity(user_id, data, files=None):
 
 
 def upload_requested_document(user_id, form, files):
-    solicitacao_id = form.get("solicitacao_id", type=int)
-    if not solicitacao_id:
-        return {"erro": "Solicitacao de documento nao informada"}, 400
-
-    if "arquivo" not in files:
-        return {"erro": "Arquivo nao enviado"}, 400
-
-    arquivo = files["arquivo"]
-    if not arquivo.filename:
-        return {"erro": "Nome do arquivo nao informado"}, 400
-
-    original_filename = secure_filename(arquivo.filename)
-    if not original_filename:
-        return {"erro": "Nome do arquivo invalido"}, 400
-
-    upload_folder = get_upload_folder()
-    os.makedirs(upload_folder, exist_ok=True)
-    filename = f"{uuid4().hex}_{original_filename}"
-    saved_path = os.path.join(upload_folder, filename)
-
+    from app.controllers.document_controller import upload_requested_document_for_owner
     db = get_session()
     try:
-        professor = (
-            db.query(ProfessorModel)
-            .filter(ProfessorModel.usuario_id == user_id)
-            .first()
-        )
+        professor = db.query(ProfessorModel).filter_by(usuario_id=user_id).first()
         if not professor:
             return {"erro": "Professor nao encontrado"}, 404
-
-        solicitacao = (
-            db.query(SolicitacaoDocumentoModel)
-            .filter(
-                SolicitacaoDocumentoModel.id == solicitacao_id,
-                SolicitacaoDocumentoModel.professor_id == professor.id,
-            )
-            .first()
-        )
-        if not solicitacao:
-            return {"erro": "Solicitacao de documento nao encontrada"}, 404
-
-        disciplina = _get_or_create_disciplina_geral(db)
-        arquivo.save(saved_path)
-        documento = DocumentoModel(
-            aluno_id=None,
-            professor_id=professor.id,
-            disciplina_id=disciplina.id,
-            titulo=solicitacao.titulo[:150],
-            caminho_arquivo=filename,
-        )
-        db.add(documento)
-        db.flush()
-
-        solicitacao.documento_id = documento.id
-        solicitacao.status = "enviado"
-        solicitacao.completed_at = datetime.now()
-        db.commit()
-        return {"mensagem": "Documento enviado"}, 201
-    except Exception:
-        db.rollback()
-        if os.path.exists(saved_path):
-            os.remove(saved_path)
-        raise
+        professor_id = professor.id
     finally:
         db.close()
+    return upload_requested_document_for_owner(
+        "professor_id", professor_id, form.get("solicitacao_id", type=int), files)
 
 
 def save_student_grade(user_id, data):
@@ -478,6 +422,7 @@ def save_student_grade(user_id, data):
             )
             .first()
         )
+        check_version(nota, data)
         if nota:
             nota.professor_id = professor.id
             nota.nota = nota_value

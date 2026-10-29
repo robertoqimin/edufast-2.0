@@ -165,7 +165,7 @@ docker compose logs -f app
 
 Acesse **http://localhost:5000** após a inicialização. A aplicação usa a porta 5000; o MySQL é publicado na porta 3306.
 
-**Administrador em instalação descartável:** `docker compose exec app python -m app.seed` cria `admin@admin.com` com senha `123`, mas o seed atual **apaga todos os usuários existentes**. Use apenas em banco novo de desenvolvimento e altere a senha antes de qualquer exposição. Não execute para atualizar uma escola cadastrada.
+**Esquema e administrador:** esta versão não altera o banco ao iniciar. Revise o [procedimento de provisionamento e migração](Códigos/migrations/README.md) antes de usar um banco novo ou atualizar uma instalação. Depois, use `docker compose exec app flask --app 'app:create_app()' create-admin` para cadastrar um administrador com credenciais próprias. O seed destrutivo anterior foi desativado.
 
 Mais comandos, configuração e solução de problemas: [guia de execução](Documentos/operacao/EXECUCAO.md).
 

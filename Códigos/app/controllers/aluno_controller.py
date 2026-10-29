@@ -311,25 +311,3 @@ def get_aluno_document_request(solicitacao_id, aluno_id):
         }
     finally:
         db.close()
-
-
-def marcar_documento_aluno_enviado(solicitacao_id, aluno_id, documento_id):
-    db = get_session()
-    try:
-        solicitacao = (
-            db.query(SolicitacaoDocumentoModel)
-            .filter(
-                SolicitacaoDocumentoModel.id == solicitacao_id,
-                SolicitacaoDocumentoModel.aluno_id == aluno_id,
-            )
-            .first()
-        )
-        if not solicitacao:
-            return
-
-        solicitacao.documento_id = documento_id
-        solicitacao.status = "enviado"
-        solicitacao.completed_at = datetime.now()
-        db.commit()
-    finally:
-        db.close()
