@@ -1,0 +1,65 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const vm = require("node:vm");
+const fs = require("node:fs");
+const path = require("node:path");
+
+function browser() {
+    const listeners = {};
+    const windowListeners = {};
+    class Form {
+        constructor() {
+            this.dataset = {};
+            this.elements = [];
+            this.attributes = {};
+        }
+        setAttribute(name, value) { this.attributes[name] = value; }
+    }
+    const context = {
+        HTMLFormElement: Form,
+        crypto: { randomUUID: () => "next-intent" },
+        document: { addEventListener: (name, fn) => { listeners[name] = fn; }, querySelectorAll: () => [] },
+        window: { addEventListener: (name, fn) => { windowListeners[name] = fn; } }
+    };
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../../Códigos/app/static/js/compartilhado/submission.js"), "utf8"), context);
+    return { ...context, listeners };
+}
+
+test("native submit disables all associated buttons and rejects a second submission", () => {
+    const { HTMLFormElement, listeners } = browser();
+    const form = new HTMLFormElement();
+    const externalSubmit = { type: "submit", disabled: false, dataset: {} };
+    const input = { type: "text", disabled: false };
+    form.elements = [externalSubmit, input];
+    let blocked = 0;
+    const event = { target: form, defaultPrevented: false, preventDefault: () => { blocked++; } };
+    listeners.submit(event);
+    listeners.submit(event);
+    assert.equal(externalSubmit.disabled, true);
+    assert.equal(input.disabled, false, "payload fields must remain enabled");
+    assert.equal(blocked, 1);
+    assert.equal(form.attributes["aria-busy"], "true");
+});
+
+test("AJAX recovery restores previously disabled controls without enabling them", () => {
+    const { HTMLFormElement, window } = browser();
+    const form = new HTMLFormElement();
+    const submit = { type: "submit", disabled: false, dataset: {} };
+    const unavailable = { type: "submit", disabled: true, dataset: {} };
+    form.elements = [submit, unavailable];
+    window.EduFastSubmission.setBusy(form, true);
+    window.EduFastSubmission.setBusy(form, false);
+    assert.equal(submit.disabled, false);
+    assert.equal(unavailable.disabled, true);
+});
+
+test("changing a grade subject selects the corresponding server version", () => {
+    const { HTMLFormElement, listeners } = browser();
+    const form = new HTMLFormElement();
+    const version = { value: "0" };
+    const select = { name: "disciplina_id", selectedOptions: [{ dataset: { versao: "7" } }], form };
+    form.elements.namedItem = (name) => name === "versao" ? version : select;
+    form.classList = { contains: () => true };
+    listeners.change({ target: select });
+    assert.equal(version.value, "7");
+});

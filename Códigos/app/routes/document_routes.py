@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from app.auth import decode_token_from_request, normalize_role
 from app.controllers.document_controller import get_upload_folder, upload_documento
 from app.database import get_session
+from app.concurrency import insert_if_missing, begin_submission, finish_submission
 from app.models import (
     AlunoModel,
     AlunoTurmaModel,
@@ -20,13 +21,8 @@ document_bp = Blueprint("document", __name__)
 
 
 def _get_or_create_disciplina_geral(db):
-    disciplina = db.query(DisciplinaModel).filter(DisciplinaModel.codigo == "GERAL").first()
-    if disciplina:
-        return disciplina
-
-    disciplina = DisciplinaModel(nome="Geral", codigo="GERAL", carga_horaria=0)
-    db.add(disciplina)
-    db.flush()
+    disciplina = insert_if_missing(db, DisciplinaModel,
+                                   codigo="GERAL", defaults={"nome": "Geral", "carga_horaria": 0})
     return disciplina
 
 
@@ -149,6 +145,13 @@ def upload_arquivo_professor(professor_id):
 
     db = get_session()
     try:
+        entry, replay = begin_submission(db, f"documento-professor:{professor_id}")
+        if replay:
+            response, status = replay
+            redirect_to = request.form.get("redirect_to")
+            if redirect_to and redirect_to.startswith("/"):
+                return redirect(redirect_to)
+            return jsonify(response), status
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
             return jsonify({"erro": "Professor nao encontrado"}), 404
@@ -163,7 +166,7 @@ def upload_arquivo_professor(professor_id):
             caminho_arquivo=filename,
         )
         db.add(documento)
-        db.commit()
+        finish_submission(db, entry, {"mensagem": "Arquivo enviado"}, 201)
     except Exception:
         db.rollback()
         if os.path.exists(saved_path):

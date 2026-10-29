@@ -14,6 +14,8 @@
         event.preventDefault();
 
         const form = event.currentTarget;
+        if (form.dataset.sending === "true") return;
+        form.dataset.sending = "true";
         const error = form.querySelector("#login-error");
         const button = form.querySelector("button[type='submit']");
 
@@ -44,6 +46,7 @@
                 definirErro(error, erroRequisicao.message || "Erro ao conectar com o servidor");
             })
             .finally(function () {
+                delete form.dataset.sending;
                 definirCarregamento(button, false);
             });
     }

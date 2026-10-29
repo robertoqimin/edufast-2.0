@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.controllers.auth_controller import _remove_saved_file, _save_profile_photo
 from app.database import get_session
+from app.concurrency import check_version, insert_if_missing, begin_submission, finish_submission
 from app.models import (
     AlunoModel,
     AlunoTurmaModel,
@@ -202,6 +203,9 @@ def criar_comunicado(data, criado_por=None):
 
     db = get_session()
     try:
+        entry, replay = begin_submission(db, "comunicado")
+        if replay:
+            return replay
         comunicado = ComunicadoModel(
             titulo=titulo,
             destinatario=destinatario,
@@ -209,8 +213,8 @@ def criar_comunicado(data, criado_por=None):
             criado_por=criado_por,
         )
         db.add(comunicado)
-        db.commit()
-        return {"id": comunicado.id}, 201
+        db.flush()
+        return finish_submission(db, entry, {"id": comunicado.id}, 201)
     finally:
         db.close()
 
@@ -544,6 +548,7 @@ def associar_professor_turma(data):
         disciplinas_professor = (
             db.query(ProfessorDisciplinaModel)
             .filter(ProfessorDisciplinaModel.professor_id == professor_id)
+            .order_by(ProfessorDisciplinaModel.disciplina_id)
             .all()
         )
         if not disciplinas_professor:
@@ -551,21 +556,8 @@ def associar_professor_turma(data):
 
         db.add(ProfessorTurmaModel(professor_id=professor_id, turma_id=turma_id))
         for vinculo in disciplinas_professor:
-            exists = (
-                db.query(TurmaDisciplinaModel)
-                .filter(
-                    TurmaDisciplinaModel.turma_id == turma_id,
-                    TurmaDisciplinaModel.disciplina_id == vinculo.disciplina_id,
-                )
-                .first()
-            )
-            if not exists:
-                db.add(
-                    TurmaDisciplinaModel(
-                        turma_id=turma_id,
-                        disciplina_id=vinculo.disciplina_id,
-                    )
-                )
+            insert_if_missing(db, TurmaDisciplinaModel,
+                              turma_id=turma_id, disciplina_id=vinculo.disciplina_id)
 
         db.commit()
         return {"mensagem": "Professor associado a turma"}, 201
@@ -585,6 +577,9 @@ def request_student_document(aluno_id, data):
 
     db = get_session()
     try:
+        entry, replay = begin_submission(db, f"solicitar-aluno:{aluno_id}")
+        if replay:
+            return replay
         aluno = db.get(AlunoModel, aluno_id)
         if not aluno:
             return {"erro": "Aluno nao encontrado"}, 404
@@ -596,8 +591,8 @@ def request_student_document(aluno_id, data):
             status="pendente",
         )
         db.add(solicitacao)
-        db.commit()
-        return {"id": solicitacao.id}, 201
+        db.flush()
+        return finish_submission(db, entry, {"id": solicitacao.id}, 201)
     finally:
         db.close()
 
@@ -611,6 +606,9 @@ def request_professor_document(professor_id, data):
 
     db = get_session()
     try:
+        entry, replay = begin_submission(db, f"solicitar-professor:{professor_id}")
+        if replay:
+            return replay
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
             return {"erro": "Professor nao encontrado"}, 404
@@ -622,8 +620,8 @@ def request_professor_document(professor_id, data):
             status="pendente",
         )
         db.add(solicitacao)
-        db.commit()
-        return {"id": solicitacao.id}, 201
+        db.flush()
+        return finish_submission(db, entry, {"id": solicitacao.id}, 201)
     finally:
         db.close()
 
@@ -647,6 +645,7 @@ def update_student_data(aluno_id, data, files=None):
             _remove_saved_file(foto_perfil)
             return {"erro": "Aluno nao encontrado"}, 404
 
+        check_version(aluno, data)
         usuario = db.get(UsuarioModel, aluno.usuario_id)
         if not usuario:
             _remove_saved_file(foto_perfil)
@@ -703,6 +702,7 @@ def update_professor_data(professor_id, data, files=None):
             _remove_saved_file(foto_perfil)
             return {"erro": "Professor nao encontrado"}, 404
 
+        check_version(professor, data)
         usuario = db.get(UsuarioModel, professor.usuario_id)
         if not usuario:
             _remove_saved_file(foto_perfil)
@@ -786,6 +786,7 @@ def get_aluno_detail(aluno_id):
 
         return {
             "aluno": {
+                "versao": aluno.versao,
                 "id": aluno.id,
                 "nome": aluno.nome,
                 "email": email,
@@ -895,6 +896,7 @@ def get_professor_detail(professor_id):
 
         return {
             "professor": {
+                "versao": professor.versao,
                 "id": professor.id,
                 "nome": professor.nome,
                 "email": email,

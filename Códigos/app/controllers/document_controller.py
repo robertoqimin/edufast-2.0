@@ -5,7 +5,12 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 from app.database import get_session
+from app.concurrency import insert_if_missing
 from app.models import AlunoModel, DisciplinaModel, DocumentoModel, ProfessorModel
+from app.models import SolicitacaoDocumentoModel
+from datetime import datetime
+from sqlalchemy import update
+from app.concurrency import begin_submission, finish_submission
 
 
 def get_upload_folder():
@@ -20,21 +25,8 @@ def _get_or_create_disciplina(session_db, disciplina_id=None):
 
         return None, ({"erro": "Disciplina nao encontrada"}, 404)
 
-    disciplina = (
-        session_db.query(DisciplinaModel)
-        .filter(DisciplinaModel.codigo == "GERAL")
-        .first()
-    )
-    if disciplina:
-        return disciplina, None
-
-    disciplina = DisciplinaModel(
-        nome="Geral",
-        codigo="GERAL",
-        carga_horaria=0,
-    )
-    session_db.add(disciplina)
-    session_db.flush()
+    disciplina = insert_if_missing(session_db, DisciplinaModel,
+                                   codigo="GERAL", defaults={"nome": "Geral", "carga_horaria": 0})
     return disciplina, None
 
 
@@ -56,6 +48,11 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
     saved_path = None
 
     try:
+        entry, replay = begin_submission(
+            session_db, f"documento-aluno:{aluno_id}",
+            actor=current_user["sub"] if current_user and not is_admin else None)
+        if replay:
+            return replay
         aluno = session_db.get(AlunoModel, aluno_id)
         if not aluno:
             return {"erro": "Aluno nao encontrado"}, 404
@@ -93,9 +90,8 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
             caminho_arquivo=filename,
         )
         session_db.add(documento)
-        session_db.commit()
-
-        return {
+        session_db.flush()
+        body = {
             "mensagem": "Arquivo enviado",
             "documento": {
                 "id": documento.id,
@@ -105,7 +101,8 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
                 "professor_id": documento.professor_id,
                 "disciplina_id": documento.disciplina_id,
             },
-        }, 201
+        }
+        return finish_submission(session_db, entry, body, 201)
     except Exception:
         session_db.rollback()
         if saved_path and os.path.exists(saved_path):
@@ -113,3 +110,47 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
         raise
     finally:
         session_db.close()
+
+
+def upload_requested_document_for_owner(owner_column, owner_id, request_id, files):
+    """Claim pending request and create its document in one transaction."""
+    if owner_column not in {"aluno_id", "professor_id"}:
+        raise ValueError("Invalid document owner")
+    arquivo = files.get("arquivo")
+    original = secure_filename(arquivo.filename or "") if arquivo else ""
+    if not request_id or not original:
+        return {"erro": "Solicitacao e arquivo sao obrigatorios"}, 400
+    db = get_session()
+    saved_path = None
+    committed = False
+    try:
+        owner = getattr(SolicitacaoDocumentoModel, owner_column)
+        criteria = (SolicitacaoDocumentoModel.id == request_id, owner == owner_id)
+        result = db.execute(update(SolicitacaoDocumentoModel).where(
+            *criteria, SolicitacaoDocumentoModel.status == "pendente"
+        ).values(status="enviado", completed_at=datetime.now()))
+        if result.rowcount != 1:
+            exists = db.query(SolicitacaoDocumentoModel.id).filter(*criteria).first()
+            return {"erro": "Solicitacao ja respondida" if exists else "Solicitacao nao encontrada"}, 409 if exists else 404
+        solicitacao = db.get(SolicitacaoDocumentoModel, request_id)
+        disciplina, _ = _get_or_create_disciplina(db)
+        folder = get_upload_folder()
+        os.makedirs(folder, exist_ok=True)
+        filename = f"{uuid4().hex}_{original}"
+        saved_path = os.path.join(folder, filename)
+        arquivo.save(saved_path)
+        documento = DocumentoModel(**{owner_column: owner_id}, disciplina_id=disciplina.id,
+                                   titulo=solicitacao.titulo, caminho_arquivo=filename)
+        db.add(documento)
+        db.flush()
+        solicitacao.documento_id = documento.id
+        db.commit()
+        committed = True
+        return {"mensagem": "Documento enviado"}, 201
+    finally:
+        db.close()
+        if saved_path and not committed:
+            try:
+                os.remove(saved_path)
+            except FileNotFoundError:
+                pass

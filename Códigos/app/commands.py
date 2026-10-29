@@ -1,5 +1,6 @@
 """Provisionamento administrativo sem apagar usuários ou redefinir senhas."""
 import click
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 
 from .database import get_session
@@ -20,6 +21,9 @@ def register_commands(app):
                 raise click.ClickException("A conta já existe; nenhuma alteração realizada.")
             db.add(UsuarioModel(email=email, senha=generate_password_hash(password), tipo="admin"))
             db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise click.ClickException("A conta ja existe; nenhuma alteracao realizada.")
         finally:
             db.close()
         click.echo("Administrador criado; usuários existentes preservados.")

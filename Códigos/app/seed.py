@@ -1,24 +1,8 @@
-from werkzeug.security import generate_password_hash
-
-from app.database import get_session
-from app.models import UsuarioModel
-
-
 def run_seed():
-    session = get_session()
-    try:
-        session.query(UsuarioModel).delete()
-        admin = UsuarioModel(
-            email="admin@admin.com",
-            senha=generate_password_hash("123"),
-            tipo="ADMIN",
-        )
-        session.add(admin)
-        session.commit()
-    finally:
-        session.close()
-
-    print("Usuários criados com sucesso!")
+    raise RuntimeError(
+        "Seed destrutivo desativado. Use flask --app app:create_app() create-admin "
+        "com email e senha proprios; contas existentes serao preservadas."
+    )
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@
 | [Próxima versão](planejamento/PROXIMA_VERSAO.md) | Acadêmico e secretaria para várias escolas; isolamento, migração e backlog |
 | [Desempenho](planejamento/DESEMPENHO.md) | Experiência em hardware modesto, orçamento de recursos e testes de carga |
 | [Testes para revisão](testes/proxima-versao/README.md) | API, unitários e integração preparados antes da implementação |
+| [Concorrência e repetição](testes/CONCORRENCIA.md) | Correções, comparação com a base, regressão e coleção Postman |
 | [Planejamento anterior](planejamento/PLANEJAMENTO_EDUCAFAST.md) | Proposta histórica de cursos e gestão acadêmica |
 | [Histórico de testes](testes/README.md) | Origem e limites dos logs preservados |
 | [Arquivo CI2](arquivo/README.md) | Pacote histórico e suas dependências |

@@ -1,4 +1,7 @@
 from flask import Flask, jsonify
+from uuid import uuid4
+from sqlalchemy.orm.exc import StaleDataError
+from .concurrency import MutationConflict
 from sqlalchemy import text
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -23,6 +26,18 @@ def create_app():
         # Um único proxy Caddy. A porta do app não é publicada no Compose de produção.
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     init_db()
+
+    @app.errorhandler(MutationConflict)
+    def mutation_conflict(error):
+        return jsonify(erro=error.message), error.status
+
+    @app.errorhandler(StaleDataError)
+    def stale_data(error):
+        return jsonify(erro="Registro alterado por outro envio; recarregue antes de salvar"), 409
+
+    @app.context_processor
+    def submission_context():
+        return {"submission_key": lambda: uuid4().hex}
 
     register_routes(app)
 

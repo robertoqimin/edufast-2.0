@@ -140,6 +140,7 @@
                         <strong class="aluno-request-status aluno-request-status-{{ solicitacao.status }}">{{ solicitacao.status_label }}</strong>
                         {% if solicitacao.status != "enviado" %}
                         <form action="{{ url_for('aluno.upload_documento_aluno') }}" method="post" enctype="multipart/form-data" class="aluno-request-upload">
+                            <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                             <input type="hidden" name="solicitacao_id" value="{{ solicitacao.id }}">
                             <input name="arquivo" type="file" required class="aluno-file">
                             <button class="aluno-submit compact">Enviar</button>
@@ -184,5 +185,6 @@
     </main>
 </template>
     <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
 </body>
 </html>

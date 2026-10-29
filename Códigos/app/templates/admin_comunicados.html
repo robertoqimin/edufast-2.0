@@ -82,6 +82,7 @@
                 {% endif %}
 
                 <form method="post" class="space-y-9">
+                    <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                     <label class="block">
                         <span class="mb-2 block text-sm font-bold text-slate-300">Título do Recado</span>
                         <input name="titulo" type="text" placeholder="Ex: Reunião de Pais e Mestres" class="comunicado-field" required>
@@ -129,5 +130,6 @@
 
     </template>
     <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
 </body>
 </html>

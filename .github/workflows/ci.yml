@@ -35,6 +35,8 @@ jobs:
       - name: Executar o mesmo CI local e remoto
         shell: bash
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
+      - name: Validar protecao de envio na interface
+        run: node --test .github/cicd/test_submission.cjs
       - name: Conferir infraestrutura e contratos TDD sem executar funcionalidades futuras
         run: python .github/cicd/next_stage.py --check
       - name: Publicar a mesma imagem testada

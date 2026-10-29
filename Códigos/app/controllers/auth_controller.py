@@ -94,8 +94,10 @@ def _remove_saved_file(filename):
         return
 
     path = os.path.join(os.path.abspath(current_app.config["UPLOAD_FOLDER"]), filename)
-    if os.path.exists(path):
+    try:
         os.remove(path)
+    except FileNotFoundError:
+        pass
 
 
 def cadastrar_usuario(data, files=None):
