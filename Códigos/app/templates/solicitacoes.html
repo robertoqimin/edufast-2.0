@@ -1,9 +1,16 @@
 <!doctype html>
 <html lang="pt-BR">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solicitações — EduFast</title>
-<style>body{font:16px system-ui;max-width:1000px;margin:auto;padding:24px;background:#0f172a;color:#e2e8f0}a{color:#67e8f9}article,fieldset{padding:20px;border:1px solid #475569;border-radius:12px;margin:20px 0}input,select,button{font:inherit;padding:8px;margin:6px;max-width:90%}label{display:block}button:disabled{opacity:.5}dt{font-weight:bold}dd{margin:4px 0 12px;overflow-wrap:anywhere}</style></head>
-<body><a href="{{ url_for('home.home') }}">Voltar ao painel</a><h1>Solicitações e aprovações</h1>
-<p>Uma proposta pendente não altera os registros da escola. A decisão identifica o responsável e só pode ser aplicada uma vez.</p>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edufast.css') }}">
+</head>
+<body class="edufast-theme"><div class="edufast-layout">
+<aside class="glass-sidebar"><div class="sidebar-brand"><h2>EduFast</h2><p>GESTÃO ESCOLAR</p></div>
+<nav aria-label="Menu principal"><a href="{{ url_for('home.home') }}">Visão geral</a>
+{% if identity.admin %}<a href="{{ url_for('home.admin_cadastro_alunos') }}">Alunos</a><a href="{{ url_for('home.admin_cadastro_professores') }}">Professores</a><a href="{{ url_for('home.admin_turmas') }}">Turmas</a><a href="{{ url_for('home.admin_disciplinas') }}">Disciplinas</a>{% endif %}
+<a href="{{ url_for('aprovacoes.painel') }}" aria-current="page">Solicitações</a></nav>
+<a class="sidebar-logout" href="{{ url_for('auth.logout') }}">Sair do sistema</a></aside>
+<main><div class="approval-content"><header><h1>Solicitações e aprovações</h1><p>Acompanhe os envios e as decisões da sua escola.</p></header>
+<p>As alterações pendentes só entram em vigor depois da aprovação do responsável.</p>
 {% if identity.papel == 'professor' %}
 <fieldset><legend>Propor nova turma</legend><form method="post" action="{{ url_for('aprovacoes.alteracoes') }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -25,13 +32,14 @@
 <fieldset><legend>Nomear responsável por materiais</legend><form id="permissoes-form"><label>ID da conta docente <input type="number" name="usuario_id" min="1" required></label><label><input type="checkbox" name="revisor">Permitir revisão de materiais</label><button>Salvar permissão</button><p id="resultado" role="status"></p></form></fieldset>
 {% endif %}
 {% for item in solicitacoes %}
-<article><h2>Solicitação {{ item.id }} — {{ item.tipo|replace('_',' ') }}</h2><p>Estado: <strong>{{ item.estado }}</strong> · Solicitante: {{ item.solicitante_id }}</p>
+<article><h2>Solicitação {{ item.id }} — {{ item.tipo|replace('_',' ') }}</h2><p>Estado: <strong class="approval-status">{{ item.estado }}</strong> · Solicitante: {{ item.solicitante_id }}</p>
 {% if item.candidato is defined %}<p>Candidato: {{ item.candidato.nome }} — {{ item.candidato.email }} · CPF: {{ item.candidato.cpf or 'Não informado' }}</p>{% endif %}
 <dl>{% for campo, valor in item.payload.items() %}<dt>{{ campo|replace('_',' ') }}</dt><dd>{{ valor if valor is not none else 'Não informado' }}</dd>{% endfor %}</dl>
 {% if item.tem_arquivo %}<p><a href="{{ url_for('aprovacoes.arquivo', proposal_id=item.id) }}">Consultar arquivo da solicitação</a></p>{% endif %}
 {% if item.pode_decidir %}<form method="post" action="{{ url_for('aprovacoes.decidir', proposal_id=item.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Justificativa <input name="justificativa" maxlength="500"></label><button name="decisao" value="aprovar">Aprovar e aplicar</button><button name="decisao" value="rejeitar">Rejeitar</button></form>{% else %}<p>Decisão: {{ item.decidido_por or 'Aguardando responsável autorizado' }}. {{ item.justificativa or '' }}</p>{% endif %}
 </article>{% else %}<p>Nenhuma solicitação disponível.</p>{% endfor %}
+</div></main></div>
 <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
 {% if identity.admin %}<script>
 document.getElementById('permissoes-form').addEventListener('submit',async function(e){e.preventDefault();const form=e.currentTarget;if(form.dataset.sending==='true')return;form.dataset.sending='true';const button=form.querySelector('button');button.disabled=true;try{const result=await fetch('/admin/usuarios/'+Number(form.usuario_id.value)+'/permissoes',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':{{ csrf_token|tojson }}},body:JSON.stringify({revisor_materiais:form.revisor.checked})});const data=await result.json();document.getElementById('resultado').textContent=result.ok?'Permissão atualizada. O professor precisa entrar novamente.':data.erro;}catch(error){document.getElementById('resultado').textContent='Falha ao salvar; confira o estado antes de repetir.';}finally{delete form.dataset.sending;button.disabled=false;}});

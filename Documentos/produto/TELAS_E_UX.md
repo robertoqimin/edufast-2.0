@@ -6,7 +6,11 @@
 
 Organizar a rotina escolar por tarefas: localizar uma turma, resolver uma pendência, lançar uma nota ou revisar uma jornada. O usuário deve entender onde está, qual informação está consultando e o resultado de cada ação.
 
-A identidade proposta usa fundo claro, navegação escura, verde para ações principais, tipografia legível e cartões com hierarquia simples. Os SVGs são pranchas estáticas: não incluem interação, persistência ou integração.
+A identidade EduFast usa fundo claro, navegação escura, verde para ações principais,
+tipografia legível e cartões com hierarquia simples. Foi aplicada às telas funcionais
+de login, administração, professor, aluno e solicitações pelo tema compartilhado
+`Códigos/app/static/css/edufast.css`. Os SVGs continuam sendo pranchas estáticas;
+seus módulos futuros não foram implementados por esta alteração de apresentação.
 
 ## Telas existentes no código
 
