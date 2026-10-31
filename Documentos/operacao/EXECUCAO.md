@@ -13,8 +13,9 @@ Com o Docker Desktop aberto, execute na raiz:
 ```
 
 Não é necessário copiar ou editar `Códigos/.env` para esse modo. O iniciador gera
-segredos aleatórios em `.ci-results/manual/.env` e usa exclusivamente o projeto
-Docker `edufast-manual`, com banco e uploads próprios. Na primeira configuração,
+segredos aleatórios em `.ci-results/manual-restaurado/.env` e usa exclusivamente o
+projeto Docker `edufast-manual-restaurado`, em **http://localhost:5050**, com banco
+e uploads próprios. O ambiente anterior não é alterado. Na primeira configuração,
 cria o esquema somente se o banco estiver vazio. Em banco existente, confere o
 esquema e recusa alterações automáticas. Não executa migrations.
 
@@ -36,7 +37,7 @@ as senhas precisam corresponder às do volume já criado.
 
 ```powershell
 .\iniciar-educafast.ps1 -SemNavegador
-.\iniciar-educafast.ps1 -Porta 5050
+.\iniciar-educafast.ps1 -Porta 5051
 .\iniciar-educafast.ps1 -Acao Status
 .\iniciar-educafast.ps1 -Acao Logs
 .\iniciar-educafast.ps1 -Acao Parar
@@ -47,6 +48,13 @@ ainda vazio, retome com `-PrepararBancoNovo`. Esse parâmetro recusa banco com t
 `Parar` preserva volumes. O navegador só abre depois de `/healthz` responder.
 Se quiser outra conta administrativa, use `-Acao CriarAdmin` (ou adicione
 `-SuperAdmin`); o comando pede credenciais próprias e não substitui usuários.
+
+O parâmetro `-Ambiente Atual` acessa a configuração/volumes anteriores (porta
+padrão 5000). O esquema desse banco não é atualizado automaticamente: a migration
+`003_restauracao_educafast.sql` continua pendente de revisão humana. A chave
+`DATA_ENCRYPTION_KEY`, gerada para o ambiente restaurado, protege os textos de
+solicitações de privacidade. Guarde-a junto do backup; não a substitua se houver
+dados cifrados que precisam ser lidos.
 
 ### Instalação própria com Compose direto
 

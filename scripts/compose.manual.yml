@@ -10,6 +10,7 @@ services:
       DB_URL: ""
       DB_NAME: edufast_manual
       EDUFAST_MANUAL_TEST: "1"
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
   db:
     container_name: !reset null
     ports: !reset []

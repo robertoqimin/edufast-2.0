@@ -1787,6 +1787,278 @@
           }
         }
       ]
+    },
+    {
+      "name": "Admin nao acessa gestao de usuarios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', function () { pm.expect(pm.response.code).to.eql(403); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login superadmin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{superadmin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Painel original de usuarios e CSRF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const token = pm.response.text().match(/name=\"csrf_token\" value=\"([^\"]+)\"/);",
+              "pm.test('Formulario protegido', () => pm.expect(token).to.be.ok);",
+              "if (token) pm.collectionVariables.set('csrf', token[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar administrador pelo superperfil",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "tipo",
+              "value": "admin"
+            },
+            {
+              "key": "nome",
+              "value": "Admin sintetico"
+            },
+            {
+              "key": "email",
+              "value": "new-{{run_key}}@example.test"
+            },
+            {
+              "key": "senha",
+              "value": "{{password}}"
+            },
+            {
+              "key": "csrf_token",
+              "value": "{{csrf}}"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-admin"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir criacao de administrador",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "tipo",
+              "value": "admin"
+            },
+            {
+              "key": "nome",
+              "value": "Admin sintetico"
+            },
+            {
+              "key": "email",
+              "value": "new-{{run_key}}@example.test"
+            },
+            {
+              "key": "senha",
+              "value": "{{password}}"
+            },
+            {
+              "key": "csrf_token",
+              "value": "{{csrf}}"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-admin"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Configuracao institucional original",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/escola?formato=json"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Salvar identidade validada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{base_url}}/super/escola/identidade",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nome\": \"Escola sintetica\", \"sigla\": \"ef\", \"subtitulo\": \"GESTAO ESCOLAR\", \"modo\": \"escuro\", \"fundo\": \"#06385d\", \"destaque\": \"#22d3ee\", \"superficie\": \"#111c2b\", \"texto\": \"#ecf1f8\", \"muted\": \"#a4bdce\", \"raio\": \"12\", \"densidade\": \"confortavel\", \"fonte\": \"dm-sans\", \"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versao anterior de identidade rejeitada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{base_url}}/super/escola/identidade",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

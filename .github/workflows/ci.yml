@@ -37,6 +37,8 @@ jobs:
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
       - name: Caracterizar entrada publica do CI
         run: python .github/cicd/test_ci_characterization.py
+      - name: Conferir protocolo original de design
+        run: python Códigos/tests/verificar_protocolo_design.py
       - name: Validar protecao de envio na interface
         run: node --test .github/cicd/test_submission.cjs
       - name: Conferir infraestrutura e contratos TDD sem executar funcionalidades futuras

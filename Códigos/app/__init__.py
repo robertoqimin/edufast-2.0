@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from uuid import uuid4
 from sqlalchemy.orm.exc import StaleDataError
 from .concurrency import MutationConflict
@@ -38,6 +38,11 @@ def create_app():
 
     @app.errorhandler(MutationConflict)
     def mutation_conflict(error):
+        if not request.is_json and request.accept_mimetypes.best_match(['application/json', 'text/html']) == 'text/html':
+            if error.status == 401:
+                session.clear()
+            return render_template('erro.html', codigo=error.status,
+                titulo='Nao foi possivel concluir esta acao', mensagem=error.message), error.status
         return jsonify(erro=error.message), error.status
 
     @app.errorhandler(StaleDataError)
@@ -67,6 +72,8 @@ def create_app():
             return jsonify(erro="Origem nao autorizada"), 403
 
     register_routes(app)
+    from .restauracao import install
+    install(app)
 
     @app.get("/healthz")
     def healthz():

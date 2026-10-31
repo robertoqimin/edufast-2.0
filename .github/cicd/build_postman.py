@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "Documentos/testes/postman"
 
 
-def request(name, method, path, status, *, form=None, raw=None, file=False, script=None, pre=None):
+def request(name, method, path, status, *, form=None, raw=None, file=False, script=None, pre=None, extra_headers=None):
     headers = []
     body = None
     if raw is not None:
@@ -19,6 +19,7 @@ def request(name, method, path, status, *, form=None, raw=None, file=False, scri
             body = {"mode": "formdata", "formdata": values}
         else:
             body = {"mode": "urlencoded", "urlencoded": [{"key": k, "value": v} for k, v in form.items()]}
+    headers += extra_headers or []
     result = {"name": name, "request": {"method": method, "header": headers, "url": "{{base_url}}" + path},
               "protocolProfileBehavior": {"followRedirects": False},
               "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
@@ -102,12 +103,31 @@ def build():
                           if label.startswith("Upload") else
                           ["pm.test('Mesmo documento', function () { pm.expect(String(pm.response.json().documento.id)).to.eql(pm.collectionVariables.get('document_id')); });"])
             items.append(request(label + owner, "POST", path, 201, form=form, file=True, script=script))
+    items += [request('Admin nao acessa gestao de usuarios', 'GET', '/super/usuarios', 403), login('superadmin'),
+        request('Painel original de usuarios e CSRF', 'GET', '/super/usuarios', 200, script=[
+            r'const token = pm.response.text().match(/name="csrf_token" value="([^"]+)"/);',
+            "pm.test('Formulario protegido', () => pm.expect(token).to.be.ok);",
+            "if (token) pm.collectionVariables.set('csrf', token[1]);"]),
+        request('Criar administrador pelo superperfil', 'POST', '/super/usuarios', 302, form={
+            'tipo':'admin','nome':'Admin sintetico','email':'new-{{run_key}}@example.test','senha':'{{password}}',
+            'csrf_token':'{{csrf}}','idempotency_key':'{{run_key}}-admin'}),
+        request('Repetir criacao de administrador', 'POST', '/super/usuarios', 302, form={
+            'tipo':'admin','nome':'Admin sintetico','email':'new-{{run_key}}@example.test','senha':'{{password}}',
+            'csrf_token':'{{csrf}}','idempotency_key':'{{run_key}}-admin'}),
+        request('Configuracao institucional original', 'GET', '/super/escola?formato=json', 200),
+        request('Salvar identidade validada', 'POST', '/super/escola/identidade', 200,
+            raw={'nome':'Escola sintetica','sigla':'ef','subtitulo':'GESTAO ESCOLAR','modo':'escuro','fundo':'#06385d',
+                 'destaque':'#22d3ee','superficie':'#111c2b','texto':'#ecf1f8','muted':'#a4bdce',
+                 'raio':'12','densidade':'confortavel','fonte':'dm-sans','versao':0},
+            extra_headers=[{'key':'X-CSRF-Token','value':'{{csrf}}'}]),
+        request('Versao anterior de identidade rejeitada', 'POST', '/super/escola/identidade', 409,
+            raw={'versao':0}, extra_headers=[{'key':'X-CSRF-Token','value':'{{csrf}}'}])]
     collection = {"info": {"name": "EduFast - concorrencia e idempotencia",
                             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
                             "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite MySQL; este fluxo verifica contratos HTTP e repeticao sequencial."},
                   "variable": [{"key": "run_key", "value": ""}], "item": items}
     values = {"base_url": "http://127.0.0.1:5000", "admin_email": "u1@example.test",
-              "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "password": "",
+              "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "superadmin_email": "u5@example.test", "password": "",
               "aluno_id": "1", "professor_id": "1", "turma_id": "1", "disciplina_id": "1",
               "aluno_request_id": "1", "professor_request_id": "2"}
     environment = {"name": "EduFast - somente dados sinteticos", "values": [

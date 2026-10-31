@@ -35,6 +35,8 @@ def _items(identity):
                 "solicitante_id": row.solicitante_id, "payload": json.loads(row.payload),
                 "decidido_por": row.decidido_por, "justificativa": row.justificativa,
                 "pode_decidir": reviewer and row.estado == "pendente", "tem_arquivo": bool(row.arquivo)})
+            from app.presenters.aprovacoes_presenter import present
+            items[-1]['titulo'], items[-1]['campos'] = present(row.tipo, json.loads(row.payload))
             if identity.admin and row.tipo == "cadastro":
                 user = db.get(UsuarioModel, row.solicitante_id)
                 profile = (db.query(ProfessorModel).filter_by(usuario_id=row.solicitante_id).first()
@@ -49,6 +51,13 @@ def painel():
     if identity.papel not in {"admin", "super_admin", "professor"}:
         raise MutationConflict("Acesso nao autorizado", 403)
     alunos = []
+    docentes = []
+    if identity.admin:
+        with get_session() as db:
+            rows = (db.query(ProfessorModel, UsuarioModel).join(UsuarioModel, UsuarioModel.id == ProfessorModel.usuario_id)
+                    .filter(UsuarioModel.tipo == 'professor', UsuarioModel.estado == 'ativo').order_by(ProfessorModel.nome).all())
+            docentes = [{'usuario_id': user.id, 'nome': profile.nome, 'email': user.email,
+                         'revisor': user.revisor_materiais} for profile, user in rows]
     if identity.papel == "professor":
         with get_session() as db:
             rows = (db.query(AlunoModel).join(AlunoTurmaModel, AlunoTurmaModel.aluno_id == AlunoModel.id)
@@ -56,7 +65,7 @@ def painel():
                     .join(ProfessorModel, ProfessorModel.id == ProfessorTurmaModel.professor_id)
                     .filter(ProfessorModel.usuario_id == identity.id).distinct().order_by(AlunoModel.nome).all())
             alunos = [{"id": r.id, "nome": r.nome, "matricula": r.matricula, "curso": r.curso_serie or "", "versao": r.versao} for r in rows]
-    return render_template("solicitacoes.html", identity=identity, solicitacoes=_items(identity), alunos=alunos)
+    return render_template("solicitacoes.html", identity=identity, solicitacoes=_items(identity), alunos=alunos, docentes=docentes)
 
 
 @aprovacoes_bp.route("/solicitacoes/alteracoes", methods=["GET", "POST"])
@@ -115,6 +124,8 @@ def permissoes(user_id):
         if not isinstance(role, str):
             raise MutationConflict("Papel invalido", 400)
         role = role.lower()
+        if user.tipo == 'super_admin' and role != user.tipo:
+            raise MutationConflict('O superperfil protegido nao pode ser rebaixado', 403)
         if "papel" in data and (identity.papel != "super_admin" or identity.id == user.id):
             raise MutationConflict("Somente superadmin pode atribuir papeis a outras contas", 403)
         if role not in {"admin", "super_admin", "professor", "aluno"}:

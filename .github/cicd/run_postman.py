@@ -30,6 +30,11 @@ def main():
         MutationApiTests.setUpClass()
         fixture = MutationApiTests()
         fixture.setUp()
+        from app.models import UsuarioModel
+        from werkzeug.security import generate_password_hash
+        with get_session() as db:
+            db.add(UsuarioModel(id=5,email='u5@example.test',tipo='super_admin',senha=generate_password_hash('test-password-123')))
+            db.commit()
         server = make_server("127.0.0.1", 0, fixture.app, threaded=True)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()

@@ -6,11 +6,12 @@
 
 Organizar a rotina escolar por tarefas: localizar uma turma, resolver uma pendência, lançar uma nota ou revisar uma jornada. O usuário deve entender onde está, qual informação está consultando e o resultado de cada ação.
 
-A identidade EduFast usa fundo claro, navegação escura, verde para ações principais,
-tipografia legível e cartões com hierarquia simples. Foi aplicada às telas funcionais
-de login, administração, professor, aluno e solicitações pelo tema compartilhado
-`Códigos/app/static/css/edufast.css`. Os SVGs continuam sendo pranchas estáticas;
-seus módulos futuros não foram implementados por esta alteração de apresentação.
+A referência funcional é o [protocolo original](../PROTOCOLO_DESIGN.md), recuperado
+de `Samucau1/Projeto-Educa-Fast`. Usa DM Sans local, tokens compartilhados, menu e
+barra superior próprios. O padrão é escuro/ciano; o superperfil configura nome,
+marca, paleta clara/escura, fonte, espaçamento e bordas com validação de contraste.
+Os SVGs em `Protótipo/edufast` são pranchas conceituais distintas, e não substituem
+esse design. Login, painéis, superperfil e solicitações usam a identidade original.
 
 ## Telas existentes no código
 

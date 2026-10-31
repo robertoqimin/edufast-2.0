@@ -2,6 +2,11 @@
 
 ### Menos burocracia. Mais tempo para a educação.
 
+**Design preservado:** [galeria das telas](Documentos/design/README.md) ·
+[protocolo obrigatório](Documentos/PROTOCOLO_DESIGN.md) ·
+[organização da entrega](Documentos/design/ORGANIZACAO_GIT.md) ·
+[validações e pendências](Documentos/testes/ENTREGA_RESTAURACAO.md).
+
 O **EduFast** é um software de gestão escolar com foco em **agilidade, experiência do usuário e clareza visual**. A proposta é reunir a rotina acadêmica, administrativa e operacional em uma experiência integrada: do cadastro e da organização das turmas ao acompanhamento de pessoas, folha de ponto e pagamentos.
 
 **Em desenvolvimento:** a base atual cobre processos acadêmicos e de secretaria. RH, ponto, folha de pagamento e financeiro são módulos planejados, apresentados aqui como protótipos.
@@ -82,7 +87,7 @@ Veja as decisões de interação, acessibilidade e novas telas no [guia de UX/UI
 
 ## Arquitetura
 
-A aplicação é um **monólito Flask organizado em camadas**, com páginas HTML renderizadas por Jinja, componentes React via CDN e persistência SQLAlchemy/MySQL.
+A aplicação é um **monólito Flask organizado em camadas**, com páginas HTML renderizadas por Jinja, componentes React locais e persistência SQLAlchemy/MySQL.
 
 ```mermaid
 flowchart LR
@@ -154,8 +159,9 @@ Para **teste manual isolado no Windows**, basta executar (não precisa copiar o 
 .\iniciar-educafast.ps1
 ```
 
-O script gera segredos em `.ci-results/manual/.env`, prepara somente um banco novo
-vazio e usa volumes do projeto `edufast-manual`. Cria os logins
+O script abre a versão restaurada em **http://localhost:5050**, gera segredos em
+`.ci-results/manual-restaurado/.env`, prepara somente um banco novo vazio e usa
+volumes separados do projeto `edufast-manual-restaurado`. Cria os logins
 `superadmin@teste.local`, `admin@teste.local`, `professor@teste.local` e
 `aluno@teste.local`, todos com senha inicial **`Teste-local-2026!`**.
 Professor e aluno ficam vinculados à turma e disciplina de teste. Essas credenciais
@@ -163,8 +169,11 @@ são públicas e servem apenas para esse ambiente local, acessível por loopback
 Reiniciar preserva senhas, permissões e dados. Banco existente não recebe migrations.
 Se a configuração já existir mas o banco ainda estiver vazio, use
 `.\iniciar-educafast.ps1 -PrepararBancoNovo` uma vez.
-Use `-Porta 5050` se a porta 5000 estiver ocupada; `-SemNavegador` evita abrir a janela.
+Use `-Porta 5051` se a porta 5050 estiver ocupada; `-SemNavegador` evita abrir a janela.
 `-Acao Parar`, `-Acao Status` e `-Acao Logs` controlam somente esse ambiente.
+`-Ambiente Atual` seleciona o ambiente anterior (porta padrão 5000), preservado.
+Um banco anterior precisa da migration revisada antes de usar os módulos novos;
+o iniciador não aplica essa atualização. Consulte [restauração](Documentos/planejamento/RESTAURACAO_EDUCAFAST.md).
 
 Para uma instalação própria, edite `Códigos/.env` e configure `SECRET_KEY`,
 `DB_PASSWORD` e `MYSQL_ROOT_PASSWORD`. Em qualquer sistema com Docker:
@@ -178,7 +187,8 @@ docker compose up -d --build
 docker compose logs -f app
 ```
 
-Acesse **http://localhost:5000** após a inicialização. No modo manual, o MySQL não
+Acesse **http://localhost:5050** no iniciador restaurado ou **http://localhost:5000**
+no Compose direto. No modo manual, o MySQL não
 publica porta no computador. No Compose direto, sua porta fica restrita ao loopback.
 
 **Esquema e administrador:** esta versão não altera o banco ao iniciar. Revise o [procedimento de provisionamento e migração](Códigos/migrations/README.md) antes de usar um banco novo ou atualizar uma instalação. Depois, use `docker compose exec app flask --app 'app:create_app()' create-admin` para cadastrar um administrador com credenciais próprias. O seed destrutivo anterior foi desativado.
@@ -189,7 +199,7 @@ Mais comandos, configuração e solução de problemas: [guia de execução](Doc
 
 | Camada | Tecnologias |
 | --- | --- |
-| Interface | HTML, Jinja, CSS, JavaScript, React 18 via CDN e Tailwind em templates |
+| Interface | HTML, Jinja, CSS, JavaScript, React 18 e utilitários locais; protocolo de design original |
 | Aplicação | Python e Flask 3.1 |
 | Dados | SQLAlchemy 2.0, PyMySQL e MySQL 8.4 |
 | Ambiente | Docker, Docker Compose e variáveis de ambiente |

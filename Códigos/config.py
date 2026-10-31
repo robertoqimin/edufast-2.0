@@ -8,6 +8,9 @@ load_dotenv()
 class Config:
     APP_ENV = os.getenv("APP_ENV", "development")
     SECRET_KEY = os.getenv("SECRET_KEY", "")
+    DATA_ENCRYPTION_KEY = os.getenv("DATA_ENCRYPTION_KEY", "")
+    LGPD_CONTROLADOR = os.getenv("LGPD_CONTROLADOR", "Administracao da escola")
+    LGPD_CONTATO = os.getenv("LGPD_CONTATO", "Consulte a secretaria da escola")
     DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
     BIND_HOST = os.getenv("FLASK_BIND_HOST", "127.0.0.1")
     JWT_EXPIRATION_HOURS = int(os.getenv("JWT_EXPIRATION_HOURS", "8"))

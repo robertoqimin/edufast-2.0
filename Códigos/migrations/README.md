@@ -1,5 +1,19 @@
 # Migração de concorrência — revisão pendente
 
+## Restauração funcional — 003 pendente de revisão
+
+`003_restauracao_educafast.sql` propõe 24 tabelas novas para identidade institucional,
+calendário, políticas, cursos, diário/boletim e privacidade. Não altera nem remove
+as tabelas existentes e não deduz vínculos acadêmicos históricos. Não foi executada
+em banco existente. Revisar a lista e eventuais tabelas homônimas antes de aplicar:
+o SQL não deve ser reexecutado às cegas nem substituir tabelas de outra versão.
+
+O iniciador restaurado usa um volume novo e cria somente esquema vazio via metadata,
+em projeto separado; isso não migra o volume anterior. Para bancos existentes,
+revisar 001/002/003, fazer backup de banco/uploads e guardar DATA_ENCRYPTION_KEY.
+O modelo de privacidade cifra novos textos; essa chave não deve ser derivada da
+senha pública de demonstração nem rotacionada sem plano de recifragem.
+
 ## Aprovações e permissões — 002 também pendente
 
 `002_aprovacoes_e_permissoes.sql` adiciona estado da conta, permissão limitada de

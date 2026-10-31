@@ -32,3 +32,8 @@ autorizar notas, atividade e resposta documental antes de conferir seus efeitos.
 Repetir a mesma chave após aprovação não cria outro documento; outra chave para
 a solicitação documental já concluída recebe conflito. O executor confere quatro
 propostas aprovadas e a nota final, além das contagens anteriores.
+
+A coleção também verifica o superperfil restaurado: admin comum recebe 403,
+o superperfil lê o formulário protegido por CSRF, cria um administrador sem duplicar
+na repetição e salva identidade institucional com rejeição de versão desatualizada.
+O executor provisiona esse superperfil somente na sua fixture descartável.

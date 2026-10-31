@@ -18,6 +18,7 @@ from app.models import (AlunoModel, AlunoTurmaModel, AtividadeModel, DisciplinaM
 from app.services.identidade_service import current_identity
 
 FIELDS = {
+    "operacao_restaurada": {"endpoint", "params", "payload"},
     "criar_turma": {"nome", "codigo", "ano_letivo", "turno"},
     "criar_disciplina": {"nome", "codigo", "carga_horaria"},
     "editar_aluno": {"aluno_id", "nome", "curso_serie", "versao"},
@@ -80,6 +81,10 @@ def validate_proposal(db, user_id, kind, raw):
         raise MutationConflict("Operacao ou campos nao permitidos", 400)
     professor = _teacher(db, user_id)
     data = dict(raw)
+    if kind == 'operacao_restaurada':
+        from app.services.restauracao_context import execute
+        execute(db, user_id, data, validate=True)
+        return data
     for key in ("aluno_id", "turma_id", "disciplina_id", "solicitacao_id"):
         if key in FIELDS[kind]:
             data[key] = _integer(data, key)
@@ -172,7 +177,7 @@ def submit_proposal(kind, data, files=None):
         elif kind == "responder_documento":
             resource = f"documento:{normalized['solicitacao_id']}"
         proposal = SolicitacaoAlteracaoModel(solicitante_id=identity.id, tipo=kind,
-            payload=json.dumps(normalized), estado="pendente", arquivo=filename, recurso_pendente=resource)
+            payload=json.dumps(normalized, ensure_ascii=False), estado="pendente", arquivo=filename, recurso_pendente=resource)
         db.add(proposal)
         db.flush()
         result = finish_submission(db, entry, {"id": proposal.id, "estado": "pendente", "mensagem": "Solicitacao enviada para aprovacao"}, 202)
@@ -193,6 +198,11 @@ def submit_proposal(kind, data, files=None):
 def can_review(db, identity, proposal):
     if identity.admin:
         return True
+    if identity.revisor_materiais and identity.papel == 'professor' and proposal.tipo == 'operacao_restaurada':
+        from app.services.restauracao_context import material_discipline
+        discipline = material_discipline(db, json.loads(proposal.payload))
+        professor = _teacher(db, identity.id)
+        return discipline is not None and db.query(ProfessorDisciplinaModel.id).filter_by(professor_id=professor.id, disciplina_id=discipline).first() is not None
     if not identity.revisor_materiais or identity.papel != "professor" or proposal.tipo != "lancar_atividade":
         return False
     data = json.loads(proposal.payload)
@@ -203,6 +213,10 @@ def can_review(db, identity, proposal):
 
 def _apply(db, proposal):
     data = json.loads(proposal.payload)
+    if proposal.tipo == 'operacao_restaurada':
+        from app.services.restauracao_context import execute
+        execute(db, proposal.solicitante_id, data)
+        return
     if proposal.tipo == "cadastro":
         user = db.get(UsuarioModel, data["usuario_id"])
         role = data["papel_solicitado"]

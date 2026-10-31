@@ -18,10 +18,10 @@ try {
     $launcher = Join-Path $temporary 'iniciar-educafast.ps1'
     $env:EDUFAST_MANUAL_PORT = '5999'
     & $launcher -PrepararBancoNovo -SemNavegador -Porta 5050
-    $configPath = Join-Path $temporary '.ci-results/manual/.env'
+    $configPath = Join-Path $temporary '.ci-results/manual-restaurado/.env'
     $first = [IO.File]::ReadAllText($configPath)
     $lines = $first.Trim().Split("`n")
-    Assert-True ($lines.Count -eq 6) 'Expected six separate configuration values.'
+    Assert-True ($lines.Count -eq 7) 'Expected seven separate configuration values.'
     foreach ($name in @('SECRET_KEY', 'DB_PASSWORD', 'MYSQL_ROOT_PASSWORD')) {
         Assert-True ($first -match "(?m)^$name=[a-f0-9]{64}`r?$") "Invalid generated secret: $name"
     }

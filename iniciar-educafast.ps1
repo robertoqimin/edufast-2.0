@@ -5,13 +5,18 @@ param(
     [switch]$SemNavegador,
     [switch]$PrepararBancoNovo,
     [switch]$SuperAdmin,
+    [ValidateSet('Atual', 'Restaurado')]
+    [string]$Ambiente = 'Restaurado',
     [ValidateRange(1024, 65535)]
-    [int]$Porta = 5000
+    [int]$Porta = 5050
 )
 
 $ErrorActionPreference = 'Stop'
 $appDirectory = Join-Path $PSScriptRoot ('C' + [char]0x00f3 + 'digos')
-$localDirectory = Join-Path $PSScriptRoot '.ci-results/manual'
+$manualName = if ($Ambiente -eq 'Restaurado') { 'manual-restaurado' } else { 'manual' }
+$manualProject = if ($Ambiente -eq 'Restaurado') { 'edufast-manual-restaurado' } else { 'edufast-manual' }
+if ($Ambiente -eq 'Atual' -and -not $PSBoundParameters.ContainsKey('Porta')) { $Porta = 5000 }
+$localDirectory = Join-Path $PSScriptRoot ('.ci-results/' + $manualName)
 $envFile = Join-Path $localDirectory '.env'
 $composeFile = Join-Path $appDirectory 'docker-compose.yml'
 $overrideFile = Join-Path $PSScriptRoot 'scripts/compose.manual.yml'
@@ -25,13 +30,20 @@ function New-LocalSecret {
     return ([BitConverter]::ToString($bytes)).Replace('-', '').ToLowerInvariant()
 }
 
+function New-EncryptionKey {
+    $hex = New-LocalSecret
+    $bytes = New-Object byte[] 32
+    for ($index = 0; $index -lt 32; $index++) { $bytes[$index] = [Convert]::ToByte($hex.Substring($index * 2, 2), 16) }
+    return ([Convert]::ToBase64String($bytes)).Replace('+', '-').Replace('/', '_')
+}
+
 function Invoke-ManualCompose {
     param([string[]]$DockerArguments)
     # Windows PowerShell 5.1 treats native progress on stderr as error records.
     $previousPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        & docker compose --project-name edufast-manual --env-file $envFile -f $composeFile -f $overrideFile @DockerArguments
+        & docker compose --project-name $manualProject --env-file $envFile -f $composeFile -f $overrideFile @DockerArguments
         $commandExit = $LASTEXITCODE
     } finally { $ErrorActionPreference = $previousPreference }
     if ($commandExit -ne 0) { throw "Docker Compose falhou (codigo $commandExit). Consulte -Acao Logs. Nenhum volume foi apagado." }
@@ -52,6 +64,7 @@ if (-not (Test-Path -LiteralPath $envFile)) {
         'SECRET_KEY=' + (New-LocalSecret)
         'DB_PASSWORD=' + (New-LocalSecret)
         'MYSQL_ROOT_PASSWORD=' + (New-LocalSecret)
+        'DATA_ENCRYPTION_KEY=' + (New-EncryptionKey)
         'DB_NAME=edufast_manual'
         'DB_USER=edufast_manual'
         'DB_PORT=3306'
@@ -62,7 +75,7 @@ if (-not (Test-Path -LiteralPath $envFile)) {
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($configuration + "`n")
         $stream.Write($bytes, 0, $bytes.Length)
     } finally { $stream.Dispose() }
-    Write-Host 'Configuracao local criada em .ci-results/manual/.env (ignorada pelo Git). Nao compartilhe esse arquivo.'
+    Write-Host "Configuracao local criada em .ci-results/$manualName/.env (ignorada pelo Git). Nao compartilhe esse arquivo."
 }
 $previousPort = [Environment]::GetEnvironmentVariable('EDUFAST_MANUAL_PORT', 'Process')
 $env:EDUFAST_MANUAL_PORT = [string]$Porta
