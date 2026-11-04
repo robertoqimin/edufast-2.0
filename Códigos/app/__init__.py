@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template
 from uuid import uuid4
 from sqlalchemy.orm.exc import StaleDataError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 from .concurrency import MutationConflict
 from sqlalchemy import text
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -32,9 +33,14 @@ def create_app():
             raise RuntimeError("Produção exige SECRET_KEY própria com pelo menos 32 caracteres.")
         if not app.config["TRUSTED_HOSTS"]:
             raise RuntimeError("Produção exige TRUSTED_HOSTS.")
-        # Um único proxy Caddy. A porta do app não é publicada no Compose de produção.
+        # Um único proxy confiável (Caddy ou Nginx). App não publica porta.
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     init_db()
+
+    @app.errorhandler(PoolTimeout)
+    def database_busy(error):
+        # Não repetir gravações automaticamente nem expor detalhes da conexão.
+        return jsonify(erro="Servico ocupado; aguarde e tente novamente."), 503, {"Retry-After": "5", "Cache-Control": "no-store"}
 
     @app.errorhandler(MutationConflict)
     def mutation_conflict(error):

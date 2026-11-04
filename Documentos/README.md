@@ -9,6 +9,9 @@
 | [Organização do Git](design/ORGANIZACAO_GIT.md) | Escopo dos commits, arquivos locais e revisão |
 | [Entrega da restauração](testes/ENTREGA_RESTAURACAO.md) | Resultados executados e pendências conhecidas |
 | [Arquitetura](arquitetura/ARQUITETURA.md) | Camadas, dados, requisições e evolução |
+| [Estudo para várias escolas](arquitetura/ESTUDO_MULTIESCOLAS.md) | Estratégias de isolamento, organização dos dados, disponibilidade e evolução |
+| [Ambientes locais, nuvem e híbridos](../infra/README.md) | Geração de ambientes por escola, limites de tráfego e modelo de recuperação |
+| [Revisão antes do commit](testes/REVISAO_PRE_COMMIT_2026-11-04.md) | Testes atuais, preservação visual e ambiente para avaliação manual |
 | [Telas e UX/UI](produto/TELAS_E_UX.md) | Telas existentes, protótipos e critérios de experiência |
 | [Execução](operacao/EXECUCAO.md) | Ambiente, configuração, comandos e persistência |
 | [CI/CD e produção](../.github/cicd/README.md) | Testes, imagem, deploy e recuperação |

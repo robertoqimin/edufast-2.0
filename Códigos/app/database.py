@@ -3,10 +3,14 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from config import Config
 
-engine = create_engine(
-    Config.SQLALCHEMY_DATABASE_URI,
-    pool_pre_ping=True,
-)
+pool_options = {}
+if Config.SQLALCHEMY_DATABASE_URI.startswith("mysql"):
+    pool_options = dict(pool_size=Config.DB_POOL_SIZE,
+                        max_overflow=Config.DB_MAX_OVERFLOW,
+                        pool_timeout=Config.DB_POOL_TIMEOUT,
+                        pool_recycle=Config.DB_POOL_RECYCLE)
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI,
+                       pool_pre_ping=True, **pool_options)
 if engine.dialect.name == "sqlite":
     @event.listens_for(engine, "connect")
     def sqlite_connect(connection, _):
