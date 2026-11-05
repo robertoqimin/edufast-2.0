@@ -2,6 +2,8 @@
 
 [Início da revisão](README.md) · [Plano de produto](../../planejamento/PROXIMA_VERSAO.md)
 
+**Revisão técnica de 05/11/2026:** consulte [divergências e decisões pendentes](REVISAO_2026-11-05.md). O catálogo anterior precisa ser conciliado com as aprovações docentes e com o esquema atual antes da implementação; esta revisão não aprova migrations.
+
 ## Decisões ainda revisáveis
 
 Os testes tornam explícitas as seguintes propostas. Elas ainda podem ser alteradas após sua leitura, antes de iniciar a implementação:

@@ -2,6 +2,8 @@
 
 **Situação: contratos propostos para sua leitura. Nenhuma funcionalidade nova foi implementada.**
 
+[Revisão técnica da etapa 2 — 05/11/2026](REVISAO_2026-11-05.md): rastreabilidade, conflitos com a versão atual, recomendações e critérios para iniciar a implementação.
+
 Esta etapa segue o ciclo TDD: definir resultado esperado → observar o teste falhar pelo recurso ausente → implementar → obter aprovação dos testes → refatorar preservando os resultados. A implementação funcional só começa depois da revisão solicitada pelo usuário.
 
 ## Ordem sugerida de leitura

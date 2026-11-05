@@ -1,5 +1,7 @@
 # Evidências de testes
 
+[Diagnóstico de 05/11/2026](DIAGNOSTICO_2026-11-05.md): regressão da versão atual, limites de execução, fluxos HTTP e limitações de cobertura.
+
 [Revisar os testes da próxima versão antes da implementação](proxima-versao/README.md): contratos de API, regras unitárias, migrações, desempenho e execução isolada.
 
 O [CI/CD ativo](../../.github/cicd/README.md) contém os testes atuais. Consulte o [relatório de validação](../../.github/cicd/VALIDACAO.md) e os artefatos de cada execução no GitHub Actions.
