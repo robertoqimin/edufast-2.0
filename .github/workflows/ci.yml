@@ -32,6 +32,9 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck rhysd/actionlint:1.7.7 .github/cicd/deploy.sh .github/cicd/remote.sh
+      - name: Validar regras unitarias sem banco
+        shell: bash
+        run: PYTHONPATH=Códigos python -m unittest discover -s .github/cicd/tests/unit -v
       - name: Executar o mesmo CI local e remoto
         shell: bash
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
