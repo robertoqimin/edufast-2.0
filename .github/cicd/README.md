@@ -88,6 +88,33 @@ Os resultados ficam em `.ci-results/`, ignorados pelo Git. O GitHub preserva log
 
 Os testes não representam auditoria integral do produto, teste de carga ou homologação do servidor futuro.
 
+### Fluxos HTTP obrigatórios no CI
+
+O workflow `ci.yml` executa também a coleção Postman com Newman **6.2.1**, instalado
+por `npm ci` usando `.github/cicd/http/package-lock.json`, e dependências Python da
+aplicação. Esse passo roda antes da publicação: falha HTTP, de persistência ou de
+arquivos interrompe o job. O Bash preserva a falha do executor mesmo com `tee`.
+
+Para repetir localmente com Node 22+ e as dependências Python instaladas:
+
+```powershell
+Push-Location .github/cicd/http
+npm ci --no-audit --no-fund
+Pop-Location
+python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js
+```
+
+O executor usa servidor e SQLite temporários, sem migrations. Os artefatos
+`.ci-results/mutations/postman.json`, `http.log` (no CI) e `summary.json` são
+preservados pelo workflow inclusive em falhas. O resumo identifica commit,
+alterações locais, runtime, hash da coleção e resultado completo, incluindo a
+conferência dos registros e arquivos. Um resultado antigo é removido antes de
+iniciar nova execução. Os limites de execução continuam na descoberta normal de
+`tests/`, em SQLite e MySQL.
+
+Automação HTTP não substitui inspeção visual desktop/mobile nem comprova cobertura
+das rotas acadêmicas adicionais identificadas no diagnóstico.
+
 ## Produção proposta
 
 ```mermaid

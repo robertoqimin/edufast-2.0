@@ -1,0 +1,8 @@
+{
+  "name": "edufast-http-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Executor dos fluxos HTTP isolados do EduFast",
+  "engines": { "node": ">=22" },
+  "devDependencies": { "newman": "6.2.1" }
+}

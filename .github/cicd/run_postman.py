@@ -1,7 +1,9 @@
 """Execute Postman against a fresh synthetic SQLite HTTP server, then discard it."""
 import argparse
+import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import subprocess
 import sys
@@ -73,5 +75,34 @@ def main():
             fixture.doCleanups()
 
 
+def run_reported():
+    report = ROOT / '.ci-results/mutations'
+    report.mkdir(parents=True, exist_ok=True)
+    # Uma execução interrompida não pode reutilizar aprovação anterior.
+    for name in ('summary.json', 'postman.json'):
+        (report / name).unlink(missing_ok=True)
+    exit_code = 1
+    try:
+        exit_code = main()
+        return exit_code
+    finally:
+        def git_output(*args):
+            result = subprocess.run(['git', *args], cwd=ROOT, capture_output=True)
+            return result.stdout.decode('utf-8', errors='replace').strip() if result.returncode == 0 else None
+
+        collection = ROOT / 'Documentos/testes/postman/EduFast.postman_collection.json'
+        summary = {
+            'passed': exit_code == 0,
+            'exit_code': exit_code,
+            'commit': git_output('rev-parse', 'HEAD'),
+            'working_tree': git_output('status', '--porcelain'),
+            'python': platform.python_version(),
+            'platform': platform.platform(),
+            'collection_sha256': hashlib.sha256(collection.read_bytes()).hexdigest(),
+            'scope': ['HTTP profiles', 'SQLite disposable', 'persisted records', 'physical files'],
+        }
+        (report / 'summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run_reported())

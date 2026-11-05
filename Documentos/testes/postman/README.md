@@ -13,6 +13,12 @@ somente o banco descartável; não limpar um banco existente.
 
 Executar tudo de forma isolada, sem preparar banco manualmente:
 
+O CI principal já executa este fluxo antes da publicação da imagem. Para instalar
+o executor versionado localmente, executar `npm ci` em `.github/cicd/http` (Node 22+).
+Na raiz, usar o caminho `.github/cicd/http/node_modules/newman/bin/newman.js` no
+comando abaixo. As dependências Python de `Códigos/requirements.txt` devem estar
+instaladas no interpretador utilizado.
+
 ```powershell
 python .github/cicd/run_postman.py --newman CAMINHO/para/newman/bin/newman.js
 ```

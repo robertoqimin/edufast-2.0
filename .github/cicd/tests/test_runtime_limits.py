@@ -10,8 +10,18 @@ from runtime_limits import bounded_int
 
 
 class RuntimeLimitsTests(unittest.TestCase):
+    def test_default_limit_when_variable_is_absent(self):
+        with patch.dict(os.environ):
+            os.environ.pop('TEST_LIMIT', None)
+            self.assertEqual(bounded_int('TEST_LIMIT', 4, 1, 32), 4)
+
+    def test_limits_accept_inclusive_boundaries(self):
+        for value in ('1', '32'):
+            with self.subTest(value=value), patch.dict(os.environ, {'TEST_LIMIT': value}):
+                self.assertEqual(bounded_int('TEST_LIMIT', 4, 1, 32), int(value))
+
     def test_invalid_limits_fail_closed(self):
-        for value in ("0", "-1", "9999", "invalid"):
+        for value in ("0", "-1", "33", "9999", "invalid", "", "1.5"):
             with self.subTest(value=value), patch.dict(os.environ, {"TEST_LIMIT": value}):
                 with self.assertRaises(ValueError):
                     bounded_int("TEST_LIMIT", 4, 1, 32)
@@ -39,12 +49,17 @@ class RuntimeLimitsTests(unittest.TestCase):
     def test_request_limit_rejects_oversized_body_before_processing(self):
         app = create_app()
         app.config.update(TESTING=True, MAX_CONTENT_LENGTH=1024)
+        processed_sizes = []
 
         @app.post('/_test/body')
         def body():
             from flask import request
-            return {'size': len(request.get_data())}
+            size = len(request.get_data())
+            processed_sizes.append(size)
+            return {'size': size}
 
         client = app.test_client()
         self.assertEqual(client.post('/_test/body', data=b'x' * 1024).status_code, 200)
         self.assertEqual(client.post('/_test/body', data=b'x' * 1025).status_code, 413)
+        self.assertEqual(processed_sizes, [1024])
+        self.assertEqual(client.post('/_test/body', data=b'x').json, {'size': 1})

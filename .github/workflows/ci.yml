@@ -37,6 +37,16 @@ jobs:
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
       - name: Caracterizar entrada publica do CI
         run: python .github/cicd/test_ci_characterization.py
+      - name: Preparar executor dos fluxos HTTP
+        run: |
+          node --version
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/cicd/http" --no-audit --no-fund
+          python -m pip install -r Códigos/requirements.txt
+      - name: Validar fluxos HTTP e persistencia por perfil
+        shell: bash
+        run: |
+          mkdir -p .ci-results/mutations
+          python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js 2>&1 | tee .ci-results/mutations/http.log
       - name: Conferir protocolo original de design
         run: python Códigos/tests/verificar_protocolo_design.py
       - name: Validar protecao de envio na interface
