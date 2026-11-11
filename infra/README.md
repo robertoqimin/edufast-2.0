@@ -4,6 +4,10 @@ Para a hospedagem em nuvem com comandos por cliente, revisões incrementais e
 backup, use o [guia de operação em nuvem](CLOUD.md) e `manage.cjs`.
 O gerador original abaixo permanece compatível para configurações iniciais.
 
+Para testar localmente **Teste 01 e Teste 02**, com 20 alunos, 5 professores e
+3 matérias em cada banco, use `node infra/demo.cjs start` e o
+[guia das duas escolas](../Documentos/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md).
+
 Base preparatória para Linux + Docker Compose 2.24.4+, Node 20+ e TLS. Uma imagem
 comum, instâncias Flask/Gunicorn, bancos, redes internas, uploads e segredos próprios
 por escola. Um gateway Nginx atende os domínios na porta 443. Não é isolamento de VM:

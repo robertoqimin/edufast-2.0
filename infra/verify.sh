@@ -2,7 +2,7 @@
 # Somente configurações descartáveis: nenhum banco ou app é iniciado.
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-node --test infra/test_environments.cjs infra/test_manage.cjs
+node --test infra/test_environments.cjs infra/test_manage.cjs infra/test_demo.cjs
 work="$(mktemp -d)"
 trap 'rm -rf -- "$work"' EXIT
 node -e 'const fs=require("fs");const m={image:"ghcr.io/samucau1/edufast-2.0@sha256:"+"a".repeat(64),schools:[{id:"escola-a",host:"a.example.test"},{id:"escola-b",host:"b.example.test"}]};fs.writeFileSync(process.argv[1],JSON.stringify(m))' "$work/manifest.json"
