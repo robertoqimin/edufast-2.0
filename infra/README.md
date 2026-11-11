@@ -1,5 +1,9 @@
 # Ambientes independentes no mesmo servidor
 
+Para a hospedagem em nuvem com comandos por cliente, revisões incrementais e
+backup, use o [guia de operação em nuvem](CLOUD.md) e `manage.cjs`.
+O gerador original abaixo permanece compatível para configurações iniciais.
+
 Base preparatória para Linux + Docker Compose 2.24.4+, Node 20+ e TLS. Uma imagem
 comum, instâncias Flask/Gunicorn, bancos, redes internas, uploads e segredos próprios
 por escola. Um gateway Nginx atende os domínios na porta 443. Não é isolamento de VM:
@@ -47,7 +51,8 @@ Não copiar segredos de outra escola nem perder a chave de criptografia.
 
 O pipeline antigo de deploy continua sendo para uma instalação única. Não usar
 `deploy.sh` antigo para esta frota: não conhece os serviços/volumes por escola.
-Não existe comando automático de migração, publicação ou exclusão de ambientes.
+`manage.cjs` oferece operações explícitas de inicialização e atualização por cliente.
+Não existe execução automática de migrations ou exclusão de ambientes.
 
 ## Controle de tráfego e capacidade
 

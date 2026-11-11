@@ -10,6 +10,7 @@
 | [Entrega da restauração](testes/ENTREGA_RESTAURACAO.md) | Resultados executados e pendências conhecidas |
 | [Arquitetura](arquitetura/ARQUITETURA.md) | Camadas, dados, requisições e evolução |
 | [Estudo para várias escolas](arquitetura/ESTUDO_MULTIESCOLAS.md) | Estratégias de isolamento, organização dos dados, disponibilidade e evolução |
+| [Instâncias por cliente — plano de aplicação](planejamento/INSTANCIAS_POR_CLIENTE_2026-11-11.md) | Mapeamento de banco, backend e frontend próprios, ações e critérios de aceite |
 | [Ambientes locais, nuvem e híbridos](../infra/README.md) | Geração de ambientes por escola, limites de tráfego e modelo de recuperação |
 | [Revisão antes do commit](testes/REVISAO_PRE_COMMIT_2026-11-04.md) | Testes atuais, preservação visual e ambiente para avaliação manual |
 | [Telas e UX/UI](produto/TELAS_E_UX.md) | Telas existentes, protótipos e critérios de experiência |

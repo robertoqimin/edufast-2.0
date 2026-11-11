@@ -2,14 +2,17 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const imagePattern = /^ghcr\.io\/samucau1\/edufast-2\.0@sha256:[a-f0-9]{64}$/;
 
 function validate(input) {
-  if (!input || !/^ghcr\.io\/samucau1\/edufast-2\.0@sha256:[a-f0-9]{64}$/.test(input.image))
+  if (!input || !imagePattern.test(input.image))
     throw new Error('Informe a imagem EduFast por digest aprovado pelo CI.');
   if (!Array.isArray(input.schools) || input.schools.length < 1 || input.schools.length > 50)
     throw new Error('Informe entre 1 e 50 escolas; isto não representa capacidade garantida.');
   const ids = new Set(), hosts = new Set();
   for (const school of input.schools) {
+    if (school?.image !== undefined && !imagePattern.test(school.image))
+      throw new Error('Imagem do cliente deve usar o repositorio EduFast e digest.');
     if (!school || !/^[a-z][a-z0-9-]{1,30}$/.test(school.id)) throw new Error('ID de escola invalido.');
     if (typeof school.host !== 'string' || school.host.length > 253 ||
         !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]$/.test(school.host))
@@ -19,29 +22,38 @@ function validate(input) {
   }
 }
 
-function render(input) {
+function render(input, previousEnv = '') {
   validate(input);
   const compose = {services: {}, networks: {}, volumes: {}};
   const servers = [];
   const env = [];
+  const saved = new Map(previousEnv.trim().split(/\r?\n/).filter(Boolean).map(line => {
+    const at = line.indexOf('=');
+    if (at < 1) throw new Error('Arquivo de segredos invalido.');
+    return [line.slice(0, at), line.slice(at + 1)];
+  }));
   const gatewayNetworks = [];
-  for (const {id, host} of input.schools) {
+  for (const {id, host, image = input.image} of input.schools) {
     const prefix = id.toUpperCase().replaceAll('-', '_');
     const app = `app-${id}`, db = `db-${id}`, front = `front-${id}`, back = `back-${id}`;
     const variable = name => '${' + prefix + '_' + name + ':?Segredo obrigatorio}';
-    for (const name of ['SECRET_KEY', 'DATA_ENCRYPTION_KEY', 'DB_PASSWORD', 'ROOT_PASSWORD'])
-      env.push(`${prefix}_${name}=${name === 'DATA_ENCRYPTION_KEY' ? crypto.randomBytes(32).toString('base64url') + '=' : crypto.randomBytes(32).toString('hex')}`);
+    for (const name of ['SECRET_KEY', 'DATA_ENCRYPTION_KEY', 'DB_PASSWORD', 'ROOT_PASSWORD']) {
+      const key = `${prefix}_${name}`;
+      const value = saved.get(key) ?? (name === 'DATA_ENCRYPTION_KEY' ? crypto.randomBytes(32).toString('base64url') + '=' : crypto.randomBytes(32).toString('hex'));
+      if (!/^[a-zA-Z0-9_=-]{32,128}$/.test(value)) throw new Error('Segredo invalido.');
+      env.push(`${key}=${value}`);
+    }
     compose.networks[front] = {internal: true};
     compose.networks[back] = {internal: true};
     gatewayNetworks.push(front);
     const uploads = `uploads-${id}`, data = `mysql-${id}`;
     compose.volumes[uploads] = {}; compose.volumes[data] = {};
     compose.services[app] = {
-      image: input.image, restart: 'unless-stopped',
+      image, restart: 'unless-stopped',
       command: ['gunicorn', '-c', '/app/gunicorn.conf.py', 'app:create_app()'],
       environment: {
         APP_ENV: 'production', SECRET_KEY: variable('SECRET_KEY'), DATA_ENCRYPTION_KEY: variable('DATA_ENCRYPTION_KEY'),
-        TRUSTED_HOSTS: `${host},localhost`, RELEASE_ID: input.image,
+        TRUSTED_HOSTS: `${host},localhost`, RELEASE_ID: image,
         DB_HOST: db, DB_NAME: 'edufast', DB_USER: 'edufast', DB_PASSWORD: variable('DB_PASSWORD'),
         UPLOAD_FOLDER: '/app/uploads', WEB_WORKERS: '1', WEB_THREADS: '4',
         DB_POOL_SIZE: '4', DB_MAX_OVERFLOW: '0', DB_POOL_TIMEOUT: '5',
