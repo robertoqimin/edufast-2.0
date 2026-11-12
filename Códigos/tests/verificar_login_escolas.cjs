@@ -3,7 +3,7 @@ const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const out = path.resolve('.ci-results/login-escolas');
+const out = path.resolve(process.env.EDUFAST_VISUAL_OUT || '.ci-results/login-escolas');
 fs.mkdirSync(out, {recursive: true});
 const schools = [{id: 'teste01', port: 5081}, {id: 'teste02', port: 5082}];
 (async () => {
@@ -13,6 +13,17 @@ const schools = [{id: 'teste01', port: 5081}, {id: 'teste02', port: 5082}];
   async function screenshot(page, name) {
     for (const [suffix, width, height] of [['desktop', 1440, 1000], ['mobile', 390, 844]]) {
       await page.setViewportSize({width, height});
+      await page.evaluate(() => document.fonts.ready);
+      const brand = await page.locator('.brand-mark').evaluate(mark => {
+        const range = document.createRange();
+        range.selectNodeContents(mark.firstChild);
+        const text = range.getBoundingClientRect(), box = mark.getBoundingClientRect();
+        return {initials: mark.firstChild.textContent.trim(), lines: range.getClientRects().length,
+          contained: text.left >= box.left - 1 && text.right <= box.right + 1 &&
+            text.top >= box.top - 1 && text.bottom <= box.bottom + 1};
+      });
+      assert.equal(brand.lines, 1, `${name} ${suffix}: sigla ${brand.initials} quebrada`);
+      assert.ok(brand.contained, `${name} ${suffix}: sigla ${brand.initials} fora da marca`);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
       const file = `${name}-${suffix}.png`;
       await page.screenshot({path: path.join(out, file), fullPage: true}); captures.push(file);

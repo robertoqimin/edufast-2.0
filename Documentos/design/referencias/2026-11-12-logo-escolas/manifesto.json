@@ -1,0 +1,35 @@
+{
+  "data_referencia": "2026-11-12",
+  "base_commit": "92d3a33",
+  "status": "brand initials contained on desktop and mobile",
+  "execucao": {
+    "passed": true,
+    "viewports": [
+      "1440x1000",
+      "390x844"
+    ],
+    "errors": []
+  },
+  "capturas": [
+    {
+      "arquivo": "admin-teste02-desktop.png",
+      "bytes": 169506,
+      "sha256": "72c1feabe0724981d5a7df2cfba5d2f66503824b6bc5f9177cb94a1d74213673"
+    },
+    {
+      "arquivo": "admin-teste02-mobile.png",
+      "bytes": 131644,
+      "sha256": "cd71092cc9ff25ca939e1c68cd578b6f9dcc9750b470b745bdfcf832d7bcf056"
+    },
+    {
+      "arquivo": "login-teste01-desktop.png",
+      "bytes": 294921,
+      "sha256": "99db7cd5e618a3c2d3d78c97349dcaedee437dc46dbf770c1df6e5c6fa0f6f2c"
+    },
+    {
+      "arquivo": "login-teste01-mobile.png",
+      "bytes": 51545,
+      "sha256": "2b5188f3c71342e32bb17896de9a0d0661d7baaa173e7869c535330923b568e9"
+    }
+  ]
+}

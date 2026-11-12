@@ -6,7 +6,7 @@
 <a href="{{ url_for(endpoint) }}" {% if active %}class="active" aria-current="page"{% endif %}>{{ icon(symbol) }} {{ text }}{% if active %}<span class="active-dot"></span>{% endif %}</a>
 {% endmacro %}
 <aside class="workspace-sidebar">
-    <a class="brand" href="{{ url_for('home.home') }}"><span class="brand-mark">{{ escola.sigla|default('ef') }}<span>↗</span></span><span>{% if escola.nome|default('EducaFast') == 'EducaFast' %}educa<span class="brand-light">fast</span>{% else %}{{ escola.nome }}{% endif %}<small>{{ escola.subtitulo|default('GESTÃO ESCOLAR') }}</small></span></a>
+    <a class="brand" href="{{ url_for('home.home') }}"><span class="brand-mark{% if escola.sigla|default('ef')|length > 2 %} brand-mark-wide{% endif %}">{{ escola.sigla|default('ef') }}<span>↗</span></span><span>{% if escola.nome|default('EducaFast') == 'EducaFast' %}educa<span class="brand-light">fast</span>{% else %}{{ escola.nome }}{% endif %}<small>{{ escola.subtitulo|default('GESTÃO ESCOLAR') }}</small></span></a>
     <div class="workspace-label">ESPAÇO DE TRABALHO <span>ESCOLA</span></div>
     <nav class="sidebar-nav" aria-label="Navegação principal">
         {% if role in ['admin','super_admin'] %}
