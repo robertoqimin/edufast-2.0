@@ -1,5 +1,25 @@
 # Migração de concorrência — revisão pendente
 
+## Frequência e atestados — 004 pendente de revisão
+
+`004_frequencia.sql` propõe quatro tabelas: chamadas versionadas, marcações por
+aluno, atestados e auditoria. Foi gerado pelos modelos, sem conectar ou executar
+SQL nos bancos das escolas. Não cria presença histórica nem altera contas,
+permissões, notas ou vínculos. As chamadas docentes aguardam decisão de admin.
+Atestado aceito apenas justifica a falta; não abona nem conta como presença.
+
+Antes de aplicar: revisar SQL, conferir esquema/tipos das chaves referenciadas,
+verificar ausência de tabelas homônimas, salvar banco/uploads e preservar
+`DATA_ENCRYPTION_KEY`. Os anexos e motivos ficam cifrados. Rever acesso e retenção
+de documentos com a escola. Não executar às cegas ou reexecutar após falha parcial:
+DDL MySQL tem commits implícitos. A aplicação não executa esta migration ao iniciar.
+
+O módulo responde 503 se não encontrar as quatro tabelas, mantendo os fluxos
+existentes. Depois de revisão e autorização explícita, aplicar separadamente por
+instalação e validar permissões, chamada/aprovação, relatório, atestado e download.
+Rollback de aplicação preserva as tabelas; não executar DROP automaticamente.
+Guia e evidências: `Documentos/testes/FREQUENCIA_2026-11-12.md`.
+
 ## Restauração funcional — 003 pendente de revisão
 
 `003_restauracao_educafast.sql` propõe 24 tabelas novas para identidade institucional,

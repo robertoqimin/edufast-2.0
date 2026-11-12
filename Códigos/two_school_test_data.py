@@ -59,6 +59,10 @@ def initialize(target_engine, school):
         raise RuntimeError('Escola de teste inválida.')
     tables = inspect(target_engine).get_table_names()
     if tables:
+        # Reconhecer módulo instalado por migration revisada, sem criar suas tabelas.
+        frequency_tables = {'frequencia_chamadas', 'frequencia_presencas', 'frequencia_atestados', 'frequencia_auditoria'}
+        if frequency_tables <= set(tables):
+            from app.models import frequencia_model  # noqa: F401
         if set(tables) != set(Base.metadata.tables):
             raise RuntimeError('Esquema existente diferente; revisão necessária, sem alteração.')
         with Session(target_engine) as db:

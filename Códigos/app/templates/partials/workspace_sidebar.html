@@ -48,6 +48,7 @@
         {{ nav_link('cursos.biblioteca', 'Meus cursos' if role == 'aluno' else 'Biblioteca de cursos', 'book', ['cursos.editor','cursos.aprender']) }}
         {% if role in ['admin','super_admin'] %}{{ nav_link('cursos.gestao_turmas', 'Gestão acadêmica', 'grid') }}{% endif %}
         <span class="nav-section">VIDA ACADÊMICA</span>
+        {{ nav_link('frequencia.painel', 'Frequência e atestados', 'book', ['frequencia.formulario','frequencia.chamada','frequencia.relatorio']) }}
         {% if role == 'aluno' %}
         {{ nav_link('academico.meu_boletim', 'Boletim por período', 'cap') }}
         {% else %}
