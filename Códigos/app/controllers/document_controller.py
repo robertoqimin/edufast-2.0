@@ -31,6 +31,13 @@ def _get_or_create_disciplina(session_db, disciplina_id=None):
 
 
 def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_override=None):
+    from app.services.identidade_service import current_identity
+    identity = current_identity()
+    if not identity.admin:
+        from app.services.aprovacoes_service import submit_proposal
+        return submit_proposal("enviar_documento", form, files)
+    is_admin = True
+    current_user = {"sub": str(identity.id)}
     if "arquivo" not in files:
         return {"erro": "Arquivo nao enviado"}, 400
 
@@ -50,7 +57,7 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
     try:
         entry, replay = begin_submission(
             session_db, f"documento-aluno:{aluno_id}",
-            actor=current_user["sub"] if current_user and not is_admin else None)
+            actor=current_user["sub"] if current_user else None)
         if replay:
             return replay
         aluno = session_db.get(AlunoModel, aluno_id)

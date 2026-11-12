@@ -1,0 +1,34 @@
+name: Containers por cliente - piloto
+
+on:
+  push:
+    branches: [feature/instancias-clientes-nuvem]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloud-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  piloto:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Conferir configuracoes e comandos por cliente
+        run: bash infra/verify.sh
+      - name: Construir imagem descartavel do piloto
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image="edufast-ci-${GITHUB_SHA:0:10}:tested"
+          docker build --build-arg "VCS_REF=$GITHUB_SHA" -f .github/cicd/Dockerfile -t "$image" .
+          mkdir -p .ci-results
+          printf '%s' "$image" > .ci-results/image.txt
+      - name: Conferir dois clientes com MySQL e HTTPS
+        run: node infra/smoke_cloud.cjs

@@ -42,6 +42,7 @@ def generate_token(user):
         "role": role,
         "tipo": role,
         "exp": int(expires_at.timestamp()),
+        "ver": user.auth_version,
     }
     header_part = _b64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
     payload_part = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
@@ -67,7 +68,7 @@ def decode_token_from_request():
     except (ValueError, json.JSONDecodeError, UnicodeDecodeError, binascii.Error):
         return None, (jsonify({"erro": "Token JWT invalido"}), 401)
 
-    if header.get("alg") != "HS256" or header.get("typ") != "JWT":
+    if not isinstance(header, dict) or not isinstance(payload, dict) or header.get("alg") != "HS256" or header.get("typ") != "JWT":
         return None, (jsonify({"erro": "Token JWT invalido"}), 401)
 
     try:
@@ -78,6 +79,13 @@ def decode_token_from_request():
     if exp < int(datetime.now(timezone.utc).timestamp()):
         return None, (jsonify({"erro": "Token JWT expirado"}), 401)
 
+    from app.services.identidade_service import load_identity
+    from app.concurrency import MutationConflict
+    try:
+        identity = load_identity(payload.get("sub"), payload.get("role") or payload.get("tipo"), payload.get("ver", 0))
+    except MutationConflict:
+        return None, (jsonify({"erro": "Acesso revogado ou conta pendente"}), 401)
+    payload["role"] = payload["tipo"] = identity.papel
     return payload, None
 
 

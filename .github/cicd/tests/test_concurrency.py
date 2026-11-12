@@ -19,7 +19,7 @@ from app.models import (AlunoModel, ProfessorModel, UsuarioModel, TurmaModel,
                         DisciplinaModel, AlunoTurmaModel, ProfessorTurmaModel,
                         ProfessorDisciplinaModel, TurmaDisciplinaModel, NotaModel,
                         DocumentoModel, SolicitacaoDocumentoModel, ComunicadoModel,
-                        AtividadeModel, IdempotenciaModel)
+                        AtividadeModel, IdempotenciaModel, SolicitacaoAlteracaoModel)
 
 
 MYSQL = engine.dialect.name == "mysql"
@@ -110,7 +110,15 @@ class MutationApiTests(TestCase):
         return {"nome": "Professor editado", "email": "u3@example.test", "cpf": "11111111111", "versao": "1", **extra}
 
     def grade(self, **extra):
-        return {"aluno_id": "1", "turma_id": "1", "disciplina_id": "1", "nota": "8", "versao": "0", **extra}
+        return {"aluno_id": "1", "turma_id": "1", "disciplina_id": "1", "nota": "8", "versao": "0", "idempotency_key": "grade-v" + str(extra.get("versao", "0")), **extra}
+
+    def approve_all(self):
+        # Changed contract: professor writes are proposals; only an admin applies them.
+        with get_session() as db:
+            ids = [row.id for row in db.query(SolicitacaoAlteracaoModel).filter_by(estado="pendente").order_by(SolicitacaoAlteracaoModel.id).all()]
+        for request_id in ids:
+            result = self.client().post(f"/solicitacoes/alteracoes/{request_id}/decidir", json={"decisao": "aprovar"})
+            self.assertEqual(result.status_code, 200, result.get_data(as_text=True))
 
     def test_schema_declares_all_unique_guarantees(self):
         inspector = inspect(engine)
@@ -140,8 +148,10 @@ class MutationApiTests(TestCase):
     def test_document_request_cannot_be_reused_sequentially(self):
         for user, request_id, path in [(2, 1, "/aluno/documentos/upload"), (3, 2, "/professor/documentos/upload")]:
             with self.subTest(user=user):
-                self.assertEqual(self.client(user).post(path, data=self.upload(solicitacao_id=str(request_id))).status_code, 302)
-                self.assertEqual(self.client(user).post(path, data=self.upload(solicitacao_id=str(request_id))).status_code, 409)
+                self.assertEqual(self.client(user).post(path, data=self.upload(solicitacao_id=str(request_id), idempotency_key=f"request-{request_id}")).status_code, 302)
+                self.approve_all()
+                self.assertEqual(self.client(user).post(path, data=self.upload(solicitacao_id=str(request_id), idempotency_key=f"request-{request_id}")).status_code, 302 if user == 3 else 409)
+                self.assertEqual(self.client(user).post(path, data=self.upload(solicitacao_id=str(request_id), idempotency_key=f"new-request-{request_id}")).status_code, 409)
         self.assertEqual(self.count(DocumentoModel), 2)
         self.assertEqual(len(self.files()), 2)
 
@@ -178,7 +188,10 @@ class MutationApiTests(TestCase):
         client = self.client(3)
         self.assertEqual(client.post(path, data=self.grade()).status_code, 302)
         self.assertEqual(client.post(path, data=self.grade(nota="4")).status_code, 409)
+        self.assertEqual(self.count(NotaModel), 0)
+        self.approve_all()
         self.assertEqual(client.post(path, data=self.grade(nota="9", versao="1")).status_code, 302)
+        self.approve_all()
         with get_session() as db:
             self.assertEqual(float(db.query(NotaModel).one().nota), 9)
 
@@ -253,7 +266,9 @@ class MutationApiTests(TestCase):
 
     @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
     def test_concurrent_teacher_document(self):
-        self.statuses(self.pair("/professor/documentos/upload", lambda _: self.upload(solicitacao_id="2"), user=3), [302, 409])
+        self.statuses(self.pair("/professor/documentos/upload", lambda i: self.upload(solicitacao_id="2", idempotency_key=f"teacher-doc-{i}"), user=3), [302, 409])
+        self.assertEqual(self.count(DocumentoModel), 0)
+        self.approve_all()
         self.assert_document_winner(2)
 
     def assert_document_winner(self, request_id):
@@ -289,8 +304,8 @@ class MutationApiTests(TestCase):
         with get_session() as db:
             db.add(NotaModel(aluno_id=1, disciplina_id=1, professor_id=1, nota=5))
             db.commit()
-        self.statuses(self.pair("/professor/notas/salvar", lambda _: self.grade(versao="1"), user=3,
-                               hook=self.version_hook("app.controllers.professor_controller")), [302, 409])
+        self.statuses(self.pair("/professor/notas/salvar", lambda i: self.grade(versao="1", idempotency_key=f"existing-grade-{i}"), user=3), [302, 409])
+        self.approve_all()
         with get_session() as db:
             note = db.query(NotaModel).one()
             self.assertEqual(note.versao, 2)
@@ -298,8 +313,9 @@ class MutationApiTests(TestCase):
 
     @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
     def test_concurrent_new_grade(self):
-        self.statuses(self.pair("/professor/notas/salvar", lambda _: self.grade(), user=3,
-                               hook=self.version_hook("app.controllers.professor_controller")), [302, 409])
+        self.statuses(self.pair("/professor/notas/salvar", lambda i: self.grade(idempotency_key=f"new-grade-{i}"), user=3), [302, 409])
+        self.assertEqual(self.count(NotaModel), 0)
+        self.approve_all()
         self.assertEqual(self.count(NotaModel), 1)
 
     @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
@@ -316,6 +332,9 @@ class MutationApiTests(TestCase):
             with self.subTest(path=path):
                 responses = self.pair(path, lambda _: {**factory(), "idempotency_key": f"same-{index}"}, user=user)
                 self.assertTrue(all(r.status_code in {201, 302} for r in responses), [r.status_code for r in responses])
+                if user == 3:
+                    self.assertEqual(self.count(model), expected - 1)
+                    self.approve_all()
                 self.assertEqual(self.count(model), expected)
         self.assertEqual(len(self.files()), 3)
 

@@ -32,11 +32,32 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck rhysd/actionlint:1.7.7 .github/cicd/deploy.sh .github/cicd/remote.sh
+      - name: Validar regras unitarias sem banco
+        shell: bash
+        run: PYTHONPATH=Códigos python -m unittest discover -s .github/cicd/tests/unit -v
       - name: Executar o mesmo CI local e remoto
         shell: bash
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
+      - name: Caracterizar entrada publica do CI
+        run: python .github/cicd/test_ci_characterization.py
+      - name: Preparar executor dos fluxos HTTP
+        run: |
+          node --version
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/cicd/http" --no-audit --no-fund
+          python -m pip install -r Códigos/requirements.txt
+      - name: Validar fluxos HTTP e persistencia por perfil
+        shell: bash
+        run: |
+          mkdir -p .ci-results/mutations
+          python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js 2>&1 | tee .ci-results/mutations/http.log
+      - name: Conferir protocolo original de design
+        run: python Códigos/tests/verificar_protocolo_design.py
       - name: Validar protecao de envio na interface
         run: node --test .github/cicd/test_submission.cjs
+      - name: Validar isolamento dos ambientes gerados
+        run: bash infra/verify.sh
+      - name: Executar piloto sintetico de dois clientes em HTTPS
+        run: node infra/smoke_cloud.cjs
       - name: Conferir infraestrutura e contratos TDD sem executar funcionalidades futuras
         run: python .github/cicd/next_stage.py --check
       - name: Publicar a mesma imagem testada

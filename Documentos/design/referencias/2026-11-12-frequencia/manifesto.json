@@ -1,0 +1,74 @@
+{
+  "data_referencia": "2026-11-12",
+  "base_commit": "7c39bc0",
+  "status": "validated in disposable environment; school migration pending review",
+  "execucao": {
+    "passed": true,
+    "captures": [
+      "professor-painel-desktop.png",
+      "professor-painel-mobile.png",
+      "chamada-desktop.png",
+      "chamada-mobile.png",
+      "aprovacao-desktop.png",
+      "aprovacao-mobile.png",
+      "atestados-desktop.png",
+      "atestados-mobile.png",
+      "relatorio-desktop.png",
+      "relatorio-mobile.png"
+    ],
+    "errors": [],
+    "scope": "professor envia 20 alunos, admin aprova, aluno envia atestado, admin aceita, falta permanece justificada"
+  },
+  "capturas": [
+    {
+      "arquivo": "professor-painel-desktop.png",
+      "sha256": "0e01561993f9468bea13d3a6b733654f04216186e028e26ebda0aacf381b5c71",
+      "bytes": 113883
+    },
+    {
+      "arquivo": "professor-painel-mobile.png",
+      "sha256": "bb654561f76e5a0ff95d878ae22579c4d6a7cdeb5c9ba87a1d48cf6440ecb215",
+      "bytes": 71925
+    },
+    {
+      "arquivo": "chamada-desktop.png",
+      "sha256": "0b2ea05723b9af1e981305929c66ec6495b92e712341b6f4426973c5985458ed",
+      "bytes": 214866
+    },
+    {
+      "arquivo": "chamada-mobile.png",
+      "sha256": "630685acabe1ebfada081889897c342cfb880428bf958c5e48aded053a845d42",
+      "bytes": 199769
+    },
+    {
+      "arquivo": "aprovacao-desktop.png",
+      "sha256": "c6df989514984da8b8aba164210cf0a8bd1d881bd1f8c346a9e64d97e111544a",
+      "bytes": 129157
+    },
+    {
+      "arquivo": "aprovacao-mobile.png",
+      "sha256": "6eb4183b0a4a736a3ef0cdd1b2d41c89918234cdc5ac8ba821372c1546d06ad9",
+      "bytes": 126584
+    },
+    {
+      "arquivo": "atestados-desktop.png",
+      "sha256": "5b080c0da642760ef40c2dfc88e70e5b03edc8a725e914540e439d4ca08646cb",
+      "bytes": 172898
+    },
+    {
+      "arquivo": "atestados-mobile.png",
+      "sha256": "8c0da6df20fbfd1b6717e9aea8504c3e7c72db617810f2881e5811bf3c1936e3",
+      "bytes": 132636
+    },
+    {
+      "arquivo": "relatorio-desktop.png",
+      "sha256": "7191d8d07a5ce2e752b6ec29cb9e5ee68f5dda1294a6353785ecb8a67c3e73e7",
+      "bytes": 231548
+    },
+    {
+      "arquivo": "relatorio-mobile.png",
+      "sha256": "42c1598455d87f70f91d7f301790a2c63b67c1e4327a8fb404345ac5f478281f",
+      "bytes": 426300
+    }
+  ]
+}

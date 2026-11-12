@@ -1,6 +1,15 @@
 """Models da aplicacao."""
 
+from .configuracao_model import ConfiguracaoModel
+from .curso_model import (CursoModel, CapituloModel, TemaModel, AulaModel, OfertaCursoModel,
+                         ProgressoAulaModel, AtribuicaoDocenteModel, EstadoTurmaModel, AuditoriaCursoModel)
+from .academico_model import PeriodoLetivoModel, AvaliacaoModel, LancamentoNotaModel, AuditoriaAcademicaModel
+from .escola_model import (IdentidadeEscolaModel, CalendarioEscolaModel, EventoCalendarioModel,
+                          PoliticaEscolaModel, RegraTurmaEscolaModel, RegraPeriodoEscolaModel)
+from .privacidade_model import PedidoPrivacidadeModel, AuditoriaPrivacidadeModel, LimiteLoginModel
+
 from .idempotencia_model import IdempotenciaModel
+from .solicitacao_alteracao_model import SolicitacaoAlteracaoModel
 from .aluno_model import AlunoModel
 from .aluno_disciplina_model import AlunoDisciplinaModel
 from .aluno_turma_model import AlunoTurmaModel

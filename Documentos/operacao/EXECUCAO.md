@@ -4,6 +4,60 @@
 
 ## Primeira instalação
 
+### Teste manual no Windows
+
+Com o Docker Desktop aberto, execute na raiz:
+
+```powershell
+.\iniciar-educafast.ps1
+```
+
+Não é necessário copiar ou editar `Códigos/.env` para esse modo. O iniciador gera
+segredos aleatórios em `.ci-results/manual-restaurado/.env` e usa exclusivamente o
+projeto Docker `edufast-manual-restaurado`, em **http://localhost:5050**, com banco
+e uploads próprios. O ambiente anterior não é alterado. Na primeira configuração,
+cria o esquema somente se o banco estiver vazio. Em banco existente, confere o
+esquema e recusa alterações automáticas. Não executa migrations.
+
+| Login local | Perfil |
+| --- | --- |
+| `superadmin@teste.local` | Super admin |
+| `admin@teste.local` | Admin |
+| `professor@teste.local` | Professor |
+| `aluno@teste.local` | Aluno |
+
+Senha inicial de todos: **`Teste-local-2026!`**. São credenciais públicas, somente
+para teste local em loopback. Professor e aluno têm vínculo com a turma
+`TESTE-2026` e a disciplina `MAT-TESTE`. O professor começa sem poder de revisor;
+o administrador pode conceder a permissão no painel de solicitações.
+
+O iniciador não redefine senhas, estado ou permissões de contas existentes.
+Não apague o arquivo de configuração para tentar redefinir senhas do MySQL:
+as senhas precisam corresponder às do volume já criado.
+
+```powershell
+.\iniciar-educafast.ps1 -SemNavegador
+.\iniciar-educafast.ps1 -Porta 5051
+.\iniciar-educafast.ps1 -Acao Status
+.\iniciar-educafast.ps1 -Acao Logs
+.\iniciar-educafast.ps1 -Acao Parar
+```
+
+Se a configuração foi criada mas a preparação inicial foi interrompida com o banco
+ainda vazio, retome com `-PrepararBancoNovo`. Esse parâmetro recusa banco com tabelas.
+`Parar` preserva volumes. O navegador só abre depois de `/healthz` responder.
+Se quiser outra conta administrativa, use `-Acao CriarAdmin` (ou adicione
+`-SuperAdmin`); o comando pede credenciais próprias e não substitui usuários.
+
+O parâmetro `-Ambiente Atual` acessa a configuração/volumes anteriores (porta
+padrão 5000). O esquema desse banco não é atualizado automaticamente: a migration
+`003_restauracao_educafast.sql` continua pendente de revisão humana. A chave
+`DATA_ENCRYPTION_KEY`, gerada para o ambiente restaurado, protege os textos de
+solicitações de privacidade. Guarde-a junto do backup; não a substitua se houver
+dados cifrados que precisam ser lidos.
+
+### Instalação própria com Compose direto
+
 Instale Git, Docker e Docker Compose. No Windows, inicie o Docker Desktop. Execute na raiz do projeto:
 
 ```powershell
@@ -25,15 +79,7 @@ No Linux/macOS, use `cp Códigos/.env.example Códigos/.env`. Edite o arquivo an
 
 O Compose repassa somente as variáveis listadas em `environment`. Alterar `DB_HOST` no `.env` não substitui `db`, definido no Compose. Se alterar a pasta de uploads, ajuste também o volume correspondente.
 
-```powershell
-.\iniciar-educafast.ps1 -SemNavegador
-.\iniciar-educafast.ps1 -Acao Status
-.\iniciar-educafast.ps1 -Acao Parar
-```
-
-O inicializador usa a pasta `Códigos` deste repositório. `Parar` preserva os volumes. A abertura do navegador não comprova que o Flask terminou de iniciar.
-
-Alternativa direta, executada dentro de `Códigos/`:
+Execute dentro de `Códigos/`:
 
 ```bash
 docker compose up -d --build
@@ -45,13 +91,16 @@ Acesse `http://localhost:5000` quando o app estiver pronto.
 
 ## Primeiro administrador
 
-O seed atual executa `session.query(UsuarioModel).delete()` antes de inserir o administrador. **Não o execute em uma base com usuários que deseja preservar.** Somente em banco novo e descartável:
+Para uma instalação própria, revise primeiro o [procedimento do banco](../../Códigos/migrations/README.md).
+Depois, provisione o administrador pelo comando não destrutivo:
 
 ```bash
-docker compose exec app python -m app.seed
+docker compose exec app flask --app 'app:create_app()' create-admin
 ```
 
-Credenciais do seed de demonstração: `admin@admin.com` / `123`. Para criar um administrador sem apagar usuários, use `docker compose exec app flask --app 'app:create_app()' create-admin`. O comando pede email e senha e recusa sobrescrever contas existentes.
+O comando pede email e senha e recusa sobrescrever contas existentes. Adicione
+`--super-admin` para uma conta nova desse perfil. O seed destrutivo antigo foi
+desativado. As contas fixas de teste são exclusivas do iniciador manual.
 
 ## Comandos úteis
 

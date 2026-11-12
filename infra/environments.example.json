@@ -1,0 +1,7 @@
+{
+  "image": "ghcr.io/samucau1/edufast-2.0@sha256:SUBSTITUIR_PELO_DIGEST_APROVADO",
+  "schools": [
+    {"id": "escola-a", "host": "escola-a.exemplo.com"},
+    {"id": "escola-b", "host": "escola-b.exemplo.com"}
+  ]
+}

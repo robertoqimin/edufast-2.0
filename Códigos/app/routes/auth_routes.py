@@ -26,14 +26,33 @@ def login():
         session["user_id"] = response["id"]
         session["user_email"] = response["email"]
         session["user_role"] = response["role"]
+        session["auth_version"] = response["auth_version"]
 
     return jsonify(response), status
 
 
 @auth_bp.route('/logout', methods=['GET'])
 def logout():
+    from app.services.identidade_service import current_identity
+    from app.database import get_session
+    from app.models import UsuarioModel
+    identity = current_identity(required=False)
+    if identity:
+        with get_session() as db:
+            db.query(UsuarioModel).filter_by(id=identity.id).update({UsuarioModel.auth_version: UsuarioModel.auth_version + 1})
+            db.commit()
     session.clear()
     return redirect(url_for("home.home"))
+
+
+@auth_bp.get('/auth/session')
+def browser_session():
+    """Confirma a sessão do navegador, revalidando estado, papel e revogação."""
+    from app.services.identidade_service import load_identity
+    if not session.get('user_id'):
+        return jsonify(authenticated=False), 401, {'Cache-Control': 'no-store'}
+    identity = load_identity(session.get('user_id'), session.get('user_role'), session.get('auth_version', 0))
+    return jsonify(authenticated=True, role=identity.papel), 200, {'Cache-Control': 'no-store'}
 
 
 @auth_bp.route('/cadastro', methods=['POST'])
@@ -52,7 +71,7 @@ def cadastro_aluno():
 
     data = _get_request_data()
     data["tipo"] = "aluno"
-    response, status = cadastrar_usuario(data, request.files)
+    response, status = cadastrar_usuario(data, request.files, aprovado=True)
     return jsonify(response), status
 
 
@@ -65,7 +84,7 @@ def cadastro_professor():
 
     data = _get_request_data()
     data["tipo"] = "professor"
-    response, status = cadastrar_usuario(data, request.files)
+    response, status = cadastrar_usuario(data, request.files, aprovado=True)
     return jsonify(response), status
 
 
@@ -77,8 +96,12 @@ def teste_professor():
 
 
 @auth_bp.route('/alunos/busca', methods=['GET'])
-@professor_required
 def alunos_busca():
+    from app.services.identidade_service import require_role
+    require_role("professor", "admin", "super_admin")
+    from app.services.identidade_service import current_identity
+    if request.args.get("cpf") is not None and not current_identity().admin:
+        return jsonify({"erro": "Busca por CPF restrita a administracao"}), 403
     termo = request.args.get("termo") or request.args.get("q") or request.args.get("cpf")
     response, status = buscar_alunos(termo)
     return jsonify(response), status

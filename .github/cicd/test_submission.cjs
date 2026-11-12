@@ -14,11 +14,13 @@ function browser() {
             this.attributes = {};
         }
         setAttribute(name, value) { this.attributes[name] = value; }
+        querySelector() { return this.hidden; }
+        appendChild(input) { this.hidden = input; this.elements.push(input); }
     }
     const context = {
         HTMLFormElement: Form,
         crypto: { randomUUID: () => "next-intent" },
-        document: { addEventListener: (name, fn) => { listeners[name] = fn; }, querySelectorAll: () => [] },
+        document: { addEventListener: (name, fn) => { listeners[name] = fn; }, querySelectorAll: () => [], createElement: () => ({ dataset: {} }) },
         window: { addEventListener: (name, fn) => { windowListeners[name] = fn; } }
     };
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../../Códigos/app/static/js/compartilhado/submission.js"), "utf8"), context);
@@ -51,6 +53,18 @@ test("AJAX recovery restores previously disabled controls without enabling them"
     window.EduFastSubmission.setBusy(form, false);
     assert.equal(submit.disabled, false);
     assert.equal(unavailable.disabled, true);
+});
+
+test("disabling the approval button preserves its decision in the payload", () => {
+    const { HTMLFormElement, listeners } = browser();
+    const form = new HTMLFormElement();
+    const button = { type: "submit", name: "decisao", value: "aprovar", disabled: false, dataset: {} };
+    form.elements = [button];
+    listeners.submit({ target: form, submitter: button, defaultPrevented: false });
+    assert.equal(button.disabled, true);
+    assert.equal(form.hidden.name, "decisao");
+    assert.equal(form.hidden.value, "aprovar");
+    assert.equal(form.hidden.type, "hidden");
 });
 
 test("changing a grade subject selects the corresponding server version", () => {

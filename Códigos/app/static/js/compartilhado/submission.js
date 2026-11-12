@@ -32,6 +32,12 @@
         const form = event.target;
         if (!(form instanceof HTMLFormElement) || event.defaultPrevented) return;
         if (form.dataset.sending === "true") { event.preventDefault(); return; }
+        if (event.submitter?.name) {
+            let input = form.querySelector("input[data-submitter]");
+            if (!input) { input = document.createElement("input"); input.type = "hidden"; input.dataset.submitter = "true"; form.appendChild(input); }
+            input.name = event.submitter.name;
+            input.value = event.submitter.value;
+        }
         form.dataset.sending = "true";
         setBusy(form, true);
     });

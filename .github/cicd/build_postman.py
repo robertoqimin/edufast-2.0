@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "Documentos/testes/postman"
 
 
-def request(name, method, path, status, *, form=None, raw=None, file=False, script=None, pre=None):
+def request(name, method, path, status, *, form=None, raw=None, file=False, script=None, pre=None, extra_headers=None):
     headers = []
     body = None
     if raw is not None:
@@ -19,6 +19,7 @@ def request(name, method, path, status, *, form=None, raw=None, file=False, scri
             body = {"mode": "formdata", "formdata": values}
         else:
             body = {"mode": "urlencoded", "urlencoded": [{"key": k, "value": v} for k, v in form.items()]}
+    headers += extra_headers or []
     result = {"name": name, "request": {"method": method, "header": headers, "url": "{{base_url}}" + path},
               "protocolProfileBehavior": {"followRedirects": False},
               "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
@@ -35,6 +36,17 @@ def login(role, reset=False):
     return request("Login " + role, "POST", "/login", 200,
                    raw={"email": "{{" + role + "_email}}", "senha": "{{password}}"},
                    pre=["pm.collectionVariables.set('run_key', pm.variables.replaceIn('{{$guid}}')); "] if reset else None)
+
+
+def approve(kind):
+    return [login("admin"), request("Localizar proposta " + kind, "GET", "/solicitacoes/alteracoes", 200, script=[
+        "const body = pm.response.json();",
+        "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+        f"const row = rows.find(r => r.tipo === '{kind}' && r.estado === 'pendente');",
+        "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+        "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"]),
+        request("Autorizar " + kind, "POST", "/solicitacoes/alteracoes/{{proposal_id}}/decidir", 200,
+                raw={"decisao": "aprovar"})]
 
 
 def build():
@@ -63,16 +75,23 @@ def build():
         items.append(request(label, "POST", "/aluno/documentos/upload", status,
                              form={"solicitacao_id": "{{aluno_request_id}}"}, file=True))
     items.append(login("professor"))
-    grade = {"aluno_id": "{{aluno_id}}", "turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "nota": "8", "versao": "0"}
+    grade = {"aluno_id": "{{aluno_id}}", "turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "nota": "8", "versao": "0", "idempotency_key": "{{run_key}}-nota0"}
     items += [request("Criar nota", "POST", "/professor/notas/salvar", 302, form=grade),
-              request("Rejeitar repeticao de nota", "POST", "/professor/notas/salvar", 409, form=grade),
-              request("Editar nota versao 1", "POST", "/professor/notas/salvar", 302, form={**grade, "nota": "9", "versao": "1"})]
+              request("Repetir proposta de nota", "POST", "/professor/notas/salvar", 302, form=grade)]
+    items += approve("salvar_nota") + [login("professor"),
+              request("Propor edicao nota versao 1", "POST", "/professor/notas/salvar", 302, form={**grade, "nota": "9", "versao": "1", "idempotency_key": "{{run_key}}-nota1"})]
+    items += approve("salvar_nota") + [login("professor")]
     activity = {"turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "titulo": "Atividade sintetica", "idempotency_key": "{{run_key}}-atividade"}
     for label in ["Criar atividade", "Repetir atividade"]:
         items.append(request(label, "POST", "/professor/atividades/lancar", 302, form=activity, file=True))
-    for label, status in [("Responder solicitacao professor", 302), ("Repetir resposta professor", 409)]:
+    for label, status in [("Responder solicitacao professor", 302), ("Repetir resposta professor", 302)]:
         items.append(request(label, "POST", "/professor/documentos/upload", status,
-                             form={"solicitacao_id": "{{professor_request_id}}"}, file=True))
+                             form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-resposta-prof"}, file=True))
+    items += approve("lancar_atividade") + approve("responder_documento")
+    items += [login("professor"), request("Repetir resposta ja autorizada", "POST", "/professor/documentos/upload", 302,
+        form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-resposta-prof"}, file=True),
+        request("Nova tentativa de responder documento concluido", "POST", "/professor/documentos/upload", 409,
+        form={"solicitacao_id": "{{professor_request_id}}", "idempotency_key": "{{run_key}}-outra-resposta-prof"}, file=True)]
     items.append(login("admin"))
     for owner, path, data in [("aluno", "/arquivos/upload", {"aluno_id": "{{aluno_id}}"}),
                               ("professor", "/professores/{{professor_id}}/arquivos/upload", {})]:
@@ -84,12 +103,31 @@ def build():
                           if label.startswith("Upload") else
                           ["pm.test('Mesmo documento', function () { pm.expect(String(pm.response.json().documento.id)).to.eql(pm.collectionVariables.get('document_id')); });"])
             items.append(request(label + owner, "POST", path, 201, form=form, file=True, script=script))
+    items += [request('Admin nao acessa gestao de usuarios', 'GET', '/super/usuarios', 403), login('superadmin'),
+        request('Painel original de usuarios e CSRF', 'GET', '/super/usuarios', 200, script=[
+            r'const token = pm.response.text().match(/name="csrf_token" value="([^"]+)"/);',
+            "pm.test('Formulario protegido', () => pm.expect(token).to.be.ok);",
+            "if (token) pm.collectionVariables.set('csrf', token[1]);"]),
+        request('Criar administrador pelo superperfil', 'POST', '/super/usuarios', 302, form={
+            'tipo':'admin','nome':'Admin sintetico','email':'new-{{run_key}}@example.test','senha':'{{password}}',
+            'csrf_token':'{{csrf}}','idempotency_key':'{{run_key}}-admin'}),
+        request('Repetir criacao de administrador', 'POST', '/super/usuarios', 302, form={
+            'tipo':'admin','nome':'Admin sintetico','email':'new-{{run_key}}@example.test','senha':'{{password}}',
+            'csrf_token':'{{csrf}}','idempotency_key':'{{run_key}}-admin'}),
+        request('Configuracao institucional original', 'GET', '/super/escola?formato=json', 200),
+        request('Salvar identidade validada', 'POST', '/super/escola/identidade', 200,
+            raw={'nome':'Escola sintetica','sigla':'ef','subtitulo':'GESTAO ESCOLAR','modo':'escuro','fundo':'#06385d',
+                 'destaque':'#22d3ee','superficie':'#111c2b','texto':'#ecf1f8','muted':'#a4bdce',
+                 'raio':'12','densidade':'confortavel','fonte':'dm-sans','versao':0},
+            extra_headers=[{'key':'X-CSRF-Token','value':'{{csrf}}'}]),
+        request('Versao anterior de identidade rejeitada', 'POST', '/super/escola/identidade', 409,
+            raw={'versao':0}, extra_headers=[{'key':'X-CSRF-Token','value':'{{csrf}}'}])]
     collection = {"info": {"name": "EduFast - concorrencia e idempotencia",
                             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
                             "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite MySQL; este fluxo verifica contratos HTTP e repeticao sequencial."},
                   "variable": [{"key": "run_key", "value": ""}], "item": items}
     values = {"base_url": "http://127.0.0.1:5000", "admin_email": "u1@example.test",
-              "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "password": "",
+              "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "superadmin_email": "u5@example.test", "password": "",
               "aluno_id": "1", "professor_id": "1", "turma_id": "1", "disciplina_id": "1",
               "aluno_request_id": "1", "professor_request_id": "2"}
     environment = {"name": "EduFast - somente dados sinteticos", "values": [

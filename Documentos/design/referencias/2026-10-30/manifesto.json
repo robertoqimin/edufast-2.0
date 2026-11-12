@@ -1,0 +1,120 @@
+{
+  "versao": "1.1",
+  "data_referencia": "2026-10-30",
+  "origem": "Samucau1/Projeto-Educa-Fast",
+  "origem_commit": "cb27d3c",
+  "base_restauracao": "51cde1b",
+  "viewports": [
+    "1440x1000",
+    "390x844"
+  ],
+  "status": "referencia visual preservada; homologacao final pendente",
+  "pendencia": "A ultima rodada ampliada do navegador parou na tela de acesso negado; nao usar resumo antigo como aprovacao final.",
+  "capturas": [
+    {
+      "arquivo": "admin-desktop.png",
+      "sha256": "b56e277097c1f7cee6dde0fc7cb9c07846ed7a2a55eec37f76f0ba4e5eb85b91",
+      "bytes": 115801
+    },
+    {
+      "arquivo": "admin-mobile.png",
+      "sha256": "1455fab453e616c82809a1b91470ea1f3312eee466417ff67f03ca8b596fbaec",
+      "bytes": 74176
+    },
+    {
+      "arquivo": "aluno-desktop.png",
+      "sha256": "a137e75f02f3c62d9a92ac6942cf7446fd61ae75cfc2011d95ca141ea4250c27",
+      "bytes": 75857
+    },
+    {
+      "arquivo": "aluno-mobile.png",
+      "sha256": "c0e6bdc2b8afd3068d302fd9d530035c9ac83f052541074f7bf0100042e949f2",
+      "bytes": 39372
+    },
+    {
+      "arquivo": "aparencia-desktop.png",
+      "sha256": "7cd162fe290cb67132eda1563ee685fc4e03e24997468d6c1746f0996da0f187",
+      "bytes": 114104
+    },
+    {
+      "arquivo": "aparencia-mobile.png",
+      "sha256": "7a72ac2ae2231ef6ec01832993dd469d4f5a21ebbe0cd4f85a968de1e5cac7da",
+      "bytes": 72983
+    },
+    {
+      "arquivo": "aprovacoes-desktop.png",
+      "sha256": "e102ed4a8be7473857468a86a1eafb6caac987f9cc08d0f2a372f8b3188a6f42",
+      "bytes": 85840
+    },
+    {
+      "arquivo": "aprovacoes-mobile.png",
+      "sha256": "1f42dad2523e2536d1a6fbfec60cf551e61df39bdedff2639b2ee90165dd3e98",
+      "bytes": 41641
+    },
+    {
+      "arquivo": "identidade-personalizada-desktop.png",
+      "sha256": "829d3f29a1a1c8baa1231efdcc12a68bec126a075cc58ba4d21634f9cbdac4a2",
+      "bytes": 150132
+    },
+    {
+      "arquivo": "identidade-personalizada-mobile.png",
+      "sha256": "fc0da6d3b5f8d80f281dda8f8c1c96c5d15c7cfde3e4dd60b8ae71a9fa001921",
+      "bytes": 128452
+    },
+    {
+      "arquivo": "login-desktop.png",
+      "sha256": "58300668d52ed64a67c04ea99ee1749fe038f5b868074a4ce79f62b97e4411e2",
+      "bytes": 294357
+    },
+    {
+      "arquivo": "login-mobile.png",
+      "sha256": "c1a8c7b5ec0e8e3c5938c03da15d0bab6f431c5bad418c4bd051a549512f3cad",
+      "bytes": 50843
+    },
+    {
+      "arquivo": "novo-usuario.png",
+      "sha256": "57fae6cb0ca55d829eb6cdb541bd8f727f23c58744231d4f5dcb284326e79813",
+      "bytes": 149891
+    },
+    {
+      "arquivo": "professor-desktop.png",
+      "sha256": "abff17cb12c6a27adf326f2eee3757f5f9c4cd7bd054241b68172a7f39d6947c",
+      "bytes": 131340
+    },
+    {
+      "arquivo": "professor-mobile.png",
+      "sha256": "721cc3535b799d22e06784c872f708f19c9f1bfca3b1e0c88f9ef59e1c344b6b",
+      "bytes": 85749
+    },
+    {
+      "arquivo": "propostas-docentes-desktop.png",
+      "sha256": "8f887530b524b937d38a9a9103c7b14f92afd7f26d6850289014a0851c3d4b28",
+      "bytes": 126024
+    },
+    {
+      "arquivo": "propostas-docentes-mobile.png",
+      "sha256": "942f03cf5ccf917cfde414322402c9c3c058eb499e6fb7d8ea101ed5a38d235a",
+      "bytes": 80614
+    },
+    {
+      "arquivo": "regras-desktop.png",
+      "sha256": "4499b49bbcb5891509bf3f99df3e9920dd39859eee612ed0a75d52b469a1a4e6",
+      "bytes": 150550
+    },
+    {
+      "arquivo": "regras-mobile.png",
+      "sha256": "41e9ee13dfeb120fb38320abfcb20f244e653ed5b1d5a722eea532ae94f64344",
+      "bytes": 128997
+    },
+    {
+      "arquivo": "usuarios-desktop.png",
+      "sha256": "60f0a584fb4f80e93de469d31120f7815755d251801d15c9cfa77abdb3ae3531",
+      "bytes": 135419
+    },
+    {
+      "arquivo": "usuarios-mobile.png",
+      "sha256": "46d760683183a45c06408ee5f1d9a7251ca5722e48eb9565bff8af87954d8f47",
+      "bytes": 83246
+    }
+  ]
+}
