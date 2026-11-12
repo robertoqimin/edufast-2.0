@@ -54,6 +54,7 @@ function render(input, previousEnv = '') {
       environment: {
         APP_ENV: 'production', SECRET_KEY: variable('SECRET_KEY'), DATA_ENCRYPTION_KEY: variable('DATA_ENCRYPTION_KEY'),
         TRUSTED_HOSTS: `${host},localhost`, RELEASE_ID: image,
+        SESSION_COOKIE_NAME: `edufast_${id.replaceAll('-', '_')}`,
         DB_HOST: db, DB_NAME: 'edufast', DB_USER: 'edufast', DB_PASSWORD: variable('DB_PASSWORD'),
         UPLOAD_FOLDER: '/app/uploads', WEB_WORKERS: '1', WEB_THREADS: '4',
         DB_POOL_SIZE: '4', DB_MAX_OVERFLOW: '0', DB_POOL_TIMEOUT: '5',

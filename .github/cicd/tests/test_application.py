@@ -29,6 +29,20 @@ class ApplicationTests(unittest.TestCase):
     def login(self):
         return self.client.post('/login', json={'email': 'admin@example.test', 'senha': 'test-password-123'})
 
+    def test_browser_session_probe_requires_cookie_and_revalidates_account(self):
+        self.assertEqual(self.client.get('/auth/session').status_code, 401)
+        login = self.login()
+        response = self.client.get('/auth/session')
+        self.assertEqual(response.json, {'authenticated': True, 'role': 'admin'})
+        self.assertEqual(response.headers['Cache-Control'], 'no-store')
+        anonymous = self.app.test_client()
+        self.assertEqual(anonymous.get('/auth/session', headers={
+            'Authorization': 'Bearer ' + login.json['token']}).status_code, 401)
+        with get_session() as db:
+            db.query(UsuarioModel).filter_by(email='admin@example.test').update({'estado': 'pendente'})
+            db.commit()
+        self.assertEqual(self.client.get('/auth/session').status_code, 401)
+
     def test_health_checks_database(self):
         self.assertEqual(self.client.get('/healthz').json['status'], 'ok')
 

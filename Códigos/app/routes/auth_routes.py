@@ -45,6 +45,16 @@ def logout():
     return redirect(url_for("home.home"))
 
 
+@auth_bp.get('/auth/session')
+def browser_session():
+    """Confirma a sessão do navegador, revalidando estado, papel e revogação."""
+    from app.services.identidade_service import load_identity
+    if not session.get('user_id'):
+        return jsonify(authenticated=False), 401, {'Cache-Control': 'no-store'}
+    identity = load_identity(session.get('user_id'), session.get('user_role'), session.get('auth_version', 0))
+    return jsonify(authenticated=True, role=identity.papel), 200, {'Cache-Control': 'no-store'}
+
+
 @auth_bp.route('/cadastro', methods=['POST'])
 def cadastro():
     data = _get_request_data()

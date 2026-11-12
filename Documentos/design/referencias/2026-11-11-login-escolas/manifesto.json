@@ -1,0 +1,123 @@
+{
+  "versao": "login-escolas-v1",
+  "data_referencia": "2026-11-11",
+  "base_commit": "9756000",
+  "status": "isolated browser regression passed; original references preserved",
+  "execucao": {
+    "passed": true,
+    "scenarios": [
+      "login HTML admin/professor/aluno nas duas escolas",
+      "cookies simultaneos no mesmo host",
+      "perfis sem privilegio administrativo",
+      "sessao bloqueada",
+      "aviso em iframe"
+    ],
+    "captures": [
+      "login-teste01-desktop.png",
+      "login-teste01-mobile.png",
+      "admin-teste01-desktop.png",
+      "admin-teste01-mobile.png",
+      "login-teste02-desktop.png",
+      "login-teste02-mobile.png",
+      "admin-teste02-desktop.png",
+      "admin-teste02-mobile.png",
+      "sessao-bloqueada-desktop.png",
+      "sessao-bloqueada-mobile.png"
+    ],
+    "errors": []
+  },
+  "fontes_testadas": [
+    {
+      "arquivo": "Códigos/config.py",
+      "sha256": "1b4fc7ea05b55d3b87f8a6df7960dc392f0e756932be1727c08c28167abb4358"
+    },
+    {
+      "arquivo": "Códigos/app/routes/auth_routes.py",
+      "sha256": "af61cb0b60fb93eebb0f26dc58246f7878778c13fb94f699499ad65c53476d12"
+    },
+    {
+      "arquivo": "Códigos/app/static/js/paginas/login.js",
+      "sha256": "81341642a61c3ca9feafb088ff8ddfcdcf8fe60713b37d2a33a5bbda902cad1e"
+    },
+    {
+      "arquivo": "Códigos/app/templates/login.html",
+      "sha256": "891c5d43c53ff5b1827f233a042c3cbbbe8871a00c6f460ad6ea288c9180e900"
+    },
+    {
+      "arquivo": "infra/demo.cjs",
+      "sha256": "e5773de2efd4e8feac01cf85948d4b3c07443164b8ed29826ebacdd9fbcf06f2"
+    }
+  ],
+  "capturas": [
+    {
+      "arquivo": "login-teste01-desktop.png",
+      "sha256": "06a275ccc390fa926a8903f9f38e58c260dfb9673901bd114dda45b2ac04ae43",
+      "bytes": 295064,
+      "width": 1440,
+      "height": 1049
+    },
+    {
+      "arquivo": "login-teste01-mobile.png",
+      "sha256": "8abc055953077190d6bba0ef53fbe7583b4b37aef58c4e49e4531b9e852c8bbd",
+      "bytes": 51605,
+      "width": 390,
+      "height": 893
+    },
+    {
+      "arquivo": "admin-teste01-desktop.png",
+      "sha256": "767ab88616c61eeaf74ec7a93cf60025b2e17d95131b9c3dbe6094f5f63f4733",
+      "bytes": 168317,
+      "width": 1440,
+      "height": 1035
+    },
+    {
+      "arquivo": "admin-teste01-mobile.png",
+      "sha256": "cbeb8100e7e0bfe5f61e2b1bb09939d58170b5471df790722ff19064a1f1a155",
+      "bytes": 130488,
+      "width": 390,
+      "height": 2384
+    },
+    {
+      "arquivo": "login-teste02-desktop.png",
+      "sha256": "be7f6eae61508d3892b58b502219b57a7217caf66af1593a5d0a9470f5a8e185",
+      "bytes": 296050,
+      "width": 1440,
+      "height": 1049
+    },
+    {
+      "arquivo": "login-teste02-mobile.png",
+      "sha256": "afab5e1153b2379f2316eff51b124abf58078b14565f4c771aec5b9a14b3f517",
+      "bytes": 52093,
+      "width": 390,
+      "height": 893
+    },
+    {
+      "arquivo": "admin-teste02-desktop.png",
+      "sha256": "230acb79c7e49621cb56e6210081ccff9bc4f788452f54c7eb7b003b3edfcfe9",
+      "bytes": 169764,
+      "width": 1440,
+      "height": 1035
+    },
+    {
+      "arquivo": "admin-teste02-mobile.png",
+      "sha256": "6771dd345ce7014f8c00dd208d1e9e640ba042321a72c90708a11735aff3aab7",
+      "bytes": 131605,
+      "width": 390,
+      "height": 2384
+    },
+    {
+      "arquivo": "sessao-bloqueada-desktop.png",
+      "sha256": "0256281801738bba44949d5d8b39fbfb34b504f1a4f0a7feda17e5436cec0426",
+      "bytes": 300658,
+      "width": 1440,
+      "height": 1049
+    },
+    {
+      "arquivo": "sessao-bloqueada-mobile.png",
+      "sha256": "8bb05361b94f8f46cf52849ffd1b07be60d49689dc755b6401fd6516cf8145b5",
+      "bytes": 55155,
+      "width": 390,
+      "height": 893
+    }
+  ]
+}

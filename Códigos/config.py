@@ -25,6 +25,7 @@ class Config:
     SESSION_COOKIE_SECURE = APP_ENV == "production"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "session")
     TRUSTED_HOSTS = [h.strip() for h in os.getenv("TRUSTED_HOSTS", "").split(",") if h.strip()] or None
     MAX_CONTENT_LENGTH = bounded_int("MAX_REQUEST_MB", 16, 1, 16) * 1024 * 1024
     MAX_FORM_MEMORY_SIZE = 500_000

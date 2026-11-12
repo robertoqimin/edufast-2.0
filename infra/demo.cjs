@@ -9,8 +9,8 @@ const ROOT = path.resolve(__dirname, '..');
 const DIRECTORY = path.join(ROOT, '.ci-results', 'duas-escolas');
 const PROJECT = 'edufast-duas-escolas-teste';
 const IMAGE = 'edufast-duas-escolas:local';
-const SCHOOLS = [{id: 'teste01', host: 'teste01.localhost', port: 5061},
-  {id: 'teste02', host: 'teste02.localhost', port: 5062}];
+const SCHOOLS = [{id: 'teste01', host: 'teste01.localhost', port: 5081},
+  {id: 'teste02', host: 'teste02.localhost', port: 5082}];
 
 function configuration() {
   const result = render({image: 'ghcr.io/samucau1/edufast-2.0@sha256:' + 'a'.repeat(64), schools: SCHOOLS});
@@ -115,7 +115,8 @@ async function main() {
     compose('up', '-d', '--no-build', '--wait', '--wait-timeout', '180');
     // Reiniciar não exige que o usuário conserve as senhas públicas iniciais.
     for (const school of SCHOOLS) assert.equal((await request(school, '/healthz')).status, 200);
-    for (const s of SCHOOLS) console.log(`Escola Teste ${s.id.slice(-2)}: http://${s.host}:${s.port} | admin@${s.id}.local`);
+    for (const s of SCHOOLS) console.log(`Escola Teste ${s.id.slice(-2)}: http://127.0.0.1:${s.port} | admin@${s.id}.local`);
+    console.log('Abra em uma aba do navegador externo; a previa do VS Code pode bloquear cookies.');
     console.log('Senha inicial de demonstracao: Teste-escolas-2026! | Somente loopback, sem publicacao na internet.');
   } else if (action === 'verify') await verify();
   else if (action === 'status') compose('ps');

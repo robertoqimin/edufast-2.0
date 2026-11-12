@@ -5,8 +5,8 @@ local Python 3.12/Flask/Gunicorn e MySQL 8.4. Dados inteiramente fictícios.
 
 | Escola | Endereço local | Administrador |
 | --- | --- | --- |
-| Escola Teste 01 | http://teste01.localhost:5061 | `admin@teste01.local` |
-| Escola Teste 02 | http://teste02.localhost:5062 | `admin@teste02.local` |
+| Escola Teste 01 | http://127.0.0.1:5081 | `admin@teste01.local` |
+| Escola Teste 02 | http://127.0.0.1:5082 | `admin@teste02.local` |
 
 **Senha inicial de todas as contas novas:** `Teste-escolas-2026!`.
 As credenciais são públicas e exclusivas de demonstração local. Não usar na nuvem.
@@ -31,6 +31,21 @@ Os identificadores obrigatórios dos professores são marcadores de teste, não 
 
 ## Iniciar, verificar e parar
 
+**Correção de acesso em 11/11:** não usar as portas anteriores 5061/5062.
+O Edge reproduziu `ERR_UNSAFE_PORT` na 5061. Os endereços atuais usam 5081/5082.
+Para abrir fora da prévia do VS Code, executar na raiz:
+
+```powershell
+.\iniciar-duas-escolas.ps1
+# Se as escolas já estiverem iniciadas:
+.\iniciar-duas-escolas.ps1 -SomenteAbrir
+```
+
+O atalho abre as duas escolas no navegador padrão do Windows. `-SemNavegador`
+permite iniciar/verificar saúde sem abrir janelas. O navegador interno do VS Code
+usa um iframe e pode bloquear o acesso local ou a sessão. Não desativar políticas
+do navegador, CSRF ou proteção de cookies para usar a prévia.
+
 Na raiz do repositório, com Docker Desktop iniciado e Node 20+:
 
 ```powershell
@@ -50,8 +65,9 @@ estados e permissões existentes. O teste não modifica ambientes de teste anter
 
 Os subdomínios `.localhost` são destinados ao navegador da própria máquina,
 sem compra de domínio ou configuração de DNS público. Os serviços são publicados
-somente em `127.0.0.1`, portas 5061/5062, usando HTTP local e modo de desenvolvimento
-com debug desativado. Os hosts distintos separam os cookies no navegador. Para
+somente em `127.0.0.1`, portas 5081/5082, usando HTTP local e modo de desenvolvimento
+com debug desativado. Cookies com nomes próprios separam as sessões mesmo quando
+as duas escolas usam o IP 127.0.0.1 em portas distintas. Para
 verificação automatizada, o script conecta ao loopback com o `Host` correspondente.
 
 Não usar esta configuração na nuvem. O modelo HTTPS de produção permanece no
@@ -92,6 +108,51 @@ Execução inicial em 11/11/2026:
   preservação de senha/estado, recusa de banco alheio e bloqueios de destino/opt-in.
 - 12 testes Node aprovados para infraestrutura, operação e configuração local.
 
-Os painéis foram verificados por HTTP. Não houve inspeção visual em navegador,
+Na primeira execução, os painéis foram verificados apenas por HTTP. Não houve inspeção visual em navegador,
 medição de carga, restauração de backup ou homologação acadêmica completa.
-Nenhum layout, template, CSS, autenticação ou regra de aprovação foi alterado.
+Naquela execução não houve alteração de layout, template, CSS ou regras de aprovação.
+
+## Correção após falha de abertura e login
+
+O teste anterior não exercitou as restrições reais do navegador. A regressão em
+Edge headless reproduziu `ERR_UNSAFE_PORT` no endereço antigo com porta 5061.
+As portas atuais são 5081/5082, sem flags para contornar esse bloqueio.
+O usuário confirmou uso do navegador interno do VS Code. Essa prévia usa iframe;
+o acesso local e os cookies podem ser bloqueados. A ferramenta de inspeção do
+navegador pessoal não conseguiu verificar sua URL e foi encerrada. A validação
+seguinte usou exclusivamente um perfil headless descartável.
+
+Mudanças: atalho externo `iniciar-duas-escolas.ps1`, cookie `edufast_teste01` ou
+`edufast_teste02`, conferência de sessão persistida em `/auth/session` antes do
+redirecionamento e aviso no formulário quando estiver em iframe ou perder sessão.
+O endpoint exige cookie e revalida estado, papel e versão de autenticação. JWT
+isolado não comprova sessão do navegador. Nenhuma regra de perfil, aprovação,
+CSRF, SameSite=Lax, HttpOnly ou HTTPS de produção foi removida. A troca de nome de
+cookie requer novo login, sem redefinir contas, senhas ou dados.
+
+Validação da correção em 11/11/2026:
+
+- 19 testes de aplicação aprovados em SQLite descartável, incluindo sessão
+  anônima, sessão válida, revogação e tentativa de usar somente JWT na conferência.
+- Aprovações/segurança: 25 aprovados; 1 ignorado por exigir concorrência MySQL.
+- 16 testes Node aprovados para infraestrutura, operação e proteção de envio.
+- Navegador Edge headless: login pelo formulário para os três perfis nas duas
+  escolas; sessões simultâneas no mesmo IP; professor/aluno sem acesso de admin;
+  erro claro quando a conferência de sessão é simulada como bloqueada; aviso em
+  iframe local de teste. A prévia real do VS Code não recebeu homologação de login.
+- Capturas desktop 1440x1000 e mobile 390x844, sem overflow horizontal; referências
+  originais preservadas e nova [comparação visual](../design/referencias/2026-11-11-login-escolas/comparacao.md).
+
+Referências: [Simple Browser do VS Code](https://github.com/microsoft/vscode/blob/main/extensions/simple-browser/README.md)
+e [configuração de cookies Flask](https://flask.palletsprojects.com/en/stable/config/).
+
+### Retomada e conferência em 12/11/2026
+
+O Docker Desktop estava desligado e foi iniciado. Uma primeira conferência ocorreu
+antes de o MySQL ficar pronto e recebeu conexão recusada; nenhum dado foi alterado.
+Após a inicialização, passaram novamente os 52 acessos HTTP e as verificações de
+separação entre escolas, os 16 testes Node, o protocolo estático com os novos
+manifestos e a regressão do formulário em Edge headless isolado. O atalho
+`iniciar-duas-escolas.ps1 -SomenteAbrir -SemNavegador` confirmou os dois endereços.
+Essa execução do atalho não abriu o navegador pessoal. Os dados continuaram com
+20 alunos, 5 professores e 3 matérias por escola. Não foram executadas migrations.

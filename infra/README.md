@@ -7,6 +7,8 @@ O gerador original abaixo permanece compatível para configurações iniciais.
 Para testar localmente **Teste 01 e Teste 02**, com 20 alunos, 5 professores e
 3 matérias em cada banco, use `node infra/demo.cjs start` e o
 [guia das duas escolas](../Documentos/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md).
+No Windows, `./iniciar-duas-escolas.ps1` inicia e abre as escolas no navegador
+externo nas portas 5081/5082. Para escolas já iniciadas, usar `-SomenteAbrir`.
 
 Base preparatória para Linux + Docker Compose 2.24.4+, Node 20+ e TLS. Uma imagem
 comum, instâncias Flask/Gunicorn, bancos, redes internas, uploads e segredos próprios

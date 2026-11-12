@@ -8,6 +8,10 @@
 
         form.dataset.pageBound = "true";
         form.addEventListener("submit", enviarLogin);
+        if (window.self !== window.top) {
+            definirErro(form.querySelector("#login-error"),
+                "Esta prévia pode bloquear sua sessão. Abra o endereço da escola em uma aba do Edge ou Chrome para entrar.");
+        }
     }
     document.addEventListener("react-shell:mounted", function (event) { inicializarLogin(event.detail.root); });
     if (document.readyState === "loading") {
@@ -30,6 +34,7 @@
 
         fetch(new URL("/login", window.location.origin), {
             method: "POST",
+            credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-Token": form.elements.namedItem("csrf_token").value
@@ -48,9 +53,26 @@
                     return data;
                 });
             })
-            .then(redirecionarPorPerfil)
+            .then(function (data) {
+                return fetch(new URL("/auth/session", window.location.origin), {
+                    credentials: "same-origin", cache: "no-store"
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Não foi possível manter sua sessão. Abra esta escola em uma aba do Edge ou Chrome e tente novamente.");
+                    }
+                    return response.json();
+                }).then(function (identity) {
+                    if (!identity.authenticated || identity.role !== data.role) {
+                        throw new Error("Sua sessão mudou. Recarregue a página e entre novamente.");
+                    }
+                    redirecionarPorPerfil(data);
+                });
+            })
             .catch(function (erroRequisicao) {
-                definirErro(error, erroRequisicao.message || "Erro ao conectar com o servidor");
+                const message = erroRequisicao.message || "Erro ao conectar com o servidor";
+                definirErro(error, window.self !== window.top
+                    ? message + " Abra o endereço da escola em uma aba do Edge ou Chrome, fora desta prévia."
+                    : message);
             })
             .finally(function () {
                 delete form.dataset.sending;
