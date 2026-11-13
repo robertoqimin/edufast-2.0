@@ -4,6 +4,33 @@ Pedido: um login exclusivo para acompanhar todas as escolas, pessoas cadastradas
 faturamento recebido, despesas e lucro por escola. Somente o proprietário cadastra
 escolas. O acesso escolar continua independente.
 
+## Hierarquia de responsabilidade e alcance
+
+Decisão confirmada pelo proprietário em 12/11/2026: o **Supremo** é o dono da
+plataforma e está acima dos perfis escolares. No painel implementado, essa conta
+é identificada como proprietário (`platform_owner`). Ela não é o `super_admin`
+de uma escola.
+
+| Nível | Perfil | Alcance |
+| --- | --- | --- |
+| 1 | Supremo / proprietário da plataforma | Todas as escolas, diretório de pessoas e resultados financeiros |
+| 2 | Superadmin da escola (`super_admin`) | Configurações, identidade e administração da própria escola |
+| 3 | Admin da escola (`admin`) | Administração e aprovações autorizadas na própria escola |
+| 4 | Professor (`professor`) | Turmas, matérias e ações docentes autorizadas |
+| 5 | Aluno (`aluno`) | Conteúdos e registros pessoais autorizados |
+
+A ordem representa responsabilidade e alcance; não altera automaticamente as
+permissões existentes nem concede acesso a documentos restritos de outros perfis.
+Somente o Supremo cadastra escolas no painel central. Nenhum perfil escolar pode
+criar, promover, rebaixar ou alterar a conta Suprema: essa conta pertence ao banco
+central e é provisionada exclusivamente pelo operador autorizado.
+
+O painel atual permite consultar pessoas de todas as escolas. Alterar permissões,
+bloquear usuários globalmente, redefinir senhas escolares ou entrar como outro
+usuário **não está implementado**. Esses controles exigem implementação própria,
+com autorização e auditoria, antes de serem oferecidos ao Supremo. Esta definição
+não executa mudanças de perfis, tabelas ou dados existentes.
+
 ## O que foi implementado
 
 - Aplicação Flask `control_plane:create_app()` separada da aplicação escolar,
