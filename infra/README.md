@@ -1,5 +1,9 @@
 # Ambientes independentes no mesmo servidor
 
+Para cadastrar escolas exclusivamente pelo administrador da plataforma, usar
+`platform.cjs` e o [guia de cadastro e acesso](PLATFORM.md). A administração usa
+seu acesso SSH; os logins escolares permanecem separados.
+
 Para a hospedagem em nuvem com comandos por cliente, revisões incrementais e
 backup, use o [guia de operação em nuvem](CLOUD.md) e `manage.cjs`.
 O gerador original abaixo permanece compatível para configurações iniciais.
