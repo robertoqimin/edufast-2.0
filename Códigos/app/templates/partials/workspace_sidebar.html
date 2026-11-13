@@ -1,4 +1,7 @@
 {% from 'partials/gestao_icons.html' import icon %}
+{% if platform_workspace|default(false) %}
+{% include 'partials/platform_sidebar.html' %}
+{% else %}
 {% set role = workspace_role %}
 {% set role_labels = {'super_admin':'Superperfil', 'admin':'Administrador', 'professor':'Professor', 'aluno':'Aluno'} %}
 {% macro nav_link(endpoint, text, symbol, related=[]) %}
@@ -72,3 +75,4 @@
         <div class="account"><span class="avatar avatar-{{ role }}">{{ icon('shield' if role in ['admin','super_admin'] else 'cap') }}</span><div><strong>{{ role_labels.get(role, 'Usuário') }}</strong><small title="{{ session.get('user_email') }}">{{ session.get('user_email') }}</small></div><a href="{{ url_for('auth.logout') }}" aria-label="Sair do sistema" title="Sair do sistema">{{ icon('logout') }}</a></div>
     </div>
 </aside>
+{% endif %}

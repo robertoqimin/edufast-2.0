@@ -1,5 +1,9 @@
 # Ambientes independentes no mesmo servidor
 
+O [painel do proprietário](../Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md)
+reúne escolas, pessoas e financeiro em um login próprio. Demonstração local:
+`node infra/platform-demo.cjs start` (porta 5093, dados fictícios descartáveis).
+
 Para cadastrar escolas exclusivamente pelo administrador da plataforma, usar
 `platform.cjs` e o [guia de cadastro e acesso](PLATFORM.md). A administração usa
 seu acesso SSH; os logins escolares permanecem separados.

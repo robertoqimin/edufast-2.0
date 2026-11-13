@@ -50,6 +50,13 @@ jobs:
         run: |
           mkdir -p .ci-results/mutations
           python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js 2>&1 | tee .ci-results/mutations/http.log
+      - name: Testar painel exclusivo do proprietario em bancos descartaveis
+        env:
+          EDUFAST_TEST_DISPOSABLE: '1'
+          PYTHONPATH: Códigos
+          DB_URL: 'sqlite:///:memory:'
+          SECRET_KEY: 'synthetic-school-import-only-ci-2026-not-a-runtime-key'
+        run: python -m unittest discover -s .github/cicd/tests -p test_control_plane.py -v
       - name: Conferir protocolo original de design
         run: python Códigos/tests/verificar_protocolo_design.py
       - name: Validar protecao de envio na interface

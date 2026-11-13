@@ -30,6 +30,10 @@ As imagens abaixo usam somente contas e dados fictícios do ambiente manual.
 
 ## Situacao da validacao
 
+O [painel do proprietário de 12/11](referencias/2026-11-12-plataforma/manifesto.json)
+possui oito capturas novas, com [comparação e limites](referencias/2026-11-12-plataforma/comparacao.md),
+preservando as referências escolares anteriores.
+
 A revisao r2 passou na execucao completa do navegador: login, quatro perfis,
 superperfil, formularios, identidade personalizada e acesso negado, em 1440×1000
 e 390×844, sem erros JavaScript e sem rolagem horizontal na pagina.

@@ -1,0 +1,9 @@
+{
+  "project": "edufast-nuvem",
+  "image": "ghcr.io/samucau1/edufast-2.0@sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "platform": {"host": "painel.example.test"},
+  "schools": [
+    {"id": "escola-01", "host": "escola01.example.test"},
+    {"id": "escola-02", "host": "escola02.example.test"}
+  ]
+}

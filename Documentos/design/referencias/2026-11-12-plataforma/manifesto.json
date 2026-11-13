@@ -1,0 +1,56 @@
+{
+    "base_commit":  "5a9c42c7d5eca5da34df1379662d49a73c5669e4",
+    "execucao":  {
+                     "passed":  true,
+                     "captures":  [
+                                      "login-proprietario-desktop.png",
+                                      "login-proprietario-mobile.png",
+                                      "escolas-financeiro-desktop.png",
+                                      "escolas-financeiro-mobile.png",
+                                      "pessoas-desktop.png",
+                                      "pessoas-mobile.png",
+                                      "contrato-lancamentos-desktop.png",
+                                      "contrato-lancamentos-mobile.png"
+                                  ],
+                     "errors":  [
+
+                                ],
+                     "scope":  "Login/logout exclusivo, duas escolas, 52 contas, filtro/paginacao e resultados sinteticos; desktop/mobile"
+                 },
+    "arvore":  "Alteracoes do painel central sobre o commit base, registradas no commit desta entrega.",
+    "capturas":  [
+                     {
+                         "sha256":  "a70c9c81ac955f6f7f582e1a849f5bad43f0262ab26c90df7f05dd09710cde90",
+                         "arquivo":  "login-proprietario-desktop.png"
+                     },
+                     {
+                         "sha256":  "7f04fe804d1a7356118b851b2ba23d075ef38d9b75de452d57df3f5d78eb382d",
+                         "arquivo":  "login-proprietario-mobile.png"
+                     },
+                     {
+                         "sha256":  "7d3c49bb83ff0b659b1ceb304f738deb654094addf9d7c97ef4cd98064b81401",
+                         "arquivo":  "escolas-financeiro-desktop.png"
+                     },
+                     {
+                         "sha256":  "48da115ab07714e6570ecd27fe676aa5c761914c9d4ca5019c8fc33b82f73c3e",
+                         "arquivo":  "escolas-financeiro-mobile.png"
+                     },
+                     {
+                         "sha256":  "ea30cb397a9c20b3801da50da09693b479065b171d4b6d36ffba0b17cbf6aeed",
+                         "arquivo":  "pessoas-desktop.png"
+                     },
+                     {
+                         "sha256":  "6476ea40610557954d9de874cfb16e37e71c8dd54aaf7ac3b560a7c808452dd7",
+                         "arquivo":  "pessoas-mobile.png"
+                     },
+                     {
+                         "sha256":  "d4c40f4d8c31cfce73f6f693bf4ebdf3524f5d570d3d0425c4ade773ea816dec",
+                         "arquivo":  "contrato-lancamentos-desktop.png"
+                     },
+                     {
+                         "sha256":  "3d51bd7cfcfec8bc0d72d3c78b456fd58640ef20375aee1609d335d7b32d588b",
+                         "arquivo":  "contrato-lancamentos-mobile.png"
+                     }
+                 ],
+    "data_referencia":  "2026-11-12"
+}

@@ -30,6 +30,9 @@
 
 ## Referências originais
 
+O [painel do proprietário](planejamento/PAINEL_SUPREMO_2026-11-12.md) reúne escolas,
+pessoas e financeiro; consulte também o [relatório de validação](testes/PAINEL_SUPREMO_2026-11-12.md).
+
 Os documentos abaixo foram preservados como fontes históricas. Podem usar a identidade anterior “Secretaria Escolar DF” e não substituem a descrição atual do código.
 
 - [Arquitetura original em PDF](Documentação%20de%20Arquitetura%20do%20Sistema.docx%20%2814%29.pdf)

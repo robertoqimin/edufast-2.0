@@ -9,6 +9,24 @@ const manifest = () => ({image: 'ghcr.io/samucau1/edufast-2.0@sha256:' + 'a'.rep
   {id: 'escola-a', host: 'a.example.test'}, {id: 'escola-b', host: 'b.example.test'},
 ]});
 
+test('painel central opcional tem segredo, banco e dominio separados sem acesso as redes escolares', () => {
+  const input = manifest(); input.platform = {host:'painel.example.test'};
+  const {compose, env, nginx} = render(input);
+  const app = compose.services['app-plataforma-central'];
+  assert.equal(app.command.at(-1), 'control_plane:create_app()');
+  assert.deepEqual(app.networks, ['front-plataforma-central','back-plataforma-central']);
+  assert.equal(compose.services['db-plataforma-central'].environment.MYSQL_DATABASE, 'edufast_platform');
+  assert.ok(app.environment.PLATFORM_DATABASE_URL.includes('@db-plataforma-central:3306/edufast_platform'));
+  assert.equal(app.environment.SECRET_KEY, undefined);
+  assert.ok(env.includes('PLATAFORMA_CENTRAL_SECRET_KEY='));
+  assert.ok(nginx.includes('server_name painel.example.test;'));
+  assert.equal(app.ports, undefined);
+  input.platform.host = input.schools[0].host;
+  assert.throws(() => render(input));
+  input.platform.host = 'painel.example.test'; input.schools[0].id = 'plataforma-central';
+  assert.throws(() => render(input));
+});
+
 test('isolamento de redes, volumes e credenciais; somente gateway publica porta', () => {
   const {compose, env} = render(manifest());
   assert.deepEqual(compose.services.gateway.ports, ['443:443']);

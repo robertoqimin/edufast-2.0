@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const {init, add, list, operation} = require('./platform.cjs');
+const {publish} = require('./publish-platform.cjs');
 const image = 'ghcr.io/samucau1/edufast-2.0@sha256:' + 'a'.repeat(64);
 function fixture(t) {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'edufast-operator-'));
@@ -12,6 +13,27 @@ function fixture(t) {
   init(root, 'edufast-nuvem', image);
   return {temp, root};
 }
+
+test('sincronizacao usa apenas CLI da escola escolhida, HTTPS e chave sem redirecionar', async t => {
+  const {root, temp} = fixture(t);
+  const revision = add(root,'teste01','teste01.example.test').revision;
+  const key = path.join(temp,'key'); fs.writeFileSync(key,'a'.repeat(64));
+  let calls=0;
+  const runner=(exe,argv,options)=>{
+    calls++; assert.equal(exe,'docker');assert.equal(options.shell,false);
+    assert.deepEqual(argv.slice(-7),['exec','-T','app-teste01','flask','--app','app:create_app()','platform-directory']);
+    return {status:0,stdout:JSON.stringify({captured_at:'synthetic',people:[]})};
+  };
+  const sender=async(url,options)=>{
+    assert.equal(url,'https://painel.example.test/integracao/teste01/pessoas');
+    assert.equal(options.redirect,'error');assert.equal(options.headers.Authorization,'Bearer '+'a'.repeat(64));
+    return {status:200};
+  };
+  assert.equal((await publish(revision,'teste01','https://painel.example.test',key,runner,sender)).synced,true);
+  await assert.rejects(publish(revision,'inexistente','https://painel.example.test',key,runner,sender));
+  await assert.rejects(publish(revision,'teste01','http://painel.example.test',key,runner,sender));
+  assert.equal(calls,1);
+});
 
 test('cadastro de duas escolas preserva segredos, servicos e volumes da primeira', t => {
   const {root} = fixture(t);

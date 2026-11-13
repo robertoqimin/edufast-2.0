@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {spawnSync} = require('node:child_process');
-const {render, validate} = require('./generate.cjs');
+const {render, validate, clients} = require('./generate.cjs');
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
 
 function load(directory) {
@@ -22,6 +22,11 @@ function prepare(manifestFile, output, previous) {
   if (previous) {
     const old = load(previous);
     if (old.inventory.project !== inventory.project) throw new Error('Nao alterar projeto: isso troca os volumes.');
+    if (old.inventory.platform) {
+      if (!inventory.platform || inventory.platform.host !== old.inventory.platform.host)
+        throw new Error('Nao remover ou trocar dominio da plataforma sem plano de transferencia.');
+      inventory.platform.image ??= old.inventory.platform.image ?? old.inventory.image;
+    }
     for (const school of old.inventory.schools) {
       const next = inventory.schools.find(s => s.id === school.id);
       if (!next || next.host !== school.host) throw new Error('Remocao, troca de ID ou dominio exige plano de transferencia separado.');
@@ -29,7 +34,7 @@ function prepare(manifestFile, output, previous) {
       next.image ??= school.image ?? old.inventory.image;
     }
     saved = fs.readFileSync(path.join(old.dir, '.env'), 'utf8');
-    for (const {id} of old.inventory.schools) {
+    for (const {id} of clients(old.inventory)) {
       for (const name of ['SECRET_KEY', 'DATA_ENCRYPTION_KEY', 'DB_PASSWORD', 'ROOT_PASSWORD']) {
         const key = `${id.toUpperCase().replaceAll('-', '_')}_${name}=`;
         if (!saved.split(/\r?\n/).some(line => line.startsWith(key))) throw new Error('Segredo anterior ausente; recuperacao necessaria.');
@@ -38,6 +43,7 @@ function prepare(manifestFile, output, previous) {
     tls = old.inventory.tls;
   }
   for (const school of inventory.schools) school.image ??= inventory.image;
+  if (inventory.platform) inventory.platform.image ??= inventory.image;
   const generated = render(inventory, saved);
   generated.compose.name = inventory.project;
   generated.compose.services.gateway.volumes[1] = {type: 'bind', source: tls, target: '/etc/nginx/tls', read_only: true};
@@ -65,7 +71,7 @@ function commands(directory, action, client) {
     return [[...base, 'run', '--rm', '--no-deps', 'gateway', 'nginx', '-t'],
       [...base, 'up', '-d', '--no-deps', '--force-recreate', 'gateway']];
   }
-  if (!inventory.schools.some(s => s.id === client)) throw new Error('Cliente ausente do inventario.');
+  if (!clients(inventory).some(s => s.id === client)) throw new Error('Cliente ausente do inventario.');
   const app = `app-${client}`, db = `db-${client}`;
   const actions = {
     database: [['up', '-d', '--wait', db]],
@@ -88,7 +94,7 @@ function execute(list, runner = spawnSync) {
 
 function backup(directory, client, output, runner = spawnSync) {
   const {dir, inventory} = load(directory);
-  const school = inventory.schools.find(s => s.id === client);
+  const school = clients(inventory).find(s => s.id === client);
   if (!school) throw new Error('Cliente ausente do inventario.');
   const base = commands(directory, 'validate')[0].slice(0, -2);
   const app = `app-${client}`, db = `db-${client}`;

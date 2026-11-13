@@ -1,0 +1,2 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Revisar solicitação' %}
+{% block content %}<section class="panel course-panel"><h1>Não foi possível concluir</h1><p role="alert">{{ message }}</p><p>Código {{ code }}</p><a class="button button-secondary" href="{{ url_for('dashboard') if platform_logged else url_for('login') }}">Voltar e revisar</a></section>{% endblock %}

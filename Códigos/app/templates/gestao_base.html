@@ -7,10 +7,11 @@
     {% include 'partials/workspace_head.html' %}
 </head>
 <body class="app-page native-page {% block page_class %}{% endblock %}">
+{% set workspace_authenticated = session.get('user_id') or (platform_workspace|default(false) and platform_logged|default(false)) %}
 <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
-{% if session.get('user_id') %}{% include 'partials/workspace_sidebar.html' %}{% endif %}
-<div class="workspace-main {% if not session.get('user_id') %}public-workspace{% endif %}">
-    {% if session.get('user_id') %}{% include 'partials/workspace_topbar.html' %}{% endif %}
+{% if workspace_authenticated %}{% include 'partials/workspace_sidebar.html' %}{% endif %}
+<div class="workspace-main {% if not workspace_authenticated %}public-workspace{% endif %}">
+    {% if workspace_authenticated %}{% include 'partials/workspace_topbar.html' %}{% endif %}
     <main id="main-content" class="app-content">
         {% if error %}<div class="notice notice-error" role="alert">{{ error }}</div>{% endif %}
         {% for category, message in get_flashed_messages(with_categories=true) %}<div class="notice notice-success" role="status">{{ message }}</div>{% endfor %}

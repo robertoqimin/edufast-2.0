@@ -1,0 +1,14 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Escolas e financeiro' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">VISÃO DO PROPRIETÁRIO</span><h1>Escolas e financeiro</h1><p>Acompanhe pessoas, recebimentos e despesas de cada escola.</p></div></div>
+<section class="panel course-panel"><h2>Resultado do mês</h2><form method="get" class="course-form"><label>Mês<input name="mes" type="month" value="{{ month }}" required></label><button class="button button-secondary">Consultar mês</button></form>
+<div class="school-fields"><article><h3>Faturamento recebido</h3><p>{{ totals.receita|brl }}</p></article><article><h3>Despesas registradas</h3><p>{{ totals.despesa|brl }}</p></article><article><h3>Lucro registrado</h3><p>{{ totals.lucro|brl }}</p></article></div>
+<p>Lucro = recebimentos menos despesas registradas no mês, pela data do pagamento. Lance também os custos compartilhados que você atribuir a cada escola. Não há integração automática com banco ou cobrança.</p></section>
+<section class="panel course-panel"><h2>{{ rows|length }} escolas · {{ totals.people }} pessoas sincronizadas</h2><div class="course-scroll"><table class="course-table"><thead><tr><th>Escola</th><th>Situação</th><th>Pessoas</th><th>Recebido</th><th>Despesas</th><th>Lucro</th><th>Última sincronização</th><th>Ações</th></tr></thead><tbody>
+{% for row in rows %}<tr><td>{{ row.name }}<br>{{ row.domain }}</td><td>{{ row.state }}</td><td>{{ row.people }}</td><td>{{ row.receita|brl }}</td><td>{{ row.despesa|brl }}</td><td>{{ row.lucro|brl }}</td><td>{{ row.synced_at|local_datetime }}</td><td><a href="{{ url_for('school_detail', school_id=row.id, mes=month) }}">Gerenciar escola</a> · <a href="{{ url_for('people', escola=row.id) }}">Pessoas</a></td></tr>
+{% else %}<tr><td colspan="8">Cadastre a primeira escola para começar.</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="panel course-panel"><h2>Cadastrar escola</h2><p>O cadastro prepara a solicitação de ativação. O responsável pela hospedagem concluirá a instalação e o primeiro acesso escolar.</p>
+<form method="post" action="{{ url_for('create_school') }}" class="course-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<label>Nome da escola<input name="name" maxlength="120" required></label><div class="school-fields"><label>Identificador único<input name="slug" pattern="[a-z][a-z0-9-]{1,30}" maxlength="31" placeholder="escola-01" required></label><label>Domínio da escola<input name="domain" maxlength="253" placeholder="escola01.seudominio.com.br" required></label></div>
+<label>Mensalidade atual contratada (R$)<input name="monthly" inputmode="decimal" value="0,00" required></label><button class="button button-primary">Cadastrar escola</button></form></section>
+{% endblock %}

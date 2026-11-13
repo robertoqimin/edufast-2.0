@@ -1,8 +1,12 @@
 # Cadastro de escolas pelo administrador da plataforma
 
+Atualização de 12/11/2026: o [painel do proprietário](../Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md)
+oferece login web, cadastro de escolas, diretório de pessoas e financeiro. O método
+por SSH abaixo continua como ferramenta operacional para preparar e ativar instalações.
+
 Decisão de 12/11/2026: somente o proprietário da plataforma cadastra escolas.
 O método implementado é um comando no servidor, autenticado pelo seu acesso SSH.
-Não há novo login web nesta etapa. Administradores e superadministradores das
+Este comando não oferece login web. Administradores e superadministradores das
 escolas continuam com as permissões locais existentes.
 
 ## Preparar seu acesso

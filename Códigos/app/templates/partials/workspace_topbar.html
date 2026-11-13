@@ -1,7 +1,11 @@
 {% from 'partials/gestao_icons.html' import icon %}
+{% if platform_workspace|default(false) %}
+<header class="topbar"><div class="breadcrumb">Plataforma {{ icon('chevron') }} <span>{{ page_title|default('Visão geral') }}</span></div><div class="topbar-actions"><span class="access-label">{{ icon('shield') }} Proprietário</span><form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit" class="icon-button" aria-label="Sair do painel" title="Sair do painel">{{ icon('logout') }}</button></form></div></header>
+{% else %}
 {% set role = workspace_role %}
 {% set role_labels = {'super_admin':'Superperfil', 'admin':'Administrador', 'professor':'Professor', 'aluno':'Aluno'} %}
 <header class="topbar">
     <div class="breadcrumb">{{ 'Administração' if role in ['super_admin','admin'] else 'Minha escola' }} {{ icon('chevron') }} <span>{{ page_title|default('Educa Fast') }}</span></div>
     <div class="topbar-actions"><span class="access-label">{{ icon('shield') }} {{ role_labels.get(role, 'Usuário') }}</span><a class="icon-button" href="{{ url_for('auth.logout') }}" title="Sair do sistema" aria-label="Sair do sistema">{{ icon('logout') }}</a></div>
 </header>
+{% endif %}

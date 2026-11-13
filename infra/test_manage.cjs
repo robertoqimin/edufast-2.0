@@ -19,6 +19,20 @@ function fixture(t) {
   return {root, first, input, manifest, write};
 }
 
+test('adicionar painel central preserva escolas e revisoes seguintes preservam a chave central', t => {
+  const f = fixture(t);
+  f.manifest.platform = {host:'painel.example.test'}; f.write();
+  const second = prepare(f.input,path.join(f.root,'r2'),f.first);
+  const before = fs.readFileSync(path.join(second,'.env'),'utf8');
+  f.manifest.image = image('b'); f.write();
+  const third = prepare(f.input,path.join(f.root,'r3'),second);
+  assert.equal(fs.readFileSync(path.join(third,'.env'),'utf8'),before);
+  assert.equal(read(path.join(third,'inventory.json')).platform.image,image('a'));
+  assert.deepEqual(commands(third,'start','plataforma-central')[0].slice(-5),['up','-d','--no-deps','--wait','app-plataforma-central']);
+  delete f.manifest.platform; f.write();
+  assert.throws(()=>prepare(f.input,path.join(f.root,'r4'),third));
+});
+
 test('adicionar cliente preserva todos os segredos, volumes, TLS e projeto anteriores', t => {
   const f = fixture(t);
   const before = fs.readFileSync(path.join(f.first, '.env'), 'utf8');

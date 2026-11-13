@@ -20,7 +20,14 @@ function validate(input) {
     if (ids.has(school.id) || hosts.has(school.host)) throw new Error('ID ou host duplicado.');
     ids.add(school.id); hosts.add(school.host);
   }
+  if (ids.has('plataforma-central')) throw new Error('ID plataforma-central reservado ao painel do proprietario.');
+  if (input.platform !== undefined) {
+    validate({image: input.platform?.image ?? input.image, schools: [{id:'validacao-central', host:input.platform?.host}]});
+    if (hosts.has(input.platform.host)) throw new Error('Dominio da plataforma duplicado com escola.');
+  }
 }
+
+const clients = input => [...input.schools, ...(input.platform ? [{...input.platform, id:'plataforma-central', central:true}] : [])];
 
 function render(input, previousEnv = '') {
   validate(input);
@@ -33,7 +40,7 @@ function render(input, previousEnv = '') {
     return [line.slice(0, at), line.slice(at + 1)];
   }));
   const gatewayNetworks = [];
-  for (const {id, host, image = input.image} of input.schools) {
+  for (const {id, host, image = input.image, central} of clients(input)) {
     const prefix = id.toUpperCase().replaceAll('-', '_');
     const app = `app-${id}`, db = `db-${id}`, front = `front-${id}`, back = `back-${id}`;
     const variable = name => '${' + prefix + '_' + name + ':?Segredo obrigatorio}';
@@ -76,6 +83,15 @@ function render(input, previousEnv = '') {
       security_opt: ['no-new-privileges:true'],
       logging: {driver: 'json-file', options: {'max-size': '10m', 'max-file': '3'}},
     };
+    if (central) {
+      compose.services[app].command = ['gunicorn', '-c', '/app/gunicorn.conf.py', 'control_plane:create_app()'];
+      compose.services[app].environment = {
+        PLATFORM_ENV:'production', PLATFORM_SECRET_KEY:variable('SECRET_KEY'),
+        PLATFORM_TRUSTED_HOSTS:`${host},localhost`,
+        PLATFORM_DATABASE_URL:`mysql+pymysql://edufast:${variable('DB_PASSWORD')}@${db}:3306/edufast_platform`,
+      };
+      compose.services[db].environment.MYSQL_DATABASE = 'edufast_platform';
+    }
     servers.push(`  server {
     listen 443 ssl;
     server_name ${host};
@@ -98,7 +114,7 @@ function render(input, previousEnv = '') {
     image: 'nginx:1.30.6-alpine', restart: 'unless-stopped', ports: ['443:443'],
     volumes: ['./nginx.conf:/etc/nginx/nginx.conf:ro', './tls:/etc/nginx/tls:ro'],
     networks: ['edge', ...gatewayNetworks],
-    depends_on: Object.fromEntries(input.schools.map(({id}) => [`app-${id}`, {condition: 'service_started'}])),
+    depends_on: Object.fromEntries(clients(input).map(({id}) => [`app-${id}`, {condition: 'service_started'}])),
     mem_limit: '256m', cpus: '1.0', pids_limit: 128,
     tmpfs: ['/var/cache/nginx:size=128m,mode=1777'],
     security_opt: ['no-new-privileges:true'],
@@ -163,4 +179,4 @@ if (require.main === module) {
     console.log('Arquivos gerados. Revise TLS, recursos e provisionamento; nenhum servico foi iniciado.');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
-module.exports = {render, validate};
+module.exports = {render, validate, clients};

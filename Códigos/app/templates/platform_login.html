@@ -1,0 +1,10 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Acesso do proprietário' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">ADMINISTRAÇÃO DA PLATAFORMA</span><h1>Acesso do proprietário</h1><p>Entre para acompanhar todas as escolas e seus resultados.</p></div></div>
+<section class="panel course-panel"><h2>Login exclusivo</h2><form method="post" class="course-form" action="{{ url_for('login') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<label for="email">E-mail do proprietário<input id="email" name="email" type="email" maxlength="120" autocomplete="username" required></label>
+<label for="password">Senha<input id="password" name="password" type="password" maxlength="256" autocomplete="current-password" required></label>
+<button class="button button-primary" type="submit">Entrar na plataforma</button></form>
+<p>Este acesso é fornecido pelo responsável pela plataforma.</p></section>
+{% endblock %}

@@ -8,6 +8,9 @@ from .models import UsuarioModel
 
 
 def register_commands(app):
+    from .platform_publish import register
+    register(app)
+
     @app.cli.command("create-admin")
     @click.option("--email", prompt=True)
     @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)

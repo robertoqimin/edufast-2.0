@@ -36,7 +36,7 @@ function load(root) {
     validate(inventory);
     if (inventory.project !== state.project) throw new Error('Inventario pertence a outro projeto.');
   }
-  return {state, schools: inventory?.schools ?? []};
+  return {state, schools: inventory?.schools ?? [], platform: inventory?.platform};
 }
 
 function locked(root, callback) {
@@ -53,8 +53,8 @@ function locked(root, callback) {
 
 function add(root, id, host) {
   return locked(root, () => {
-    const {state, schools} = load(root);
-    const manifest = {project: state.project, image: state.image, schools: [...schools, {id, host}]};
+    const {state, schools, platform} = load(root);
+    const manifest = {project: state.project, image: state.image, schools: [...schools, {id, host}], ...(platform ? {platform} : {})};
     validate(manifest); // Duplicatas e entradas inválidas não criam revisão nem segredos.
     const revision = crypto.randomUUID();
     const input = path.join(root, `request-${revision}.json`);
