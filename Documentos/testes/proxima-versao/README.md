@@ -4,6 +4,8 @@
 
 [Revisão técnica da etapa 2 — 05/11/2026](REVISAO_2026-11-05.md): rastreabilidade, conflitos com a versão atual, recomendações e critérios para iniciar a implementação.
 
+[Matriz de permissões e transições](PERMISSOES_E_TRANSICOES.md): detalhamento do incremento 2.1 e conciliação inicial dos contratos docentes no incremento 2.2.
+
 Esta etapa segue o ciclo TDD: definir resultado esperado → observar o teste falhar pelo recurso ausente → implementar → obter aprovação dos testes → refatorar preservando os resultados. A implementação funcional só começa depois da revisão solicitada pelo usuário.
 
 ## Ordem sugerida de leitura

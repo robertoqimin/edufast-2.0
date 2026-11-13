@@ -27,6 +27,7 @@ REQUIRED = {
     'comunicados': ['id', 'escola_id', 'titulo', 'mensagem', 'destinatario'],
     'notas': ['id', 'escola_id', 'aluno_id', 'oferta_id', 'professor_id', 'nota'],
     'atividades': ['id', 'escola_id', 'oferta_id', 'professor_id', 'titulo'],
+    'solicitacoes_alteracoes': ['id', 'escola_id', 'solicitante_id', 'tipo', 'payload', 'estado', 'decidido_por'],
     'eventos_auditoria': ['id', 'escola_id', 'ator_id', 'acao', 'recurso_id'],
 }
 

@@ -1,5 +1,9 @@
 # Frequência, faltas e atestados — 12/11/2026
 
+Complemento: [testes de API ampliados e execução HTTP real](API_FREQUENCIA_2026-11-12.md).
+O usuário adiou a aplicação da migration; a publicação do código/PR não autoriza
+alterar os bancos Teste 01/02.
+
 Estado: código preparado e testado em ambientes descartáveis. A migration
 [`004_frequencia.sql`](../../Códigos/migrations/004_frequencia.sql) **não foi
 executada nas escolas Teste 01/02 nem em produção**. Base: commit `7c39bc0` mais

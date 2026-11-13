@@ -18,6 +18,7 @@ from app.database import Base, engine, get_session
 from app.models import (UsuarioModel, AlunoModel, ProfessorModel, TurmaModel, DisciplinaModel,
                         TurmaDisciplinaModel, AlunoTurmaModel, ProfessorTurmaModel, ProfessorDisciplinaModel)
 from app.models.frequencia_model import ChamadaModel, PresencaModel, AtestadoModel
+from app.models.curso_model import AtribuicaoDocenteModel, EstadoTurmaModel
 
 
 class FrequenciaTests(unittest.TestCase):
@@ -176,6 +177,94 @@ class FrequenciaTests(unittest.TestCase):
 
     def test_form_requires_csrf_even_without_origin_header(self):
         self.assertEqual(self.clients[2].post('/frequencia/chamadas',data={}).status_code,403)
+
+    def test_anonymous_and_invalid_bearer_do_not_inherit_cookie(self):
+        self.assertEqual(self.app.test_client().get('/frequencia?formato=json').status_code,403)
+        self.assertEqual(self.clients[1].get('/frequencia?formato=json',headers={'Authorization':'Bearer invalid'}).status_code,401)
+
+    def test_missing_idempotency_and_invalid_request_have_no_effect(self):
+        response = self.clients[2].post('/frequencia/chamadas',json={},headers={'Authorization':'Bearer '+self.tokens[2]})
+        self.assertEqual(response.status_code,428)
+        self.assertEqual(self.post(2,'/frequencia/chamadas',[]).status_code,400)
+        self.assertEqual(self.proposal(turma_disciplina_id='²').status_code,400)
+        self.assertEqual(self.proposal(aula=21).status_code,400)
+        with get_session() as db:
+            self.assertEqual(db.query(ChamadaModel).count(),0)
+
+    def test_explicit_assignment_overrides_legacy_permissions(self):
+        with get_session() as db:
+            db.add(AtribuicaoDocenteModel(professor_id=2,turma_disciplina_id=1,ativo=True))
+            db.commit()
+        self.assertEqual(self.proposal().status_code,403)
+        self.assertEqual(self.proposal(uid=3).status_code,201)
+
+    def test_archiving_class_blocks_pending_approval(self):
+        rid = self.proposal().json['id']
+        with get_session() as db:
+            db.add(EstadoTurmaModel(turma_id=1,arquivada=True))
+            db.commit()
+        self.assertEqual(self.decision('chamada',rid).status_code,409)
+        self.assertEqual(self.report().json['totais'],[])
+
+    def test_inactive_teacher_token_is_rejected_before_writing(self):
+        with get_session() as db:
+            db.query(UsuarioModel).filter_by(id=2).update({'estado':'pendente'})
+            db.commit()
+        self.assertEqual(self.proposal().status_code,401)
+
+    def test_decision_replay_is_idempotent_and_second_decision_conflicts(self):
+        rid = self.proposal().json['id']
+        body = {'decisao':'aprovar','versao':1,'motivo':'Chamada conferida'}
+        first = self.post(1,f'/frequencia/chamada/{rid}/decidir',body,key='decision')
+        replay = self.post(1,f'/frequencia/chamada/{rid}/decidir',body,key='decision')
+        self.assertEqual(first.status_code,200)
+        self.assertEqual(first.json,replay.json)
+        self.assertEqual(self.decision('chamada',rid,decision='rejeitar',version=2).status_code,409)
+
+    def test_rejected_certificate_preserves_unjustified_absence(self):
+        self.decision('chamada',self.proposal().json['id'])
+        rid = self.certificate().json['id']
+        self.assertEqual(self.decision('atestado',rid,decision='rejeitar').status_code,200)
+        row = self.report().json['totais'][1]
+        self.assertEqual((row['faltas'],row['justificadas']),(1,0))
+
+    def test_certificate_accepted_before_call_justifies_later_approval(self):
+        self.decision('atestado',self.certificate().json['id'])
+        self.decision('chamada',self.proposal().json['id'])
+        self.assertEqual(self.report().json['totais'][1]['justificadas'],1)
+
+    def test_invalid_oversized_or_missing_certificate_does_not_create_files(self):
+        headers = {'Authorization':'Bearer '+self.tokens[5]}
+        for content in [b'<html>invalid</html>', b'%PDF-'+b'x'*(5*1024*1024)]:
+            response = self.clients[5].post('/frequencia/atestados?formato=json',data={
+                'aluno_id':'2','inicio':self.day,'fim':self.day,'arquivo':(io.BytesIO(content),'test.pdf')},headers=headers)
+            self.assertEqual(response.status_code,400)
+        self.assertEqual(self.clients[5].post('/frequencia/atestados?formato=json',data={},headers=headers).status_code,400)
+        self.assertEqual(list(Path(self.folder.name).rglob('*.enc')),[])
+
+    def test_report_interval_percentages_and_detailed_scope(self):
+        self.decision('chamada',self.proposal().json['id'])
+        second = self.proposal(aula=2,presencas={'1':'falta','2':'presente'}).json['id']
+        self.decision('chamada',second)
+        rows = self.report().json['totais']
+        self.assertEqual([r['percentual_presenca'] for r in rows],['50.00','50.00'])
+        self.assertEqual(self.report(inicio='2999-01-01').status_code,400)
+        self.assertEqual(self.report(inicio='2000-01-01').status_code,400)
+        own = self.report(uid=2,turma_disciplina_id=1).json
+        self.assertTrue(all(r['turma']=='Turma 1' and r['materia']=='Matéria 1' for r in own['registros']))
+
+    def test_csv_escapes_formula_and_excludes_certificate_details(self):
+        with get_session() as db:
+            db.query(AlunoModel).filter_by(id=1).update({'nome':'=HYPERLINK("test")'})
+            db.commit()
+        self.decision('chamada',self.proposal().json['id'])
+        self.certificate()
+        result = self.clients[1].get('/frequencia/relatorio',query_string={
+            'inicio':self.day,'fim':self.day,'formato':'csv'})
+        self.assertEqual(result.status_code,200)
+        self.assertIn("'=HYPERLINK",result.text)
+        self.assertNotIn('.enc',result.text)
+        self.assertEqual(result.headers['Cache-Control'],'no-store')
 
     def test_certificate_failure_rolls_back_file_and_database(self):
         with patch('app.routes.frequencia_routes.finish_submission',side_effect=RuntimeError('synthetic failure')):

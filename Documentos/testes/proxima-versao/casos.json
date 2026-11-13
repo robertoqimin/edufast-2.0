@@ -937,7 +937,7 @@
     {
       "id": "API-051",
       "area": "Notas",
-      "title": "Professor lança nota apenas na própria oferta",
+      "title": "Professor propõe nota na própria oferta sem gravação acadêmica imediata",
       "actor": "professor_a",
       "method": "POST",
       "path": "/api/v1/escolas/1/ofertas/1/notas",
@@ -947,9 +947,33 @@
         "nota": 8.5
       },
       "equals": {
-        "data.oferta_id": 1,
-        "data.nota": 8.5
-      }
+        "data.escola_id": 1,
+        "data.estado": "pendente",
+        "data.tipo": "salvar_nota",
+        "data.payload.oferta_id": 1,
+        "data.payload.aluno_id": 1,
+        "data.payload.nota": 8.5
+      },
+      "db": [
+        {
+          "table": "notas",
+          "where": {
+            "escola_id": 1
+          },
+          "count": 0
+        },
+        {
+          "table": "solicitacoes_alteracoes",
+          "where": {
+            "escola_id": 1,
+            "solicitante_id": 5,
+            "tipo": "salvar_nota",
+            "estado": "pendente",
+            "decidido_por": null
+          },
+          "count": 1
+        }
+      ]
     },
     {
       "id": "API-052",
@@ -1005,7 +1029,7 @@
     {
       "id": "API-055",
       "area": "Atividades",
-      "title": "Professor cria atividade na oferta atribuída",
+      "title": "Professor propõe atividade na oferta atribuída sem publicação imediata",
       "actor": "professor_a",
       "method": "POST",
       "path": "/api/v1/escolas/1/ofertas/1/atividades",
@@ -1017,8 +1041,31 @@
       },
       "equals": {
         "data.escola_id": 1,
-        "data.oferta_id": 1
-      }
+        "data.estado": "pendente",
+        "data.tipo": "lancar_atividade",
+        "data.payload.oferta_id": 1,
+        "data.payload.titulo": "Exercício"
+      },
+      "db": [
+        {
+          "table": "atividades",
+          "where": {
+            "escola_id": 1
+          },
+          "count": 0
+        },
+        {
+          "table": "solicitacoes_alteracoes",
+          "where": {
+            "escola_id": 1,
+            "solicitante_id": 5,
+            "tipo": "lancar_atividade",
+            "estado": "pendente",
+            "decidido_por": null
+          },
+          "count": 1
+        }
+      ]
     },
     {
       "id": "API-056",

@@ -113,16 +113,23 @@ api('API-049', 'Docência', 'Professor externo não recebe atribuição local', 
     json={'professor_id': 2, 'oferta_id': 1}, error='not_found')
 api('API-050', 'Docência', 'Professor não se autoatribui', 'professor_a', 'POST', S+'/atribuicoes', 403,
     json={'professor_id': 1, 'oferta_id': 3}, error='forbidden')
-api('API-051', 'Notas', 'Professor lança nota apenas na própria oferta', 'professor_a', 'POST', S+'/ofertas/1/notas', 201,
-    json={'aluno_id': 1, 'nota': 8.5}, equals={'data.oferta_id': 1, 'data.nota': 8.5})
+api('API-051', 'Notas', 'Professor propõe nota na própria oferta sem gravação acadêmica imediata', 'professor_a', 'POST', S+'/ofertas/1/notas', 201,
+    json={'aluno_id': 1, 'nota': 8.5}, equals={'data.escola_id': 1, 'data.estado': 'pendente', 'data.tipo': 'salvar_nota',
+        'data.payload.oferta_id': 1, 'data.payload.aluno_id': 1, 'data.payload.nota': 8.5},
+    db=[{'table': 'notas', 'where': {'escola_id': 1}, 'count': 0},
+        {'table': 'solicitacoes_alteracoes', 'where': {'escola_id': 1, 'solicitante_id': 5, 'tipo': 'salvar_nota', 'estado': 'pendente', 'decidido_por': None}, 'count': 1}])
 api('API-052', 'Notas', 'Mesmo professor em pares separados não autoriza outra oferta', 'professor_a', 'POST', S+'/ofertas/3/notas', 403,
     json={'aluno_id': 3, 'nota': 8.5}, error='assignment_required')
 api('API-053', 'Notas', 'Revogação docente bloqueia token existente', 'professor_a', 'POST', S+'/ofertas/1/notas', 403,
     json={'aluno_id': 1, 'nota': 8.5}, mutate={'table': 'atribuicoes_docentes', 'where': {'id': 1}, 'values': {'ativo': False}}, error='assignment_required')
 api('API-054', 'Notas', 'Nota fora da escala não é gravada', 'professor_a', 'POST', S+'/ofertas/1/notas', 422,
     json={'aluno_id': 1, 'nota': 11}, error='invalid_grade')
-api('API-055', 'Atividades', 'Professor cria atividade na oferta atribuída', 'professor_a', 'POST', S+'/ofertas/1/atividades', 201,
-    json={'titulo': 'Exercício', 'descricao': 'Dados fictícios', 'data_entrega': '2099-11-15'}, equals={'data.escola_id': 1, 'data.oferta_id': 1})
+api('API-055', 'Atividades', 'Professor propõe atividade na oferta atribuída sem publicação imediata', 'professor_a', 'POST', S+'/ofertas/1/atividades', 201,
+    json={'titulo': 'Exercício', 'descricao': 'Dados fictícios', 'data_entrega': '2099-11-15'},
+    equals={'data.escola_id': 1, 'data.estado': 'pendente', 'data.tipo': 'lancar_atividade',
+        'data.payload.oferta_id': 1, 'data.payload.titulo': 'Exercício'},
+    db=[{'table': 'atividades', 'where': {'escola_id': 1}, 'count': 0},
+        {'table': 'solicitacoes_alteracoes', 'where': {'escola_id': 1, 'solicitante_id': 5, 'tipo': 'lancar_atividade', 'estado': 'pendente', 'decidido_por': None}, 'count': 1}])
 api('API-056', 'Atividades', 'Aluno não cria atividade', 'aluno_a', 'POST', S+'/ofertas/1/atividades', 403,
     json={'titulo': 'Indevida'}, error='forbidden')
 

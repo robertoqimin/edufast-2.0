@@ -32,3 +32,5 @@ jobs:
           printf '%s' "$image" > .ci-results/image.txt
       - name: Conferir dois clientes com MySQL e HTTPS
         run: node infra/smoke_cloud.cjs
+      - name: Testar API de frequencia em bancos descartaveis e HTTP real
+        run: node .github/cicd/run_frequencia_api.cjs --image "$(cat .ci-results/image.txt)"

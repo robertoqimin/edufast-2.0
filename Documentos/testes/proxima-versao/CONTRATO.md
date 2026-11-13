@@ -6,6 +6,11 @@
 
 ## Decisões ainda revisáveis
 
+A [matriz de permissões e transições](PERMISSOES_E_TRANSICOES.md) detalha atores,
+precondições, recusas e lacunas. Escritas docentes de notas e atividades criam
+propostas pendentes; `API-051` e `API-055` exigem ausência de efeito acadêmico
+imediato. A aprovação deve preservar as garantias da versão atual.
+
 Os testes tornam explícitas as seguintes propostas. Elas ainda podem ser alteradas após sua leitura, antes de iniciar a implementação:
 
 - Somente o administrador da plataforma cria novas instituições nesta primeira etapa.

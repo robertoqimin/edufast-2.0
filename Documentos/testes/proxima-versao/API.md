@@ -56,11 +56,11 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 | API-048 | Docência | Coordenação atribui professor à oferta exata | 201 |
 | API-049 | Docência | Professor externo não recebe atribuição local | 404 |
 | API-050 | Docência | Professor não se autoatribui | 403 |
-| API-051 | Notas | Professor lança nota apenas na própria oferta | 201 |
+| API-051 | Notas | Professor propõe nota na própria oferta sem gravação acadêmica imediata | 201 |
 | API-052 | Notas | Mesmo professor em pares separados não autoriza outra oferta | 403 |
 | API-053 | Notas | Revogação docente bloqueia token existente | 403 |
 | API-054 | Notas | Nota fora da escala não é gravada | 422 |
-| API-055 | Atividades | Professor cria atividade na oferta atribuída | 201 |
+| API-055 | Atividades | Professor propõe atividade na oferta atribuída sem publicação imediata | 201 |
 | API-056 | Atividades | Aluno não cria atividade | 403 |
 | API-057 | Documentos | Secretaria solicita documento de aluno local | 201 |
 | API-058 | Documentos | Aluno envia arquivo da própria solicitação | 201 |
@@ -1130,7 +1130,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 }
 ```
 
-## API-051 — Professor lança nota apenas na própria oferta
+## API-051 — Professor propõe nota na própria oferta sem gravação acadêmica imediata
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/notas`.
 
@@ -1143,9 +1143,33 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
     "nota": 8.5
   },
   "equals": {
-    "data.oferta_id": 1,
-    "data.nota": 8.5
-  }
+    "data.escola_id": 1,
+    "data.estado": "pendente",
+    "data.tipo": "salvar_nota",
+    "data.payload.oferta_id": 1,
+    "data.payload.aluno_id": 1,
+    "data.payload.nota": 8.5
+  },
+  "db": [
+    {
+      "table": "notas",
+      "where": {
+        "escola_id": 1
+      },
+      "count": 0
+    },
+    {
+      "table": "solicitacoes_alteracoes",
+      "where": {
+        "escola_id": 1,
+        "solicitante_id": 5,
+        "tipo": "salvar_nota",
+        "estado": "pendente",
+        "decidido_por": null
+      },
+      "count": 1
+    }
+  ]
 }
 ```
 
@@ -1206,7 +1230,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 }
 ```
 
-## API-055 — Professor cria atividade na oferta atribuída
+## API-055 — Professor propõe atividade na oferta atribuída sem publicação imediata
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/atividades`.
 
@@ -1221,8 +1245,31 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
   },
   "equals": {
     "data.escola_id": 1,
-    "data.oferta_id": 1
-  }
+    "data.estado": "pendente",
+    "data.tipo": "lancar_atividade",
+    "data.payload.oferta_id": 1,
+    "data.payload.titulo": "Exercício"
+  },
+  "db": [
+    {
+      "table": "atividades",
+      "where": {
+        "escola_id": 1
+      },
+      "count": 0
+    },
+    {
+      "table": "solicitacoes_alteracoes",
+      "where": {
+        "escola_id": 1,
+        "solicitante_id": 5,
+        "tipo": "lancar_atividade",
+        "estado": "pendente",
+        "decidido_por": null
+      },
+      "count": 1
+    }
+  ]
 }
 ```
 
