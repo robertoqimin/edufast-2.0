@@ -26,16 +26,22 @@ async function run(base) {
   await request('sem idempotencia','/frequencia/chamadas',428,{token:teacher,method:'POST',json:body});
   await request('professor sem vinculo','/frequencia/chamadas',403,{token:other,method:'POST',key:randomUUID(),json:body});
   const key=randomUUID();
-  const first=(await request('chamada pendente','/frequencia/chamadas',201,{token:teacher,method:'POST',key,json:body})).body;
+  const first=(await request('chamada confirmada pelo professor','/frequencia/chamadas',201,{token:teacher,method:'POST',key,json:body})).body;
+  assert.equal(first.estado,'aprovada');
   const replay=(await request('reenvio de chamada','/frequencia/chamadas',201,{token:teacher,method:'POST',key,json:body})).body;
   assert.equal(first.id,replay.id);
   await request('duplicacao de aula','/frequencia/chamadas',409,{token:teacher,method:'POST',key:randomUUID(),json:body});
   const query=`/frequencia/relatorio?inicio=${when}&fim=${when}&formato=json`;
-  assert.deepEqual((await request('pendente fora do relatorio',query,200,{token:admin})).body.totais,[]);
+  assert.equal((await request('confirmacao imediata no relatorio',query,200,{token:admin})).body.totais.length,20);
   const decision={decisao:'aprovar',versao:1,motivo:'Conferido no teste HTTP'};
   await request('professor nao decide',`/frequencia/chamada/${first.id}/decidir`,403,{token:teacher,method:'POST',key:randomUUID(),json:decision});
   await request('conflito de versao',`/frequencia/chamada/${first.id}/decidir`,409,{token:admin,method:'POST',key:randomUUID(),json:{...decision,versao:999}});
-  await request('aprovacao de chamada',`/frequencia/chamada/${first.id}/decidir`,200,{token:admin,method:'POST',key:randomUUID(),json:decision});
+  await request('confirmacao nao exige nova aprovacao',`/frequencia/chamada/${first.id}/decidir`,409,{token:admin,method:'POST',key:randomUUID(),json:decision});
+  const correction={...body,anterior_id:first.id,versao:first.versao,motivo:'Correção conferida no HTTP'};
+  await request('correcao sem versao','/frequencia/chamadas',428,{token:teacher,method:'POST',key:randomUUID(),json:{...correction,versao:undefined}});
+  const corrected=(await request('correcao direta','/frequencia/chamadas',201,{token:teacher,method:'POST',key:randomUUID(),json:correction})).body;
+  assert.notEqual(corrected.id,first.id);
+  await request('correcao obsoleta','/frequencia/chamadas',409,{token:teacher,method:'POST',key:randomUUID(),json:correction});
   function certificate() {const form=new FormData();form.set('aluno_id','2');form.set('inicio',when);form.set('fim',when);
     form.set('arquivo',new Blob(['%PDF-1.4\nDocumento ficticio\n%%EOF'],{type:'application/pdf'}),'teste.pdf');return form;}
   const certKey=randomUUID();

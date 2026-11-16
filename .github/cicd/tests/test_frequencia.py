@@ -74,6 +74,18 @@ class FrequenciaTests(unittest.TestCase):
         return self.post(uid, f'/frequencia/{kind}/{rid}/decidir',
             {'decisao':decision,'versao':version,'motivo':'Conferência administrativa'})
 
+    def legacy_pending(self, **overrides):
+        """Fixture representing a pending call created before direct confirmation."""
+        response = self.proposal(**overrides)
+        self.assertEqual(response.status_code, 201, response.text)
+        with get_session() as db:
+            row = db.get(ChamadaModel, response.json['id'])
+            row.estado, row.decidido_por = 'pendente', None
+            if row.anterior_id:
+                db.get(ChamadaModel, row.anterior_id).estado = 'aprovada'
+            db.commit()
+        return response
+
     def report(self, uid=1, **extra):
         return self.clients[uid].get('/frequencia/relatorio', query_string={
             'inicio':self.day,'fim':self.day,'formato':'json',**extra})
@@ -84,14 +96,19 @@ class FrequenciaTests(unittest.TestCase):
             'arquivo':(io.BytesIO(b'%PDF-1.4\nDocumento ficticio\n%%EOF'), 'teste.pdf')},
             headers={'Authorization':'Bearer '+self.tokens[uid], 'Idempotency-Key':key or uuid4().hex})
 
-    def test_teacher_proposes_admin_approves_and_pending_is_not_attendance(self):
+    def test_teacher_confirms_and_report_is_available_without_admin_decision(self):
         proposed = self.proposal()
         self.assertEqual(proposed.status_code, 201)
-        self.assertEqual(self.report().json['totais'], [])
+        self.assertEqual(proposed.json['estado'], 'aprovada')
+        self.assertEqual(proposed.json['versao'], 1)
         self.assertEqual(self.decision('chamada', proposed.json['id'],uid=2).status_code, 403)
-        self.assertEqual(self.decision('chamada', proposed.json['id']).status_code, 200)
+        self.assertEqual(self.decision('chamada', proposed.json['id']).status_code, 409)
         result = self.report().json['totais']
         self.assertEqual([(r['presentes'],r['faltas']) for r in result], [(1,0),(0,1)])
+        with get_session() as db:
+            from app.models.frequencia_model import AuditoriaFrequenciaModel
+            self.assertEqual(db.get(ChamadaModel, proposed.json['id']).decidido_por, 2)
+            self.assertEqual(db.query(AuditoriaFrequenciaModel).filter_by(acao='confirmar_chamada', ator_id=2).count(), 1)
 
     def test_outside_scope_incomplete_roster_and_future_are_denied(self):
         self.assertEqual(self.proposal(uid=3).status_code, 403)
@@ -103,7 +120,7 @@ class FrequenciaTests(unittest.TestCase):
         with get_session() as db:
             self.assertEqual(db.query(ChamadaModel).count(),0)
 
-    def test_replay_is_exact_and_second_pending_is_rejected(self):
+    def test_replay_is_exact_and_duplicate_lesson_is_rejected(self):
         body = {'turma_disciplina_id':1,'dia':self.day,'aula':1,'presencas':{'1':'presente','2':'falta'}}
         a = self.post(2,'/frequencia/chamadas',body,key='same')
         b = self.post(2,'/frequencia/chamadas',body,key='same')
@@ -115,26 +132,93 @@ class FrequenciaTests(unittest.TestCase):
             self.assertEqual(db.query(ChamadaModel).count(),1)
             self.assertEqual(db.query(PresencaModel).count(),2)
 
-    def test_correction_retains_previous_report_until_approved(self):
+    def test_correction_is_immediate_and_preserves_original_history(self):
         first = self.proposal().json['id']
-        self.decision('chamada',first)
-        correction = self.proposal(motivo='Corrigir marcação',presencas={'1':'presente','2':'presente'})
+        correction = self.proposal(anterior_id=first,versao=1,motivo='Corrigir marcação',presencas={'1':'presente','2':'presente'})
         self.assertEqual(correction.status_code,201)
-        self.assertEqual(self.report().json['totais'][1]['faltas'],1)
-        self.assertEqual(self.decision('chamada',correction.json['id']).status_code,200)
         totals = self.report().json['totais']
         self.assertEqual([r['presentes'] for r in totals],[1,1])
         with get_session() as db:
             self.assertEqual(db.get(ChamadaModel,first).estado,'substituida')
+            self.assertEqual(db.get(ChamadaModel,correction.json['id']).anterior_id,first)
+            self.assertEqual(db.query(PresencaModel).filter_by(chamada_id=first,aluno_id=2).one().situacao,'falta')
 
     def test_rejected_correction_does_not_replace_approved(self):
-        self.decision('chamada',self.proposal().json['id'])
-        correction = self.proposal(motivo='Revisar marcação').json['id']
+        first = self.proposal().json['id']
+        correction = self.legacy_pending(anterior_id=first,versao=1,motivo='Revisar marcação').json['id']
         self.decision('chamada',correction,decision='rejeitar')
         self.assertEqual(self.report().json['totais'][1]['faltas'],1)
 
-    def test_version_and_revoked_assignment_block_approval(self):
+    def test_correction_requires_current_reference_version_and_reason(self):
+        first = self.proposal().json['id']
+        for fields, status in [({},409), ({'anterior_id':first},428),
+                ({'anterior_id':first,'versao':9},409),
+                ({'anterior_id':first,'versao':1},400)]:
+            self.assertEqual(self.proposal(**fields).status_code,status)
+        body = {'anterior_id':first,'versao':1,'motivo':'Correção conferida',
+                'presencas':{'1':'presente','2':'presente'}}
+        correction = self.proposal(**body)
+        self.assertEqual(correction.status_code,201,correction.text)
+        self.assertEqual(self.proposal(**body).status_code,409)
+        with get_session() as db:
+            self.assertEqual(db.query(ChamadaModel).count(),2)
+            self.assertEqual(db.query(ChamadaModel).filter_by(estado='aprovada').count(),1)
+
+    def test_correction_uses_original_roster_and_form_is_scoped(self):
+        first = self.proposal().json['id']
+        with get_session() as db:
+            db.query(AlunoTurmaModel).filter_by(aluno_id=2,turma_id=1).delete()
+            db.commit()
+        url = f'/frequencia/turmas/1/chamada?chamada_id={first}'
+        page = self.clients[2].get(url)
+        self.assertEqual(page.status_code,200)
+        self.assertIn('name="aluno_2"',page.text)
+        self.assertIn('name="anterior_id"',page.text)
+        self.assertEqual(self.clients[3].get(url).status_code,403)
+        self.assertEqual(self.clients[2].get(f'/frequencia/turmas/1/chamada?chamada_id=999').status_code,404)
+        corrected = self.proposal(anterior_id=first,versao=1,motivo='Revisar elenco original')
+        self.assertEqual(corrected.status_code,201,corrected.text)
+        self.assertEqual(self.clients[2].get(url).status_code,409)
+
+    def test_legacy_pending_is_preserved_and_blocks_new_call_until_decision(self):
+        rid = self.legacy_pending().json['id']
+        self.assertEqual(self.report().json['totais'],[])
+        self.assertEqual(self.proposal().status_code,409)
+        with get_session() as db:
+            self.assertEqual(db.get(ChamadaModel,rid).estado,'pendente')
+        self.assertEqual(self.decision('chamada',rid).status_code,200)
+        self.assertEqual(len(self.report().json['totais']),2)
+
+    def test_failed_correction_rolls_back_replacement_and_marks(self):
         rid = self.proposal().json['id']
+        with patch('app.routes.frequencia_routes.finish_submission',side_effect=RuntimeError('synthetic failure')):
+            with self.assertRaises(RuntimeError):
+                self.proposal(anterior_id=rid,versao=1,motivo='Correção interrompida')
+        with get_session() as db:
+            self.assertEqual(db.query(ChamadaModel).count(),1)
+            self.assertEqual(db.get(ChamadaModel,rid).estado,'aprovada')
+            self.assertEqual(db.get(ChamadaModel,rid).versao,1)
+
+    def test_archived_class_blocks_direct_confirmation(self):
+        with get_session() as db:
+            db.add(EstadoTurmaModel(turma_id=1,arquivada=True))
+            db.commit()
+        self.assertEqual(self.proposal().status_code,409)
+        self.assertEqual(self.clients[2].get('/frequencia/turmas/1/chamada').status_code,409)
+
+    def test_correction_replay_does_not_duplicate_history(self):
+        first = self.proposal().json['id']
+        data = {'turma_disciplina_id':1,'dia':self.day,'aula':1,'anterior_id':first,
+                'versao':1,'motivo':'Revisão idempotente','presencas':{'1':'presente','2':'presente'}}
+        a = self.post(2,'/frequencia/chamadas',data,key='correction')
+        b = self.post(2,'/frequencia/chamadas',data,key='correction')
+        self.assertEqual(a.status_code,201)
+        self.assertEqual(a.json,b.json)
+        with get_session() as db:
+            self.assertEqual(db.query(ChamadaModel).count(),2)
+
+    def test_version_and_revoked_assignment_block_approval(self):
+        rid = self.legacy_pending().json['id']
         self.assertEqual(self.decision('chamada',rid,version=9).status_code,409)
         with get_session() as db:
             db.query(ProfessorTurmaModel).filter_by(professor_id=1).delete()
@@ -143,7 +227,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.report().json['totais'],[])
 
     def test_accepted_certificate_justifies_but_does_not_remove_absence(self):
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         certificate = self.certificate()
         self.assertEqual(certificate.status_code,201)
         self.assertEqual(self.report().json['totais'][1]['justificadas'],0)
@@ -168,7 +252,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.certificate(uid=4).status_code,404)
 
     def test_student_sees_only_own_report_and_teacher_cannot_export(self):
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         self.assertEqual([r['aluno_id'] for r in self.report(uid=4).json['totais']],[1])
         self.assertEqual(self.report(uid=3,turma_disciplina_id=1).status_code,403)
         self.assertEqual(self.clients[2].get('/frequencia/relatorio',query_string={
@@ -199,7 +283,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.proposal(uid=3).status_code,201)
 
     def test_archiving_class_blocks_pending_approval(self):
-        rid = self.proposal().json['id']
+        rid = self.legacy_pending().json['id']
         with get_session() as db:
             db.add(EstadoTurmaModel(turma_id=1,arquivada=True))
             db.commit()
@@ -213,7 +297,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.proposal().status_code,401)
 
     def test_decision_replay_is_idempotent_and_second_decision_conflicts(self):
-        rid = self.proposal().json['id']
+        rid = self.legacy_pending().json['id']
         body = {'decisao':'aprovar','versao':1,'motivo':'Chamada conferida'}
         first = self.post(1,f'/frequencia/chamada/{rid}/decidir',body,key='decision')
         replay = self.post(1,f'/frequencia/chamada/{rid}/decidir',body,key='decision')
@@ -222,15 +306,15 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.decision('chamada',rid,decision='rejeitar',version=2).status_code,409)
 
     def test_rejected_certificate_preserves_unjustified_absence(self):
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         rid = self.certificate().json['id']
         self.assertEqual(self.decision('atestado',rid,decision='rejeitar').status_code,200)
         row = self.report().json['totais'][1]
         self.assertEqual((row['faltas'],row['justificadas']),(1,0))
 
-    def test_certificate_accepted_before_call_justifies_later_approval(self):
+    def test_certificate_accepted_before_call_justifies_direct_confirmation(self):
         self.decision('atestado',self.certificate().json['id'])
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         self.assertEqual(self.report().json['totais'][1]['justificadas'],1)
 
     def test_invalid_oversized_or_missing_certificate_does_not_create_files(self):
@@ -243,9 +327,8 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(list(Path(self.folder.name).rglob('*.enc')),[])
 
     def test_report_interval_percentages_and_detailed_scope(self):
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         second = self.proposal(aula=2,presencas={'1':'falta','2':'presente'}).json['id']
-        self.decision('chamada',second)
         rows = self.report().json['totais']
         self.assertEqual([r['percentual_presenca'] for r in rows],['50.00','50.00'])
         self.assertEqual(self.report(inicio='2999-01-01').status_code,400)
@@ -257,7 +340,7 @@ class FrequenciaTests(unittest.TestCase):
         with get_session() as db:
             db.query(AlunoModel).filter_by(id=1).update({'nome':'=HYPERLINK("test")'})
             db.commit()
-        self.decision('chamada',self.proposal().json['id'])
+        self.proposal()
         self.certificate()
         result = self.clients[1].get('/frequencia/relatorio',query_string={
             'inicio':self.day,'fim':self.day,'formato':'csv'})
@@ -282,7 +365,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(self.clients[1].get('/admin/dashboard').status_code,200)
 
     @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
-    def test_two_simultaneous_proposals_have_one_pending_call(self):
+    def test_two_simultaneous_submissions_have_one_confirmed_call(self):
         barrier = threading.Barrier(2)
         body = {'turma_disciplina_id':1,'dia':self.day,'aula':1,'presencas':{'1':'presente','2':'falta'}}
         def send(_):
@@ -295,10 +378,29 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(sorted(statuses),[201,409])
         with get_session() as db:
             self.assertEqual(db.query(ChamadaModel).count(),1)
+            self.assertEqual(db.query(ChamadaModel).one().estado,'aprovada')
+
+    @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
+    def test_two_simultaneous_corrections_have_one_current_revision(self):
+        rid = self.proposal().json['id']
+        barrier = threading.Barrier(2)
+        data = {'turma_disciplina_id':1,'dia':self.day,'aula':1,'anterior_id':rid,
+                'versao':1,'motivo':'Correção simultânea','presencas':{'1':'presente','2':'presente'}}
+        def send(_):
+            client = self.app.test_client()
+            barrier.wait(timeout=10)
+            return client.post('/frequencia/chamadas',json=data,headers={
+                'Authorization':'Bearer '+self.tokens[2], 'Idempotency-Key':uuid4().hex}).status_code
+        with ThreadPoolExecutor(max_workers=2) as workers:
+            self.assertEqual(sorted(workers.map(send,range(2))),[201,409])
+        with get_session() as db:
+            self.assertEqual(db.query(ChamadaModel).count(),2)
+            self.assertEqual(db.query(ChamadaModel).filter_by(estado='aprovada').count(),1)
+            self.assertEqual(db.get(ChamadaModel,rid).estado,'substituida')
 
     @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
     def test_two_simultaneous_decisions_have_one_approval(self):
-        rid = self.proposal().json['id']
+        rid = self.legacy_pending().json['id']
         barrier = threading.Barrier(2)
         def decide(_):
             client = self.app.test_client()

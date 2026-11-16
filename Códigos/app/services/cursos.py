@@ -94,14 +94,29 @@ def autoria(db, curso_id, user_id, role, editar=False):
 
 
 def estrutura(db, curso_id):
-    result = []
-    for cap in db.query(CapituloModel).filter_by(curso_id=curso_id).order_by(CapituloModel.posicao):
-        temas = []
-        for tema in db.query(TemaModel).filter_by(capitulo_id=cap.id).order_by(TemaModel.posicao):
-            aulas = list(db.query(AulaModel).filter_by(tema_id=tema.id).order_by(AulaModel.posicao))
-            temas.append({'tema': tema, 'aulas': aulas})
-        result.append({'capitulo': cap, 'temas': temas})
-    return result
+    """Load the outline in three bounded queries, including empty groups.
+
+    Scope each query to this course in SQL; avoid one round trip per chapter/theme
+    and avoid repeating chapter/theme data once for every lesson in a wide join.
+    Callers remain responsible for checking authorship or access to the offer.
+    """
+    capitulos = db.query(CapituloModel).filter_by(curso_id=curso_id).order_by(
+        CapituloModel.posicao).all()
+    if not capitulos:
+        return []
+    temas = db.query(TemaModel).join(CapituloModel,
+        TemaModel.capitulo_id == CapituloModel.id).filter(
+        CapituloModel.curso_id == curso_id).order_by(TemaModel.posicao).all()
+    aulas = aulas_curso(db, curso_id)
+    aulas_por_tema = {}
+    for aula in aulas:
+        aulas_por_tema.setdefault(aula.tema_id, []).append(aula)
+    temas_por_capitulo = {}
+    for tema in temas:
+        temas_por_capitulo.setdefault(tema.capitulo_id, []).append(
+            {'tema': tema, 'aulas': aulas_por_tema.get(tema.id, [])})
+    return [{'capitulo': cap, 'temas': temas_por_capitulo.get(cap.id, [])}
+            for cap in capitulos]
 
 
 def aulas_curso(db, curso_id):

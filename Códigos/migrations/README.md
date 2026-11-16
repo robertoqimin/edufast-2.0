@@ -2,6 +2,13 @@
 
 ## Frequência e atestados — 004 pendente de revisão
 
+Atualização de comportamento em 16/11: novas chamadas são confirmadas diretamente
+pelo professor autorizado, sem mudança de esquema. O estado técnico `aprovada` é
+preservado; chamadas antigas pendentes não são convertidas. A análise de atestados
+continua administrativa. Consulte `Documentos/testes/CHAMADA_DIRETA_2026-11-16.md`.
+A descrição de aprovação abaixo registra a proposta original; o SQL continua
+pendente de revisão e não deve ser executado automaticamente.
+
 `004_frequencia.sql` propõe quatro tabelas: chamadas versionadas, marcações por
 aluno, atestados e auditoria. Foi gerado pelos modelos, sem conectar ou executar
 SQL nos bancos das escolas. Não cria presença histórica nem altera contas,

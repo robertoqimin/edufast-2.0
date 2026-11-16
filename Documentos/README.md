@@ -4,6 +4,9 @@
 
 | Documento | Conteúdo |
 | --- | --- |
+| [Confirmação direta de chamada — 16/11](testes/CHAMADA_DIRETA_2026-11-16.md) | MS01: confirmação docente, correção com histórico, testes atuais e limites de MySQL |
+| [Primeira versão — ensino médio e superior](planejamento/ENSINO_MEDIO_SUPERIOR_2026-11-16.md) | Turmas, confirmação docente de presença, materiais, abas, cursos modulares e entregas com testes |
+| [Preparação para entrega — 16/11/2026](planejamento/PREPARACAO_ENTREGA_2026-11-16.md) | Mapa funcional, diretrizes propostas, prioridades, agenda da semana e critérios de liberação |
 | [Protocolo de design](PROTOCOLO_DESIGN.md) | Layout, tokens, acessibilidade e portões de entrega |
 | [Galeria visual preservada](design/README.md) | Prints desktop/celular e manifesto das referências |
 | [Organização do Git](design/ORGANIZACAO_GIT.md) | Escopo dos commits, arquivos locais e revisão |

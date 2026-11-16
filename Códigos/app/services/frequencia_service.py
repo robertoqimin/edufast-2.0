@@ -1,4 +1,4 @@
-"""Chamada docente pendente, decisão administrativa e faltas justificadas."""
+"""Confirmação docente, revisões auditáveis e análise administrativa de atestados."""
 from datetime import date
 from decimal import Decimal
 from app.concurrency import MutationConflict, check_version
@@ -76,8 +76,16 @@ def propose(db, identity, data):
     previous = db.query(ChamadaModel).filter_by(turma_disciplina_id=pair.id, dia=when, aula=lesson).order_by(
         ChamadaModel.revisao.desc()).with_for_update().all()
     if any(c.estado == 'pendente' for c in previous):
-        raise MutationConflict('Já existe chamada pendente para essa aula.')
+        raise MutationConflict('Há uma chamada antiga pendente para essa aula. Solicite a conferência administrativa antes de registrar outra.')
     approved = next((c for c in previous if c.estado == 'aprovada'), None)
+    if approved:
+        if not data.get('anterior_id'):
+            raise MutationConflict('Esta aula já tem chamada confirmada. Abra a chamada e escolha Corrigir chamada.')
+        if integer(data.get('anterior_id')) != approved.id:
+            raise MutationConflict('A chamada foi corrigida por outro envio. Reabra a versão atual.')
+        check_version(approved, data)
+    elif data.get('anterior_id'):
+        raise MutationConflict('A chamada indicada para correção não está mais vigente.')
     reason = str(data.get('motivo') or '').strip()
     if len(reason) > 500 or (approved and len(reason) < 5):
         raise MutationConflict('Informe um motivo de correção entre 5 e 500 caracteres.', 400)
@@ -94,11 +102,13 @@ def propose(db, identity, data):
         raise MutationConflict('A chamada deve conter exatamente os alunos da turma e situações válidas.', 400)
     call = ChamadaModel(turma_disciplina_id=pair.id, dia=when, aula=lesson,
         revisao=(previous[0].revisao + 1 if previous else 1), anterior_id=approved.id if approved else None,
-        autor_id=identity.id, estado='pendente', motivo=reason)
+        autor_id=identity.id, estado='aprovada', decidido_por=identity.id, motivo=reason)
+    if approved:
+        approved.estado = 'substituida'
     db.add(call)
     db.flush()
     db.add_all(PresencaModel(chamada_id=call.id, aluno_id=sid, situacao=status) for sid, status in marks.items())
-    audit(db, identity.id, 'propor_chamada', call.id)
+    audit(db, identity.id, 'corrigir_chamada' if approved else 'confirmar_chamada', call.id)
     return call
 
 

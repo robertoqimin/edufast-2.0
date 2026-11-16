@@ -1,0 +1,139 @@
+{
+    "data_referencia":  "2026-11-16",
+    "base_commit":  "7e996a167c5f40657eab12d9bde36e8af223e030",
+    "estado":  "Alteracoes locais; SQLite/HTTP/navegador validados; concorrencia MySQL pendente",
+    "ambiente":  "Windows; Python 3.14.3; SQLite em memoria; Edge headless; dados ficticios",
+    "execucao":  {
+                     "passed":  true,
+                     "captures":  [
+                                      "professor-painel-desktop.png",
+                                      "professor-painel-mobile.png",
+                                      "chamada-desktop.png",
+                                      "chamada-mobile.png",
+                                      "confirmada-desktop.png",
+                                      "confirmada-mobile.png",
+                                      "correcao-desktop.png",
+                                      "correcao-mobile.png",
+                                      "conferencia-desktop.png",
+                                      "conferencia-mobile.png",
+                                      "atestados-desktop.png",
+                                      "atestados-mobile.png",
+                                      "relatorio-desktop.png",
+                                      "relatorio-mobile.png"
+                                  ],
+                     "errors":  [
+
+                                ],
+                     "scope":  "professor confirma 20 alunos, corrige com histórico; admin confere, aluno envia atestado, admin aceita, falta permanece justificada"
+                 },
+    "capturas":  [
+                     {
+                         "arquivo":  "atestados-desktop.png",
+                         "bytes":  180025,
+                         "sha256":  "29f1ff0ebbf5cfc19f38c51db6b6dbbfa4db52d5cf0d2f9fdceee5c45b438674"
+                     },
+                     {
+                         "arquivo":  "atestados-mobile.png",
+                         "bytes":  145946,
+                         "sha256":  "d22e9bd5d85c906e6583dfc14af8a769e5b9d734d069274a9a8b375effcb1f84"
+                     },
+                     {
+                         "arquivo":  "chamada-desktop.png",
+                         "bytes":  211392,
+                         "sha256":  "ec968040e6d25515772b69aeef8d532d0352013c9588cc03c0671592c615cf82"
+                     },
+                     {
+                         "arquivo":  "chamada-mobile.png",
+                         "bytes":  196774,
+                         "sha256":  "82fbbc31a59fd63280625de16cdab842c0c010ca4327cd5682de7159d5878bb5"
+                     },
+                     {
+                         "arquivo":  "conferencia-desktop.png",
+                         "bytes":  125016,
+                         "sha256":  "697674ade475d3aaaf1d384aa81f96ff7e6d84a2f4b6c66725628b35dbbeda15"
+                     },
+                     {
+                         "arquivo":  "conferencia-mobile.png",
+                         "bytes":  123147,
+                         "sha256":  "e53defa409341c140689de129c18a6af04d5bb4b5da5b0a9e37cb26a3856f59a"
+                     },
+                     {
+                         "arquivo":  "confirmada-desktop.png",
+                         "bytes":  122336,
+                         "sha256":  "3657db6c99c294cd9ec4f8b9327b1eb2a6c524a41c60d7a570f101c31a9db724"
+                     },
+                     {
+                         "arquivo":  "confirmada-mobile.png",
+                         "bytes":  121215,
+                         "sha256":  "1e6c7c944a211b93e1082ca5060e6615e80b98d47710acca47baeb4fd973b7a9"
+                     },
+                     {
+                         "arquivo":  "correcao-desktop.png",
+                         "bytes":  218636,
+                         "sha256":  "f3a5d463d3f8c42a01d678fd498cb79d496798f9758d1a3248aaa848757e5c43"
+                     },
+                     {
+                         "arquivo":  "correcao-mobile.png",
+                         "bytes":  203518,
+                         "sha256":  "d18d998558414b09a9ae61d901365a037dd5807b0722f6ea0ddbea76b7b2fbe6"
+                     },
+                     {
+                         "arquivo":  "professor-painel-desktop.png",
+                         "bytes":  116463,
+                         "sha256":  "4dc186e60babba0b3f4b8943ee41ea3b5bf6f802e9851721ce6025f13b7f6315"
+                     },
+                     {
+                         "arquivo":  "professor-painel-mobile.png",
+                         "bytes":  75911,
+                         "sha256":  "a6db6649827537b9d27407b2e8e9dee33a6a49635dca1d9acd3abee7588313cd"
+                     },
+                     {
+                         "arquivo":  "relatorio-desktop.png",
+                         "bytes":  235783,
+                         "sha256":  "bc5cfe0ec4973c10b2c0d09718e70b0b7832b021ff38e2cdef056755e56f361e"
+                     },
+                     {
+                         "arquivo":  "relatorio-mobile.png",
+                         "bytes":  428198,
+                         "sha256":  "3ed99008123b8c1cfcf0d68c8737492b3c508aa0a376954ae17a91e9c12e3020"
+                     }
+                 ],
+    "fontes":  [
+                   {
+                       "arquivo":  "Códigos/app/services/frequencia_service.py",
+                       "sha256":  "eba63c12eff8e7b37a1d1d3e8becc4f8bf3d8c2331419a940b561e0376276ad1"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/routes/frequencia_routes.py",
+                       "sha256":  "129a1a5b8ae9495cdefb79272fdc56d5ab1a904bc736408474e7c1a9e72b8813"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/frequencia_chamada.html",
+                       "sha256":  "abb23af721c837be60193e1da192c11ef2a707571c5173205c80b9a61b23edd4"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/frequencia_painel.html",
+                       "sha256":  "370b261c9722914ebfa95e65ebade9de0ce8828c94f24d6949fce5308a377228"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/frequencia_detalhe.html",
+                       "sha256":  "15a973e427d09f1c35c094e99b4c6b3a4c4fa25c66dace9d95037c7ee99c28a3"
+                   },
+                   {
+                       "arquivo":  "Códigos/tests/verificar_frequencia.cjs",
+                       "sha256":  "aa120de487fb54fcba1efe379af2470e84c701fd7a49013b12f0ca67a46a014d"
+                   },
+                   {
+                       "arquivo":  ".github/cicd/tests/test_frequencia.py",
+                       "sha256":  "e04c300de0250ad7ef43713a7b293c76e69214a37c9b729c7237d98919116658"
+                   },
+                   {
+                       "arquivo":  ".github/cicd/tests/frequencia_visual_fixture.py",
+                       "sha256":  "6e49a35cc946ec2d18fa583350b8140183d149088ec434db517b6a5853af789b"
+                   },
+                   {
+                       "arquivo":  ".github/cicd/frequencia_http.cjs",
+                       "sha256":  "675d421200522b465a59b6fa645897871d257f869893237799c59595675e2944"
+                   }
+               ]
+}

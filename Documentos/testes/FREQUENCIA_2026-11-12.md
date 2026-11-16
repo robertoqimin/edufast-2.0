@@ -1,5 +1,8 @@
 # Frequência, faltas e atestados — 12/11/2026
 
+Atualização posterior: [confirmação direta docente em 16/11](CHAMADA_DIRETA_2026-11-16.md).
+Este relatório preserva os resultados e a regra administrativa da entrega original.
+
 Complemento: [testes de API ampliados e execução HTTP real](API_FREQUENCIA_2026-11-12.md).
 O usuário adiou a aplicação da migration; a publicação do código/PR não autoriza
 alterar os bancos Teste 01/02.

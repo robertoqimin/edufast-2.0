@@ -1,7 +1,7 @@
 // Somente o servidor sintético e descartável na porta 5091.
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
-const out = path.resolve('.ci-results/frequencia-visual');
+const out = path.resolve('.ci-results/frequencia-visual',new Date().toISOString().replace(/[:.]/g,'-'));
 fs.mkdirSync(out, {recursive: true});
 const base = 'http://127.0.0.1:5091';
 (async () => {
@@ -34,15 +34,24 @@ const base = 'http://127.0.0.1:5091';
     const when = await p.locator('[name=dia]').inputValue();
     const selects = p.locator('select[name^=aluno_]');
     assert.equal(await selects.count(),20);
-    for(let i=0;i<20;i++) await selects.nth(i).selectOption(i===1?'falta':'presente');
-    await p.getByRole('button',{name:'Enviar chamada para aprovação'}).click();
-    await p.getByText('Chamada enviada para aprovação administrativa.',{exact:true}).waitFor();
+    for(let i=0;i<20;i++) await selects.nth(i).selectOption('presente');
+    await p.getByRole('button',{name:'Confirmar chamada',exact:true}).click();
+    await p.getByText('Chamada confirmada. A frequência já está disponível no relatório.',{exact:true}).waitFor();
+    await p.getByRole('link',{name:'Conferir chamada',exact:true}).first().click();
+    await capture(p,'confirmada');
+    await p.getByRole('link',{name:'Corrigir chamada',exact:true}).click();
+    assert.equal(await p.locator('select[name^=aluno_]').count(),20);
+    assert.equal(await p.locator('select[name^=aluno_]').nth(1).inputValue(),'presente');
+    await p.locator('select[name^=aluno_]').nth(1).selectOption('falta');
+    await p.locator('[name=motivo]').fill('Corrigir presença no teste de navegador');
+    await capture(p,'correcao');
+    await p.getByRole('button',{name:'Confirmar correção',exact:true}).click();
+    await p.getByText('Correção confirmada. O histórico anterior foi preservado.',{exact:true}).waitFor();
     const a = await login(admin,'admin');
     await a.goto(base+'/frequencia');
     await a.getByRole('link',{name:'Conferir chamada',exact:true}).first().click();
-    await capture(a,'aprovacao');
-    await a.locator('[name=motivo]').fill('Chamada conferida no teste');
-    await a.getByRole('button',{name:'Aprovar chamada',exact:true}).click();
+    await capture(a,'conferencia');
+    assert.equal(await a.getByRole('button',{name:'Aprovar chamada',exact:true}).count(),0);
     const s = await login(student,'aluno02');
     await s.goto(base+'/frequencia');
     await s.locator('[name=inicio]').last().fill(when);
@@ -58,7 +67,7 @@ const base = 'http://127.0.0.1:5091';
     assert.equal((await row.locator('td').allTextContents()).join('|'),'Aluno 02 - Teste 01|1|0|0|1|1|0.00%');
     assert.deepEqual(errors,[]);
     fs.writeFileSync(path.join(out,'resumo.json'),JSON.stringify({passed:true,captures,errors,
-      scope:'professor envia 20 alunos, admin aprova, aluno envia atestado, admin aceita, falta permanece justificada'},null,2));
-    console.log('Frequencia: chamada, aprovacao, atestado e relatorio aprovados no navegador.');
+      scope:'professor confirma 20 alunos, corrige com histórico; admin confere, aluno envia atestado, admin aceita, falta permanece justificada'},null,2));
+    console.log('Frequencia: confirmação direta, correção, atestado e relatório aprovados. Evidências: '+out);
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1});

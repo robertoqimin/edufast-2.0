@@ -2,6 +2,10 @@
 
 ### Menos burocracia. Mais tempo para a educação.
 
+**Preparação para entrega:** [mapa atual, diretrizes e plano de 16 a 20/11/2026](Documentos/planejamento/PREPARACAO_ENTREGA_2026-11-16.md).
+Esse levantamento inclui módulos posteriores à apresentação abaixo e distingue
+código existente, evidências históricas e pendências de homologação.
+
 **Design preservado:** [galeria das telas](Documentos/design/README.md) ·
 [protocolo obrigatório](Documentos/PROTOCOLO_DESIGN.md) ·
 [organização da entrega](Documentos/design/ORGANIZACAO_GIT.md) ·

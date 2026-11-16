@@ -30,6 +30,11 @@ As imagens abaixo usam somente contas e dados fictícios do ambiente manual.
 
 ## Situacao da validacao
 
+A [confirmação direta de chamada de 16/11](referencias/2026-11-16-chamada-direta/manifesto.json)
+tem 14 novas capturas desktop/mobile e [comparação](referencias/2026-11-16-chamada-direta/comparacao.md).
+Os [resultados e limites atuais](../testes/CHAMADA_DIRETA_2026-11-16.md) distinguem
+validação SQLite/HTTP/navegador da concorrência MySQL ainda pendente.
+
 O [painel do proprietário de 12/11](referencias/2026-11-12-plataforma/manifesto.json)
 possui oito capturas novas, com [comparação e limites](referencias/2026-11-12-plataforma/comparacao.md),
 preservando as referências escolares anteriores.

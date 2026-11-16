@@ -2,6 +2,13 @@
 
 [Início](../../README.md) · [Arquitetura](../arquitetura/ARQUITETURA.md)
 
+**Preparação da entrega em 16/11/2026:** consulte o
+[mapa de funcionalidades, diretrizes e plano da semana](PREPARACAO_ENTREGA_2026-11-16.md).
+As etapas abaixo preservam o planejamento anterior. As decisões de novembro
+adotam instalações independentes por escola e painel Supremo separado; há código
+e evidências posteriores para cursos, frequência e gestão central. As afirmações
+de implementação futura abaixo precisam ser lidas com essa atualização.
+
 Esta é uma sequência proposta, sem datas ou compromisso de entrega. Gestão completa é a visão do produto; a tabela de funcionalidades do README identifica a implementação presente.
 
 **Direção confirmada em 26/10/2026:** consolidar acadêmico e secretaria para várias escolas na mesma plataforma. O [plano da próxima versão](PROXIMA_VERSAO.md) detalha escopo, isolamento institucional, migração e critérios de aceite. A base de CI/CD já foi implantada e validada; os testes atuais ainda não cobrem múltiplas escolas, que permanecem uma entrega futura.

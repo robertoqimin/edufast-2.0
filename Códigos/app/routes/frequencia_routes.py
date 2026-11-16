@@ -87,12 +87,31 @@ def painel():
 def formulario(pair_id):
     from app.services import frequencia_service as service
     from app.models import TurmaModel, DisciplinaModel
+    from app.models.frequencia_model import ChamadaModel, PresencaModel
+    from app.models.curso_model import EstadoTurmaModel
     identity = g.frequencia_identity
     if identity.papel != 'professor':
         raise MutationConflict('Somente o professor envia chamada.', 403)
     with get_session() as db:
         pair = service.scope(db, identity, pair_id)
-        return render_template('frequencia_chamada.html', pair=pair, alunos=service.students(db, pair),
+        archived = db.get(EstadoTurmaModel, pair.turma_id)
+        if archived and archived.arquivada:
+            raise MutationConflict('Turma arquivada.', 409)
+        previous, marks = None, {}
+        pupils = service.students(db, pair)
+        if request.args.get('chamada_id'):
+            previous = db.get(ChamadaModel, service.integer(request.args['chamada_id']))
+            if not previous or previous.turma_disciplina_id != pair.id:
+                raise MutationConflict('Chamada não encontrada.', 404)
+            if previous.estado != 'aprovada':
+                raise MutationConflict('Abra uma chamada confirmada e vigente para corrigir.', 409)
+            from app.models import AlunoModel
+            rows = db.query(PresencaModel, AlunoModel).join(AlunoModel,
+                AlunoModel.id == PresencaModel.aluno_id).filter(
+                PresencaModel.chamada_id == previous.id).order_by(AlunoModel.nome, AlunoModel.id).all()
+            pupils = [student for mark, student in rows]
+            marks = {mark.aluno_id: mark.situacao for mark, student in rows}
+        return render_template('frequencia_chamada.html', pair=pair, alunos=pupils, anterior=previous, marcacoes=marks,
             turma=db.get(TurmaModel, pair.turma_id), disciplina=db.get(DisciplinaModel, pair.disciplina_id), today=date.today().isoformat())
 
 
@@ -109,8 +128,9 @@ def propor():
         if replay:
             return result(*replay)
         call = service.propose(db, g.frequencia_identity, data)
-        return result(*finish_submission(db, entry, {'id': call.id, 'estado': 'pendente',
-            'mensagem': 'Chamada enviada para aprovação administrativa.'}, 201))
+        return result(*finish_submission(db, entry, {'id': call.id, 'estado': call.estado, 'versao': call.versao,
+            'mensagem': 'Correção confirmada. O histórico anterior foi preservado.' if call.anterior_id
+                else 'Chamada confirmada. A frequência já está disponível no relatório.'}, 201))
 
 
 @frequencia_bp.get('/frequencia/chamadas/<int:call_id>')
