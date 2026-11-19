@@ -1,0 +1,183 @@
+{
+    "data_referencia":  "2026-11-16",
+    "base_commit":  "85aed361bd819ff26f6803b2c07595286fdf1f77",
+    "estado":  "Alteracoes locais MS02; ativacao em banco persistente depende de revisao da proposta 005",
+    "ambiente":  "Windows; Python 3.14.3; SQLite em memoria; Edge headless; dados ficticios",
+    "execucao":  {
+                     "passed":  true,
+                     "captures":  [
+                                      "disciplinas-professor-desktop.png",
+                                      "disciplinas-professor-mobile.png",
+                                      "disciplina-vazia-desktop.png",
+                                      "disciplina-vazia-mobile.png",
+                                      "preparar-aviso-desktop.png",
+                                      "preparar-aviso-mobile.png",
+                                      "rascunho-desktop.png",
+                                      "rascunho-mobile.png",
+                                      "publicacao-pendente-desktop.png",
+                                      "publicacao-pendente-mobile.png",
+                                      "aviso-aluno-desktop.png",
+                                      "aviso-aluno-mobile.png",
+                                      "material-aluno-desktop.png",
+                                      "material-aluno-mobile.png",
+                                      "materiais-aluno-desktop.png",
+                                      "materiais-aluno-mobile.png"
+                                  ],
+                     "errors":  [
+
+                                ],
+                     "scope":  "Professor prepara aviso, arquivo e link; rascunhos privados; admin revisa; aluno acessa e baixa material; teclado e desktop/mobile"
+                 },
+    "capturas":  [
+                     {
+                         "arquivo":  "aviso-aluno-desktop.png",
+                         "bytes":  68268,
+                         "sha256":  "92b644e4ef5ea3114ffa22fc3120021e10e80dba5b6bc780cc4d495de3845b6c"
+                     },
+                     {
+                         "arquivo":  "aviso-aluno-mobile.png",
+                         "bytes":  30237,
+                         "sha256":  "d50a507be5927dcde6930b51a13e1ff328311c687bdee209228f4cdaaa81979c"
+                     },
+                     {
+                         "arquivo":  "disciplinas-professor-desktop.png",
+                         "bytes":  77625,
+                         "sha256":  "1d14c2931c54beb3d7d4074983ccd094743a15ef2554c81d3a995efa16a2a6c7"
+                     },
+                     {
+                         "arquivo":  "disciplinas-professor-mobile.png",
+                         "bytes":  35556,
+                         "sha256":  "d3dd52bc1c4569bdcf2e83e149e66901ab8834d0377f1de0d8a417d9a2c0261b"
+                     },
+                     {
+                         "arquivo":  "disciplina-vazia-desktop.png",
+                         "bytes":  78344,
+                         "sha256":  "0177e85d997c38434a1715102a314a97a6ce152ecd4fab1c13daf3fd2349672c"
+                     },
+                     {
+                         "arquivo":  "disciplina-vazia-mobile.png",
+                         "bytes":  37348,
+                         "sha256":  "423c8de01d086f92bf52e2c3664f84c919bf3e106ea1d70acc34740221cb9da3"
+                     },
+                     {
+                         "arquivo":  "materiais-aluno-desktop.png",
+                         "bytes":  79114,
+                         "sha256":  "8ce39cd29e5b76f1511e11b1c629da982ed58f70c019d1a3fa04864e3595ae24"
+                     },
+                     {
+                         "arquivo":  "materiais-aluno-mobile.png",
+                         "bytes":  41047,
+                         "sha256":  "1055c340a099d59d633cd5ab029b901338b5021c1510a29fd9b5c1621e0bac84"
+                     },
+                     {
+                         "arquivo":  "material-aluno-desktop.png",
+                         "bytes":  75477,
+                         "sha256":  "7920d7beab7940396be02c7b05947b7c974c547827b52a97b99baea013673d32"
+                     },
+                     {
+                         "arquivo":  "material-aluno-mobile.png",
+                         "bytes":  37433,
+                         "sha256":  "84ea0dd86ce1dfcdf86922f55fa0d45149cb82f127372d7445efaf4316b1ab89"
+                     },
+                     {
+                         "arquivo":  "preparar-aviso-desktop.png",
+                         "bytes":  96595,
+                         "sha256":  "c80dd45a89c4a19b87dc68d22fc77f9f200cecab9a71d01f71c6cd642f5b8307"
+                     },
+                     {
+                         "arquivo":  "preparar-aviso-mobile.png",
+                         "bytes":  54301,
+                         "sha256":  "5096f38a1f7ac3488404970a927ab315015b4bfd764265c811269a30a6eb5eb6"
+                     },
+                     {
+                         "arquivo":  "publicacao-pendente-desktop.png",
+                         "bytes":  97387,
+                         "sha256":  "251e4537f599b6928a936346c88cf461d55f621e01f2dfef956e01b28517aef4"
+                     },
+                     {
+                         "arquivo":  "publicacao-pendente-mobile.png",
+                         "bytes":  56020,
+                         "sha256":  "4bcd29a67e4829b44137555a40861de5ac95e998b517bb25fb369326eb931184"
+                     },
+                     {
+                         "arquivo":  "rascunho-desktop.png",
+                         "bytes":  95583,
+                         "sha256":  "00cca28e13be11a1d7fa6bb8695f9af29aec7824048b8cb1e7fd24f4b3c973c1"
+                     },
+                     {
+                         "arquivo":  "rascunho-mobile.png",
+                         "bytes":  52797,
+                         "sha256":  "2e1852a97b1c2395e845587327c2d45d53c36a4a66db8cd3b20e264b151a7f2b"
+                     }
+                 ],
+    "fontes":  [
+                   {
+                       "arquivo":  "Códigos/app/models/estudo_model.py",
+                       "sha256":  "9df852ae2c8f989a2ee17b6908d2717b7cc62df3146ee959085702a14f4e95de"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/services/estudo_service.py",
+                       "sha256":  "3373b8fb9b83a5290558f7a2702dc0939e8a50d2ad461f1ef2de0475dc12ae7e"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/routes/estudo_routes.py",
+                       "sha256":  "4de4e4087fe82442dc91bb3fd1c8ad91c1569e42ad6e65a889a552b683e0f826"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/database.py",
+                       "sha256":  "ec847b7c20fba7e67811b8e424f320a1c656debff9ed5ee2f966de21f161a19a"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/services/aprovacoes_service.py",
+                       "sha256":  "f029347ee17a39f7e4e3883f4aa48627f0fb73a022a866a6711f918eae36a4b5"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/estudo_formulario.html",
+                       "sha256":  "bbb56ca2f1b7efd7f478ded8facecc02cca582908a0f2b1bc289004f87dc9f06"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/estudo_conteudo.html",
+                       "sha256":  "f06296e7fa18fd42e718f9b6c7b34e3b773ee0755471666bef38127ebf8451e3"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/estudo_disciplina.html",
+                       "sha256":  "168f11079b4435aa4cb6448969f608307f40287fb7015c5c3be6a91b64f22046"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/estudo_disciplinas.html",
+                       "sha256":  "cf88fff51a33bf607dcd9e5d666d5d3a71d781f1724c5e5823704d16bc45d7aa"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/estudo_erro.html",
+                       "sha256":  "1b0894b818a651872da7cc36ee70ca671bacefdda2fd370f6de3e5cf23299f00"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/templates/partials/workspace_sidebar.html",
+                       "sha256":  "e348f927dc4e25bf2e549a786733e2fdd3d60419adaaae87bf651b1508c35184"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/static/css/escola.css",
+                       "sha256":  "f1abee728253e8d900333a164f3d08801952d1c499cb6d94c5bbfe1a0f00fcd3"
+                   },
+                   {
+                       "arquivo":  "Códigos/app/static/js/paginas/estudos.js",
+                       "sha256":  "047676e1bcc422abd22aaf0ae7001d8d7f254319698d081a815c01edba7f4bdb"
+                   },
+                   {
+                       "arquivo":  "Códigos/tests/verificar_estudos.cjs",
+                       "sha256":  "25a5d644c3b8d25c212dc05311cdd733daa021174ccccca7adc0c435a6d52d55"
+                   },
+                   {
+                       "arquivo":  ".github/cicd/tests/test_estudos.py",
+                       "sha256":  "9c11eefea5c8fa6c8a8404cebb8141b6357887d7d4614ec76d241803f3de8379"
+                   },
+                   {
+                       "arquivo":  "Códigos/migrations/005_espaco_disciplina.sql",
+                       "sha256":  "06a1b3a6802b97805f9579d7818ea198f211b81490c8352caf6bcff74d5dbec1"
+                   },
+                   {
+                       "arquivo":  "Códigos/control_plane/__init__.py",
+                       "sha256":  "c05a336e16197e4f8be75fe4c3f393ce7416d3fdcb3b263a11d430e4e892898a"
+                   }
+               ]
+}

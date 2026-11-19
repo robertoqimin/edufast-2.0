@@ -4,6 +4,9 @@
 
 | Documento | Conteúdo |
 | --- | --- |
+| [Revisão para publicação — 19/11](testes/REVISAO_PRE_COMMIT_2026-11-19.md) | Compatibilidade com a main, API HTTP/Postman, regressão e validação visual atuais |
+| [Abas da disciplina — 19/11](testes/ABAS_DISCIPLINA_2026-11-19.md) | MS03: autoria, ordenação, arquivamento, histórico e proposta SQL 006 |
+| [Espaço da disciplina — 16/11](testes/ESPACO_DISCIPLINA_2026-11-16.md) | MS02: avisos, links, arquivos privados, publicação revisada e proposta SQL 005 |
 | [Confirmação direta de chamada — 16/11](testes/CHAMADA_DIRETA_2026-11-16.md) | MS01: confirmação docente, correção com histórico, testes atuais e limites de MySQL |
 | [Primeira versão — ensino médio e superior](planejamento/ENSINO_MEDIO_SUPERIOR_2026-11-16.md) | Turmas, confirmação docente de presença, materiais, abas, cursos modulares e entregas com testes |
 | [Preparação para entrega — 16/11/2026](planejamento/PREPARACAO_ENTREGA_2026-11-16.md) | Mapa funcional, diretrizes propostas, prioridades, agenda da semana e critérios de liberação |

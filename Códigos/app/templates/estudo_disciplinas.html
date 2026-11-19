@@ -1,0 +1,8 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Espaço da disciplina' %}
+{% block page_class %}study-space{% endblock %}
+{% block content %}
+<section class="page-heading"><div><span class="eyebrow">APRENDIZAGEM</span><h1>Espaço da disciplina</h1><p>Avisos e materiais de estudo, organizados por turma e matéria.</p></div></section>
+<section class="panel course-panel"><h2>Suas disciplinas</h2><p class="course-meta">{{ total }} disciplinas disponíveis · página {{ page }}</p>
+{% for pair,turma,disciplina in rows %}<article class="course-outline"><h3><a href="{{ url_for('estudos.disciplina',pair_id=pair.id) }}">{{ disciplina.nome }} · {{ turma.nome }}</a></h3><p>Ano letivo {{ turma.ano_letivo }} · {{ turma.codigo }}</p></article>{% else %}<p>Nenhuma disciplina disponível. A administração pode conferir seus vínculos de turma e matéria.</p>{% endfor %}
+<nav class="course-actions" aria-label="Páginas de disciplinas">{% if page > 1 %}<a class="button button-secondary" href="{{ url_for('estudos.disciplinas',pagina=page-1) }}">Página anterior</a>{% endif %}{% if has_next %}<a class="button button-secondary" href="{{ url_for('estudos.disciplinas',pagina=page+1) }}">Próxima página</a>{% endif %}</nav></section>
+{% endblock %}

@@ -83,17 +83,22 @@ def create_app(config=None):
     app.extensions['platform_session'] = sessionmaker(bind=engine, expire_on_commit=False)
     # Validação somente: DDL nunca é executado ao iniciar o painel.
     if not app.config.get('TESTING'):
-        inspector = inspect(engine)
-        for table in Base.metadata.sorted_tables:
-            if table.name not in inspector.get_table_names() or set(table.columns.keys()) - {
-                    column['name'] for column in inspector.get_columns(table.name)}:
-                raise RuntimeError('Banco central pendente de revisao/provisionamento: ' + table.name)
-            unique = inspector.get_unique_constraints(table.name)
-            unique += [index for index in inspector.get_indexes(table.name) if index.get('unique')]
-            for constraint in table.constraints:
-                if constraint.__class__.__name__ == 'UniqueConstraint' and not any(
-                        set(item['column_names']) == set(constraint.columns.keys()) for item in unique):
-                    raise RuntimeError('Constraint central pendente de revisao: ' + table.name)
+        try:
+            inspector = inspect(engine)
+            for table in Base.metadata.sorted_tables:
+                if table.name not in inspector.get_table_names() or set(table.columns.keys()) - {
+                        column['name'] for column in inspector.get_columns(table.name)}:
+                    raise RuntimeError('Banco central pendente de revisao/provisionamento: ' + table.name)
+                unique = inspector.get_unique_constraints(table.name)
+                unique += [index for index in inspector.get_indexes(table.name) if index.get('unique')]
+                for constraint in table.constraints:
+                    if constraint.__class__.__name__ == 'UniqueConstraint' and not any(
+                            set(item['column_names']) == set(constraint.columns.keys()) for item in unique):
+                        raise RuntimeError('Constraint central pendente de revisao: ' + table.name)
+        except Exception:
+            # A rejected startup has no application lifetime to close its pool.
+            engine.dispose()
+            raise
 
     fake_hash = generate_password_hash(secrets.token_urlsafe(32))
 

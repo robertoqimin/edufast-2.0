@@ -35,6 +35,11 @@ def init_db():
     inspector = inspect(engine)
     tables = set(inspector.get_table_names())
     for table in Base.metadata.sorted_tables:
+        # Optional new module: old installations keep their login until SQL review.
+        # Existing optional tables are still checked; no startup DDL is performed.
+        if table.name in {'estudo_conteudos', 'estudo_auditoria', 'estudo_secoes',
+                          'estudo_conteudo_secao', 'estudo_secao_auditoria'} and table.name not in tables:
+            continue
         if table.name not in tables:
             raise RuntimeError(f"Esquema pendente de revisao/provisionamento: {table.name}")
         columns = {c["name"] for c in inspector.get_columns(table.name)}

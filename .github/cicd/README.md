@@ -115,6 +115,11 @@ iniciar nova execução. Os limites de execução continuam na descoberta normal
 Automação HTTP não substitui inspeção visual desktop/mobile nem comprova cobertura
 das rotas acadêmicas adicionais identificadas no diagnóstico.
 
+O piloto `run_frequencia_api.cjs` também executa `estudos_http.cjs` na mesma
+fixture HTTP descartável: JWT por perfil, abas, versões/idempotência, material
+multipart, aprovação existente e download antes/depois de arquivar. A descoberta
+normal inclui `test_estudos.py` e `test_estudo_abas.py` em SQLite e MySQL.
+
 ## Produção proposta
 
 ```mermaid

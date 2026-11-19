@@ -9,6 +9,7 @@
 | API e persistência | `test_application.py` | Login real, JWT, perfis, cadastros e turmas em banco descartável |
 | Contratos administrativos | `test_admin_characterization.py` | Formatos, consultas e validações; combina regras e integração com fixtures |
 | Aprovações e permissões | `test_approvals_security.py` | Autorização, propostas, revogação e propriedade de documentos |
+| Espaço da disciplina e abas | `test_estudos.py`, `test_estudo_abas.py` | Rascunhos, aprovação, vínculos, arquivo cifrado, arquivamento, versões e concorrência MySQL |
 | Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige MySQL |
 | Restauração funcional | `test_restauracao.py` | Superperfil, identidade, calendário, regras escolares, privacidade e aprovações |
 | Massa de teste manual | `test_manual_fixtures.py` | Repetição, preservação de contas e bloqueio de preparação fora do ambiente autorizado |

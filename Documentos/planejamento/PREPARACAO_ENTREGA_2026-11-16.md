@@ -209,6 +209,16 @@ e preparação, sem presumir contratação de infraestrutura ou ativação de ba
 
 ## 8. Registro deste levantamento
 
+### Retomada em 19/11/2026
+
+O estado local já continha o MS02. A continuação implementou o MS03 (abas docentes:
+criar, renomear, ordenar e arquivar) preservando as aprovações de conteúdo e o
+design compartilhado. Evidências e limites atuais estão no
+[relatório MS03](../testes/ABAS_DISCIPLINA_2026-11-19.md). As propostas SQL 005/006
+continuam pendentes de revisão, sem execução em bancos persistentes. Próxima
+entrega funcional: MS04, consolidar a organização e a retomada dos cursos.
+Esta atualização não homologa globalmente E01–E12 nem o ambiente MySQL/produção.
+
 Em 16/11 foram lidos documentos, inventariados arquivos e inspecionadas rotas,
 modelos e histórico recente do Git. A árvore estava limpa no início. Não foram
 executados testes funcionais, servidores, migrations, deploy, carga ou inspeção

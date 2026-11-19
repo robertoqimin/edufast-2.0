@@ -1,0 +1,22 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Organizar abas' %}
+{% block page_class %}study-space{% endblock %}
+{% block content %}
+<a href="{{ url_for('estudos.disciplina',pair_id=pair.id) }}">← {{ disciplina.nome }}</a>
+<section class="page-heading"><div><span class="eyebrow">{{ turma.nome }} · {{ disciplina.nome }}</span><h1>Organizar abas</h1><p>Crie seções para organizar o estudo. Os rascunhos continuam sujeitos à revisão antes de aparecer aos alunos.</p></div></section>
+<section class="panel course-panel"><h2>Criar aba</h2><form class="course-form" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+<label>Nome da aba<input name="nome" maxlength="80" required></label>
+<label>Ordem da aba<input name="ordem" type="number" min="0" max="9999" value="0" required></label>
+<p class="course-meta">Menores números aparecem primeiro. Em caso de empate, a aba mais antiga vem primeiro. Avisos e Materiais de estudo permanecem no início.</p>
+<button class="button button-primary">Criar aba</button></form></section>
+<section class="panel course-panel"><h2>Abas desta disciplina</h2>
+{% for item in sections %}<article class="course-outline"><h3><a href="{{ url_for('estudos.disciplina',pair_id=pair.id,aba='secao-'~item.id) }}">{{ item.nome }}</a></h3><p class="course-meta">{{ item.estado }} · ordem {{ item.ordem }} · versão {{ item.versao }}</p>
+{% if item.estado=='ativa' and (identity.admin or item.autor_id==identity.id) %}
+<form class="course-form" method="post" action="{{ url_for('estudos.alterar_aba',section_id=item.id,action='editar') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="versao" value="{{ item.versao }}">
+<label>Nome<input name="nome" maxlength="80" value="{{ item.nome }}" required></label><label>Ordem<input name="ordem" type="number" min="0" max="9999" value="{{ item.ordem }}" required></label><button class="button button-secondary">Salvar aba</button></form>
+<form class="course-form" method="post" action="{{ url_for('estudos.alterar_aba',section_id=item.id,action='arquivar') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="versao" value="{{ item.versao }}">
+<p>Arquivar retira a aba e seus conteúdos do acesso dos alunos, inclusive downloads. O histórico e os arquivos são preservados.</p><button class="button button-secondary">Arquivar aba</button></form>
+{% endif %}</article>{% else %}<p>Nenhuma aba criada. Avisos e Materiais de estudo já estão disponíveis.</p>{% endfor %}</section>
+{% endblock %}

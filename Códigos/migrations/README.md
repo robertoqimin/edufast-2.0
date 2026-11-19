@@ -1,5 +1,53 @@
 # Migração de concorrência — revisão pendente
 
+## Abas docentes — 006 pendente de revisão
+
+`006_abas_disciplina.sql` propõe três tabelas opcionais: `estudo_secoes`,
+`estudo_conteudo_secao` e `estudo_secao_auditoria`. Depende da proposta 005 e das
+tabelas de usuários/ofertas. Foi compilado offline, sem executar migrations.
+Não altera tabelas do MS02: conteúdos antigos permanecem nas abas padrão.
+
+O autor autorizado organiza suas abas; administração pode intervir. A publicação
+dos conteúdos continua passando pela aprovação existente. Arquivar uma aba revoga
+leitura e download pelo aluno, preservando associações, conteúdos e arquivos.
+Não há exclusão nem restauração automática de abas arquivadas nesta versão.
+
+Revisar 005/006, destino, chaves estrangeiras e compatibilidade MySQL. Preparar
+backup consistente de banco/uploads/chave e ensaiar recuperação antes de ativar.
+Nenhuma execução em banco persistente foi autorizada por esta implementação.
+DDL MySQL pode ficar parcial: inspecionar o estado antes de qualquer repetição.
+Sem as três tabelas, MS02 continua disponível; esquema parcial bloqueia os acessos
+de conteúdo para não contornar a restrição de abas arquivadas. Startup não cria
+tabelas. Rollback preserva tabelas/arquivos; código MS02 anterior ao MS03 não deve
+ser usado após ativação sem revisão, pois não conhece a restrição de arquivamento.
+Evidências: `Documentos/testes/ABAS_DISCIPLINA_2026-11-19.md`.
+
+## Espaço da disciplina — 005 pendente de revisão
+
+`005_espaco_disciplina.sql` propõe `estudo_conteudos` e `estudo_auditoria` para
+avisos, links e arquivos de estudo por oferta turma/disciplina. Não foi executado
+em bancos persistentes. O SQL foi compilado offline a partir dos modelos e não
+altera matrículas, permissões, documentos pessoais ou dados históricos.
+
+O professor prepara rascunhos; publicação passa por solicitação administrativa.
+Materiais publicados são preservados, e arquivar revoga a leitura pelo aluno sem
+excluir o histórico. Aluno precisa de vínculo com a turma **e** a disciplina.
+Turmas sob gestão explícita exigem atribuição docente ativa, sem herdar combinações
+dos pares legados. Os arquivos ficam cifrados em `uploads/materiais_estudo`.
+
+Revisar SQL, destino e esquema anterior; conferir `usuarios`,
+`turmas_disciplinas`, idempotência e aprovações existentes. Fazer backup consistente
+de banco/uploads e preservar `DATA_ENCRYPTION_KEY`. Ensaiar recuperação antes da
+ativação. Não reexecutar o SQL após falha parcial sem inspecionar o estado: DDL
+MySQL tem commits implícitos. Não há `IF NOT EXISTS`, conversão ou limpeza de dados.
+
+Sem as tabelas opcionais, o módulo responde 503 e a aplicação mantém seus acessos
+existentes; o startup não as cria. Tabelas opcionais já presentes continuam sendo
+verificadas na validação de produção. Não iniciar contra esquema parcial incompatível.
+Após revisão do usuário e ativação explícita por instalação, conferir rascunho,
+publicação, recusa de outro aluno e download. Reverter código não deve apagar as
+tabelas nem arquivos. Relatório: `Documentos/testes/ESPACO_DISCIPLINA_2026-11-16.md`.
+
 ## Frequência e atestados — 004 pendente de revisão
 
 Atualização de comportamento em 16/11: novas chamadas são confirmadas diretamente

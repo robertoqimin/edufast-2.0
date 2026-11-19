@@ -7,6 +7,8 @@ from .academico_model import PeriodoLetivoModel, AvaliacaoModel, LancamentoNotaM
 from .escola_model import (IdentidadeEscolaModel, CalendarioEscolaModel, EventoCalendarioModel,
                           PoliticaEscolaModel, RegraTurmaEscolaModel, RegraPeriodoEscolaModel)
 from .privacidade_model import PedidoPrivacidadeModel, AuditoriaPrivacidadeModel, LimiteLoginModel
+from .estudo_model import ConteudoEstudoModel, AuditoriaEstudoModel
+from .estudo_model import SecaoEstudoModel, ConteudoSecaoEstudoModel, AuditoriaSecaoEstudoModel
 
 from .idempotencia_model import IdempotenciaModel
 from .solicitacao_alteracao_model import SolicitacaoAlteracaoModel

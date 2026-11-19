@@ -28,6 +28,7 @@
 {% if item.candidato is defined %}<p>Candidato: {{ item.candidato.nome }} — {{ item.candidato.email }} · CPF: {{ item.candidato.cpf or 'Não informado' }}</p>{% endif %}
 <dl>{% for campo, valor in item.campos.items() %}<dt>{{ campo|replace('_',' ') }}</dt><dd>{{ valor if valor is not none else 'Não informado' }}</dd>{% endfor %}</dl>
 {% if item.tem_arquivo %}<p><a href="{{ url_for('aprovacoes.arquivo', proposal_id=item.id) }}">Consultar arquivo da solicitação</a></p>{% endif %}
+{% if item.conteudo_url is defined %}<p><a class="button button-secondary" href="{{ item.conteudo_url }}">Conferir aviso ou material</a></p>{% endif %}
 {% if item.pode_decidir %}<form method="post" action="{{ url_for('aprovacoes.decidir', proposal_id=item.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Justificativa <input name="justificativa" maxlength="500"></label><button name="decisao" value="aprovar">Aprovar e aplicar</button><button name="decisao" value="rejeitar">Rejeitar</button></form>{% else %}<p>Decisão: {{ item.decidido_por or 'Aguardando responsável autorizado' }}. {{ item.justificativa or '' }}</p>{% endif %}

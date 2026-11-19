@@ -48,6 +48,7 @@
         {% endif %}
         {% if workspace_role in ['admin','super_admin','professor'] %}{{ nav_link('aprovacoes.painel', 'Solicitações e aprovações', 'shield') }}{% endif %}
         <span class="nav-section">APRENDIZAGEM</span>
+        {{ nav_link('estudos.disciplinas', 'Espaço da disciplina', 'book', ['estudos.disciplina','estudos.conteudo','estudos.novo','estudos.editar']) }}
         {{ nav_link('cursos.biblioteca', 'Meus cursos' if role == 'aluno' else 'Biblioteca de cursos', 'book', ['cursos.editor','cursos.aprender']) }}
         {% if role in ['admin','super_admin'] %}{{ nav_link('cursos.gestao_turmas', 'Gestão acadêmica', 'grid') }}{% endif %}
         <span class="nav-section">VIDA ACADÊMICA</span>

@@ -1,0 +1,220 @@
+{
+    "capturas":  [
+                     {
+                         "arquivo":  "disciplinas-professor-desktop.png",
+                         "sha256":  "1d14c2931c54beb3d7d4074983ccd094743a15ef2554c81d3a995efa16a2a6c7",
+                         "bytes":  77625
+                     },
+                     {
+                         "arquivo":  "disciplinas-professor-mobile.png",
+                         "sha256":  "d3dd52bc1c4569bdcf2e83e149e66901ab8834d0377f1de0d8a417d9a2c0261b",
+                         "bytes":  35556
+                     },
+                     {
+                         "arquivo":  "disciplina-vazia-desktop.png",
+                         "sha256":  "3859fbb64cf7c94fc24c6ad26a62590c5f3c31081c793b8ed6d7457bf12bb502",
+                         "bytes":  80273
+                     },
+                     {
+                         "arquivo":  "disciplina-vazia-mobile.png",
+                         "sha256":  "da286823dd351d876347a56c7d8785fdfb11cdad4b88bb2756fcecd7940a8c20",
+                         "bytes":  39220
+                     },
+                     {
+                         "arquivo":  "preparar-aviso-desktop.png",
+                         "sha256":  "c80dd45a89c4a19b87dc68d22fc77f9f200cecab9a71d01f71c6cd642f5b8307",
+                         "bytes":  96595
+                     },
+                     {
+                         "arquivo":  "preparar-aviso-mobile.png",
+                         "sha256":  "5096f38a1f7ac3488404970a927ab315015b4bfd764265c811269a30a6eb5eb6",
+                         "bytes":  54301
+                     },
+                     {
+                         "arquivo":  "rascunho-desktop.png",
+                         "sha256":  "00cca28e13be11a1d7fa6bb8695f9af29aec7824048b8cb1e7fd24f4b3c973c1",
+                         "bytes":  95583
+                     },
+                     {
+                         "arquivo":  "rascunho-mobile.png",
+                         "sha256":  "2e1852a97b1c2395e845587327c2d45d53c36a4a66db8cd3b20e264b151a7f2b",
+                         "bytes":  52797
+                     },
+                     {
+                         "arquivo":  "publicacao-pendente-desktop.png",
+                         "sha256":  "251e4537f599b6928a936346c88cf461d55f621e01f2dfef956e01b28517aef4",
+                         "bytes":  97387
+                     },
+                     {
+                         "arquivo":  "publicacao-pendente-mobile.png",
+                         "sha256":  "4bcd29a67e4829b44137555a40861de5ac95e998b517bb25fb369326eb931184",
+                         "bytes":  56020
+                     },
+                     {
+                         "arquivo":  "aviso-aluno-desktop.png",
+                         "sha256":  "92b644e4ef5ea3114ffa22fc3120021e10e80dba5b6bc780cc4d495de3845b6c",
+                         "bytes":  68268
+                     },
+                     {
+                         "arquivo":  "aviso-aluno-mobile.png",
+                         "sha256":  "d50a507be5927dcde6930b51a13e1ff328311c687bdee209228f4cdaaa81979c",
+                         "bytes":  30237
+                     },
+                     {
+                         "arquivo":  "material-aluno-desktop.png",
+                         "sha256":  "7920d7beab7940396be02c7b05947b7c974c547827b52a97b99baea013673d32",
+                         "bytes":  75477
+                     },
+                     {
+                         "arquivo":  "material-aluno-mobile.png",
+                         "sha256":  "84ea0dd86ce1dfcdf86922f55fa0d45149cb82f127372d7445efaf4316b1ab89",
+                         "bytes":  37433
+                     },
+                     {
+                         "arquivo":  "materiais-aluno-desktop.png",
+                         "sha256":  "8ce39cd29e5b76f1511e11b1c629da982ed58f70c019d1a3fa04864e3595ae24",
+                         "bytes":  79114
+                     },
+                     {
+                         "arquivo":  "materiais-aluno-mobile.png",
+                         "sha256":  "1055c340a099d59d633cd5ab029b901338b5021c1510a29fd9b5c1621e0bac84",
+                         "bytes":  41047
+                     },
+                     {
+                         "arquivo":  "abas-vazias-desktop.png",
+                         "sha256":  "ea13dcb89b3167561e6d573a65b620c89b71c6ab8488e7f42518f6c2b60314c4",
+                         "bytes":  91510
+                     },
+                     {
+                         "arquivo":  "abas-vazias-mobile.png",
+                         "sha256":  "2e116a5ce561a24b6f0a79795573b04fefb5314a1dec6b03cb94ddb4e4a4ddf3",
+                         "bytes":  51654
+                     },
+                     {
+                         "arquivo":  "abas-organizadas-desktop.png",
+                         "sha256":  "f850505d15f18b9b829febd928c51e0f7956cafc605dd6c5036ec8db04af2167",
+                         "bytes":  112354
+                     },
+                     {
+                         "arquivo":  "abas-organizadas-mobile.png",
+                         "sha256":  "b9691ecf988d7b4185d31762f00638374456326befacbcb79945d6f3b859d265",
+                         "bytes":  71982
+                     },
+                     {
+                         "arquivo":  "aba-personalizada-vazia-desktop.png",
+                         "sha256":  "5d7f6207d3d374ef90e8a509ac8be46c768cc2ead3f822a3e2bc5ee4bb453335",
+                         "bytes":  83622
+                     },
+                     {
+                         "arquivo":  "aba-personalizada-vazia-mobile.png",
+                         "sha256":  "bcace313af3d984edeeda85e68257a4b0b57158f3d524eaff22338adb584c8ea",
+                         "bytes":  42474
+                     },
+                     {
+                         "arquivo":  "rascunho-na-aba-desktop.png",
+                         "sha256":  "03d8bfaec1bd73581a4218c7be488212bd7566b7550ea3b01df37e990b51308f",
+                         "bytes":  104866
+                     },
+                     {
+                         "arquivo":  "rascunho-na-aba-mobile.png",
+                         "sha256":  "d97651d15b13f132dd6e51dc96acb23f224da071f100270505de1b46ed42809e",
+                         "bytes":  62822
+                     },
+                     {
+                         "arquivo":  "aba-aluno-publicada-desktop.png",
+                         "sha256":  "6731e66082cce6f30bb90a92e2367aec25830194196d4fbfb0198f626c303367",
+                         "bytes":  75538
+                     },
+                     {
+                         "arquivo":  "aba-aluno-publicada-mobile.png",
+                         "sha256":  "db45d95fa1f7a6fac66422415f07f8c627c529ec72d145fb2be1f3be5409b367",
+                         "bytes":  38072
+                     },
+                     {
+                         "arquivo":  "aba-arquivada-desktop.png",
+                         "sha256":  "802225d7617cabc8e101d9bbd75a3ff8e8e2c3e4717e5500154188a32dd41830",
+                         "bytes":  98634
+                     },
+                     {
+                         "arquivo":  "aba-arquivada-mobile.png",
+                         "sha256":  "be1f0882bf4fadf85ebe843989bfa8b5f11a7c26126fb4f776c656876a1c0ab3",
+                         "bytes":  59478
+                     }
+                 ],
+    "fontes":  [
+                   {
+                       "sha256":  "99276b50f31a85bd025e52467bff9505c4966b41648aa272d3de5e88d72b13a2",
+                       "arquivo":  "Códigos/app/models/estudo_model.py"
+                   },
+                   {
+                       "sha256":  "f3e201537abc1150174279baa52431b2059941d8802fa8fc90765c0c13a1c7d9",
+                       "arquivo":  "Códigos/app/services/estudo_service.py"
+                   },
+                   {
+                       "sha256":  "56ea8b153b8d3f1ee30dc90ec95d03c71b340a833b596c10f79f7e4c8d3ffd3f",
+                       "arquivo":  "Códigos/app/routes/estudo_routes.py"
+                   },
+                   {
+                       "sha256":  "74b2c1a198aa85627beadacaef38db724a29e6d3943dca5f4e78dc8dbe17e0ad",
+                       "arquivo":  "Códigos/app/templates/estudo_abas.html"
+                   },
+                   {
+                       "sha256":  "f369f228550ccc4e970c247c04f902e9e8f30c5680109a80e08b2d48707dff26",
+                       "arquivo":  "Códigos/app/templates/estudo_disciplina.html"
+                   },
+                   {
+                       "sha256":  "7e90035fedc8aca19812eaac0805861a059ffd542a8f1fc2edd32a9adbfbc59f",
+                       "arquivo":  "Códigos/app/templates/estudo_formulario.html"
+                   },
+                   {
+                       "sha256":  "5bec3aa22fee1fb4766a1bd11d9ba2ad856a16775d0f9083cda71a9d36bb5fb1",
+                       "arquivo":  "Códigos/app/templates/estudo_conteudo.html"
+                   },
+                   {
+                       "sha256":  "21d7016ec2ad30b8a236b0285019b7d7e421e241d83c81549b4e253fb6a0bd1c",
+                       "arquivo":  "Códigos/tests/verificar_estudos.cjs"
+                   }
+               ],
+    "ambiente":  "Windows; Python 3.14.3; SQLite em memoria; Edge headless; dados ficticios",
+    "data_referencia":  "2026-11-19",
+    "base_commit":  "85aed361bd819ff26f6803b2c07595286fdf1f77",
+    "execucao":  {
+                     "passed":  true,
+                     "captures":  [
+                                      "disciplinas-professor-desktop.png",
+                                      "disciplinas-professor-mobile.png",
+                                      "disciplina-vazia-desktop.png",
+                                      "disciplina-vazia-mobile.png",
+                                      "preparar-aviso-desktop.png",
+                                      "preparar-aviso-mobile.png",
+                                      "rascunho-desktop.png",
+                                      "rascunho-mobile.png",
+                                      "publicacao-pendente-desktop.png",
+                                      "publicacao-pendente-mobile.png",
+                                      "aviso-aluno-desktop.png",
+                                      "aviso-aluno-mobile.png",
+                                      "material-aluno-desktop.png",
+                                      "material-aluno-mobile.png",
+                                      "materiais-aluno-desktop.png",
+                                      "materiais-aluno-mobile.png",
+                                      "abas-vazias-desktop.png",
+                                      "abas-vazias-mobile.png",
+                                      "abas-organizadas-desktop.png",
+                                      "abas-organizadas-mobile.png",
+                                      "aba-personalizada-vazia-desktop.png",
+                                      "aba-personalizada-vazia-mobile.png",
+                                      "rascunho-na-aba-desktop.png",
+                                      "rascunho-na-aba-mobile.png",
+                                      "aba-aluno-publicada-desktop.png",
+                                      "aba-aluno-publicada-mobile.png",
+                                      "aba-arquivada-desktop.png",
+                                      "aba-arquivada-mobile.png"
+                                  ],
+                     "errors":  [
+
+                                ],
+                     "scope":  "MS02 e MS03: conteúdo com revisão, download privado, criar/renomear/ordenar/arquivar aba; revogação de acesso direto; teclado e desktop/mobile"
+                 },
+    "estado":  "Alteracoes locais MS02/MS03; propostas SQL 005/006 aguardam revisao",
+    "execucao_id":  "2026-11-19T14-55-39-351Z"
+}

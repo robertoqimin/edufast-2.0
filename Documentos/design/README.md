@@ -30,6 +30,15 @@ As imagens abaixo usam somente contas e dados fictícios do ambiente manual.
 
 ## Situacao da validacao
 
+As [abas docentes de 19/11](referencias/2026-11-19-abas-disciplina/manifesto.json)
+adicionam 28 capturas atuais do MS02/MS03, com [comparação e limites](referencias/2026-11-19-abas-disciplina/comparacao.md).
+Criação, renomeação, ordenação, publicação revisada e arquivamento foram exercitados
+em desktop/mobile; ativação persistente depende da revisão das propostas 005/006.
+
+O [espaço da disciplina de 16/11](referencias/2026-11-16-espaco-disciplina/manifesto.json)
+adiciona 16 capturas de avisos, materiais e rascunhos, com
+[comparação e limites](referencias/2026-11-16-espaco-disciplina/comparacao.md).
+
 A [confirmação direta de chamada de 16/11](referencias/2026-11-16-chamada-direta/manifesto.json)
 tem 14 novas capturas desktop/mobile e [comparação](referencias/2026-11-16-chamada-direta/comparacao.md).
 Os [resultados e limites atuais](../testes/CHAMADA_DIRETA_2026-11-16.md) distinguem

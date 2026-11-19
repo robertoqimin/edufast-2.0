@@ -1,0 +1,16 @@
+{% extends 'gestao_base.html' %}{% set page_title = 'Editar rascunho' if row else 'Preparar conteúdo' %}
+{% block page_class %}study-space{% endblock %}
+{% block content %}
+<a href="{{ url_for('estudos.disciplina',pair_id=pair.id) }}">← {{ disciplina.nome }}</a>
+<section class="page-heading"><div><span class="eyebrow">{{ turma.nome }} · {{ disciplina.nome }}</span><h1>{{ page_title }}</h1><p>Prepare seu conteúdo com calma. O rascunho só fica disponível aos alunos após a publicação.</p></div></section>
+<section class="panel course-panel"><form class="course-form" method="post" enctype="multipart/form-data" data-study-form>
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+{% if row %}<input type="hidden" name="versao" value="{{ row.versao }}"><p>Tipo: {{ {'aviso':'Aviso','arquivo':'Arquivo','link':'Link de estudo'}[row.tipo] }}. O tipo e o arquivo original são preservados.</p>{% else %}<label for="conteudo-tipo">Tipo de conteúdo</label><select id="conteudo-tipo" name="tipo" required><option value="aviso">Aviso</option><option value="link">Link de estudo</option><option value="arquivo">Arquivo de estudo</option></select>{% endif %}
+{% if not row and sections %}<label for="conteudo-aba">Aba do conteúdo</label><select id="conteudo-aba" name="secao_id"><option value="">Aba padrão do tipo escolhido</option>{% for item in sections %}<option value="{{ item.id }}" {% if selected_section|string==item.id|string %}selected{% endif %}>{{ item.nome }}</option>{% endfor %}</select><p class="course-meta">A aba organiza o material; os alunos só verão conteúdos publicados.</p>{% endif %}
+<label>Título<input name="titulo" maxlength="150" value="{{ row.titulo if row else '' }}" required></label>
+<label>Texto ou orientação de estudo<textarea name="texto" rows="6" maxlength="10000">{{ row.texto if row else '' }}</textarea></label><p class="course-meta">O texto é obrigatório para avisos. Para materiais, você pode acrescentar instruções de estudo.</p>
+{% if not row or row.tipo=='link' %}<div data-study-field="link"><label>Link HTTPS do material<input type="url" name="link" maxlength="2048" value="{{ row.link if row else '' }}" {% if row %}required{% endif %}></label><p class="course-meta">Preencha o link somente quando escolher Link de estudo.</p></div>{% endif %}
+{% if not row %}<div data-study-field="arquivo"><label>Arquivo de estudo (PDF, PNG ou JPEG, até 5 MiB)<input type="file" name="arquivo" accept="application/pdf,image/png,image/jpeg"></label><p class="course-meta">Anexe somente quando escolher Arquivo de estudo. Não inclua documentos pessoais dos alunos.</p></div>{% endif %}
+<div class="course-actions"><button class="button button-primary">Salvar rascunho</button><a class="button button-secondary" href="{{ url_for('estudos.disciplina',pair_id=pair.id) }}">Voltar à disciplina</a></div></form></section>
+{% if not row %}<script src="{{ url_for('static',filename='js/paginas/estudos.js') }}" defer></script>{% endif %}
+{% endblock %}

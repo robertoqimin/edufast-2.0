@@ -37,6 +37,8 @@ def _items(identity):
                 "pode_decidir": reviewer and row.estado == "pendente", "tem_arquivo": bool(row.arquivo)})
             from app.presenters.aprovacoes_presenter import present
             items[-1]['titulo'], items[-1]['campos'] = present(row.tipo, json.loads(row.payload))
+            if row.tipo == 'publicar_material':
+                items[-1]['conteudo_url'] = url_for('estudos.conteudo',content_id=json.loads(row.payload)['conteudo_id'])
             if identity.admin and row.tipo == "cadastro":
                 user = db.get(UsuarioModel, row.solicitante_id)
                 profile = (db.query(ProfessorModel).filter_by(usuario_id=row.solicitante_id).first()

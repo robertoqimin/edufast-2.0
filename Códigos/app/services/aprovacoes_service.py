@@ -18,6 +18,7 @@ from app.models import (AlunoModel, AlunoTurmaModel, AtividadeModel, DisciplinaM
 from app.services.identidade_service import current_identity
 
 FIELDS = {
+    "publicar_material": {"conteudo_id", "versao"},
     "operacao_restaurada": {"endpoint", "params", "payload"},
     "criar_turma": {"nome", "codigo", "ano_letivo", "turno"},
     "criar_disciplina": {"nome", "codigo", "carga_horaria"},
@@ -81,6 +82,9 @@ def validate_proposal(db, user_id, kind, raw):
         raise MutationConflict("Operacao ou campos nao permitidos", 400)
     professor = _teacher(db, user_id)
     data = dict(raw)
+    if kind == 'publicar_material':
+        from app.services.estudo_service import prepare_publication
+        return prepare_publication(db,user_id,data)
     if kind == 'operacao_restaurada':
         from app.services.restauracao_context import execute
         execute(db, user_id, data, validate=True)
@@ -156,12 +160,18 @@ def submit_proposal(kind, data, files=None):
     filename = None
     committed = False
     try:
-        entry, replay = begin_submission(db, "proposta:" + kind, actor=identity.id)
+        operation = 'proposta:' + kind
+        if kind == 'publicar_material':
+            from app.services.frequencia_service import integer
+            operation += ':' + str(integer(data.get('conteudo_id')))
+        entry, replay = begin_submission(db, operation, actor=identity.id)
         if replay:
             return replay
         raw = {k: v for k, v in dict(data).items() if k not in {"idempotency_key", "redirect_to", "csrf_token"}}
         normalized = validate_proposal(db, identity.id, kind, raw)
         file = files.get("arquivo") if files else None
+        if kind == 'publicar_material' and file:
+            raise MutationConflict('Anexe o arquivo ao rascunho antes de pedir publicação.',400)
         if kind in {"enviar_documento", "responder_documento"} and (not file or not file.filename):
             raise MutationConflict("Arquivo obrigatorio", 400)
         if file and file.filename:
@@ -172,6 +182,8 @@ def submit_proposal(kind, data, files=None):
             os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
             file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
         resource = None
+        if kind == 'publicar_material':
+            resource = f"estudo:{normalized['conteudo_id']}:{normalized['versao']}"
         if kind == "salvar_nota":
             resource = f"nota:{normalized['aluno_id']}:{normalized['disciplina_id']}:{normalized['versao']}"
         elif kind == "responder_documento":
@@ -213,6 +225,10 @@ def can_review(db, identity, proposal):
 
 def _apply(db, proposal):
     data = json.loads(proposal.payload)
+    if proposal.tipo == 'publicar_material':
+        from app.services.estudo_service import prepare_publication
+        prepare_publication(db,proposal.solicitante_id,data,apply=True)
+        return
     if proposal.tipo == 'operacao_restaurada':
         from app.services.restauracao_context import execute
         execute(db, proposal.solicitante_id, data)
