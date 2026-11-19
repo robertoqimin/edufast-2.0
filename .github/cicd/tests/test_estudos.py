@@ -287,13 +287,21 @@ class StudyTests(TestCase):
         self.assertEqual(self.create().status_code,404)
 
     def test_database_rejects_incomplete_file_metadata(self):
-        from sqlalchemy.exc import IntegrityError
+        from sqlalchemy.exc import IntegrityError, OperationalError
         with get_session() as db:
             db.add(ConteudoEstudoModel(turma_disciplina_id=1,autor_id=3,tipo='arquivo',
                 titulo='Inválido',arquivo='a'*32+'.enc',mime='application/pdf',tamanho=None))
-            with self.assertRaises(IntegrityError):
+            # PyMySQL classifies CHECK error 3819 as OperationalError; SQLite
+            # uses IntegrityError. Require the specific constraint in both.
+            with self.assertRaises((IntegrityError,OperationalError)) as rejected:
                 db.flush()
+            self.assertIn('ck_estudo_recurso',str(rejected.exception.orig))
+            if engine.dialect.name == 'mysql':
+                self.assertEqual(rejected.exception.orig.args[0],3819)
+            else:
+                self.assertIsInstance(rejected.exception,IntegrityError)
             db.rollback()
+            self.assertEqual(db.query(ConteudoEstudoModel).count(),0)
 
     @skipUnless(engine.dialect.name=='mysql','Concorrência exige MySQL descartável')
     def test_concurrent_draft_edits_have_one_effect(self):

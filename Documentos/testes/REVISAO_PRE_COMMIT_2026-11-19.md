@@ -80,6 +80,21 @@ aprovados e dois exclusivos de MySQL ignorados, sem erros (10,722 s). Log local:
 `.ci-results/pre-commit-2026-11-19/central-relocated.log`.
 Essa correção não altera o produto, as migrations ou as regras de aprovação.
 
+A execução seguinte, `44551607581` no commit `4911941`, passou nos 190 testes
+SQLite (22 ignorados). Em MySQL, 187 passaram, dois cenários concorrentes centrais
+foram ignorados (a central usa SQLite nessa descoberta) e um teste falhou por
+classificação da exceção: o banco recusou
+corretamente metadados incompletos pela constraint `ck_estudo_recurso`, mas
+PyMySQL expõe o código 3819 como `OperationalError`, enquanto SQLite usa
+`IntegrityError`. O contrato agora exige explicitamente o nome da constraint,
+o código 3819 no MySQL e ausência de registro após rollback. Não foram alteradas
+as constraints nem a aceitação de arquivos do produto. Os demais casos MySQL,
+incluindo concorrência de conteúdo e abas, passaram nessa rodada. O piloto
+`44551600263` também foi aprovado por inteiro.
+A suíte de estudos foi repetida localmente após esse ajuste: 19 testes, 18
+aprovados e um concorrente MySQL ignorado, sem erros (7,567 s), em
+`.ci-results/pre-commit-2026-11-19/estudos-final.log`.
+
 Docker Engine indisponível localmente. Os 22 cenários de MySQL, concorrência real,
 runtime Linux, imagem/HTTPS e restauração ficam para o CI remoto; nenhum resultado
 remoto é presumido por esta revisão. Avisos de recursos não fechados nas suítes
