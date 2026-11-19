@@ -63,6 +63,23 @@ arquivamento. Histórico e arquivo continuam acessíveis ao autor autorizado.
 
 ## Limites e publicação
 
+### Correção encontrada no primeiro CI remoto
+
+O commit inicial `33757ce` passou no piloto remoto (MySQL/HTTPS por escola,
+frequência/estudos HTTP e painel central). O CI completo, execução
+`44550702134`, encontrou uma incompatibilidade no teste de startup central:
+ele calculava a localização da proposta SQL a partir da profundidade da pasta
+de testes. O runner monta essa pasta em `/tests`, causando `IndexError` antes de
+comparar o SQL. A regressão Linux terminou com um erro e 22 cenários ignorados.
+
+A localização passou a derivar do módulo `control_plane` efetivamente importado,
+que acompanha a proposta SQL na imagem. A asserção de igualdade com o SQL gerado
+e a recusa de DDL no startup foram mantidas. A validação focada repete a suíte
+central com o arquivo de teste copiado para outro diretório: 18 testes, 16
+aprovados e dois exclusivos de MySQL ignorados, sem erros (10,722 s). Log local:
+`.ci-results/pre-commit-2026-11-19/central-relocated.log`.
+Essa correção não altera o produto, as migrations ou as regras de aprovação.
+
 Docker Engine indisponível localmente. Os 22 cenários de MySQL, concorrência real,
 runtime Linux, imagem/HTTPS e restauração ficam para o CI remoto; nenhum resultado
 remoto é presumido por esta revisão. Avisos de recursos não fechados nas suítes

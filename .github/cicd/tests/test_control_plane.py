@@ -11,6 +11,7 @@ from uuid import uuid4
 from sqlalchemy import create_engine, inspect, select
 from sqlalchemy.orm import Session
 from sqlalchemy.engine import make_url
+import control_plane
 from control_plane import create_app, utcnow, today
 from control_plane.models import Base, Owner, School, Person, Movement, Audit
 from control_plane.schema import proposed_sql
@@ -260,7 +261,7 @@ class PlatformTest(unittest.TestCase):
             create_app(dict(SECRET_KEY='', DATABASE_URL='sqlite:///:memory:'))
         self.assertNotIn('usuarios', Base.metadata.tables)
         self.assertIn('PROPOSTA', proposed_sql())
-        proposal = Path(__file__).resolve().parents[3] / 'Códigos/control_plane/migrations/001_central.sql'
+        proposal = Path(control_plane.__file__).resolve().parent / 'migrations/001_central.sql'
         self.assertEqual(proposal.read_text(encoding='utf-8'), proposed_sql())
 
     def parallel_posts(self, actions):
