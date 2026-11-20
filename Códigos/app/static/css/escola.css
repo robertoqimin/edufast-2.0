@@ -21,3 +21,30 @@
 .restored-approvals button:disabled { opacity:.5;cursor:not-allowed; }
 .restored-approvals dt { color:var(--muted); margin-top:12px; }
 .restored-approvals dd { margin:4px 0; overflow-wrap:anywhere; }
+.course-space { color:var(--text); min-width:0; }
+.course-workspace .app-content .notice { color:var(--text); background:var(--surface); border-color:var(--line); }
+.course-space .course-panel { margin-block:1rem; }
+.course-space .course-layout { grid-template-columns:minmax(240px, 310px) minmax(0, 1fr); align-items:start; }
+.course-space .course-reading, .course-space .course-index { min-width:0; }
+.course-space .course-body { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.85; }
+.course-space .course-module { border-top:1px solid var(--line); padding-block:1rem; }
+.course-space .course-chapter { border-left:2px solid var(--line); padding-left:1rem; margin-block:1.2rem; }
+.course-space .course-lessons li { padding-block:.65rem; overflow-wrap:anywhere; }
+.course-space .course-meta { display:block; color:var(--muted); margin-block:.4rem; }
+.course-space details { margin-block:.8rem; }
+.course-space summary { cursor:pointer; font-weight:600; padding-block:.6rem; }
+.course-space .course-open { margin-block:.5rem; }
+.course-space .course-open .button { white-space:normal; text-align:left; max-width:100%; }
+.course-space .course-index .course-open .button { width:100%; }
+.course-space .course-resource { border-top:1px solid var(--line); padding-block:1rem; margin-block:1rem; }
+.course-space progress { width:100%; accent-color:var(--accent); }
+.course-space input, .course-space textarea, .course-space select { max-width:100%; min-width:0; }
+.course-space .course-player { background:var(--surface); border:1px solid var(--line); border-radius:var(--school-radius); }
+.course-space .course-player iframe { border:0; width:100%; aspect-ratio:16/9; }
+.course-space h1,.course-space h2,.course-space h3,.course-space h4 { overflow-wrap:anywhere; }
+@media(max-width:800px) {
+ .course-space .course-layout { grid-template-columns:minmax(0,1fr); }
+ .course-space .course-reading { grid-row:1; }
+ .course-space .course-chapter { padding-left:.7rem; }
+ .course-space .course-actions { flex-wrap:wrap; }
+}

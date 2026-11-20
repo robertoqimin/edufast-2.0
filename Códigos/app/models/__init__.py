@@ -9,6 +9,7 @@ from .escola_model import (IdentidadeEscolaModel, CalendarioEscolaModel, EventoC
 from .privacidade_model import PedidoPrivacidadeModel, AuditoriaPrivacidadeModel, LimiteLoginModel
 from .estudo_model import ConteudoEstudoModel, AuditoriaEstudoModel
 from .estudo_model import SecaoEstudoModel, ConteudoSecaoEstudoModel, AuditoriaSecaoEstudoModel
+from .curso_ms04_model import CursoVersaoModel, AulaConteudoCursoModel, RetomadaCursoModel, RecursoAulaCursoModel
 
 from .idempotencia_model import IdempotenciaModel
 from .solicitacao_alteracao_model import SolicitacaoAlteracaoModel

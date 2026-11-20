@@ -6,6 +6,13 @@ Esta é a fonte de verdade da automação. Os dois pontos de entrada em [workflo
 
 ## Concorrência, regressão e Postman
 
+O backend de cursos MS04 tem [contratos e evidências atuais](../../Documentos/testes/API_CURSOS_MS04_2026-11-20.md).
+Para repetir o checkout atual em SQLite/MySQL descartáveis e HTTP Linux:
+`python .github/cicd/run_cursos_backend.py --suite regressao`. O código é montado
+somente para leitura; a imagem local `edufast-platform:test` fornece dependências.
+O runner não aceita banco externo, usa tmpfs/redes próprias e verifica hash de
+fonte/limpeza. `--suite ms04` limita a descoberta aos testes novos.
+
 As [correções e evidências](../../Documentos/testes/CONCORRENCIA.md) abrangem
 solicitações de documentos, versões de cadastros/notas e idempotência dos envios.
 Os novos testes estão em `tests/test_concurrency.py`; a concorrência real exige MySQL.

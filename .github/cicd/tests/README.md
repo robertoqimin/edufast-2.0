@@ -10,6 +10,7 @@
 | Contratos administrativos | `test_admin_characterization.py` | Formatos, consultas e validações; combina regras e integração com fixtures |
 | Aprovações e permissões | `test_approvals_security.py` | Autorização, propostas, revogação e propriedade de documentos |
 | Espaço da disciplina e abas | `test_estudos.py`, `test_estudo_abas.py` | Rascunhos, aprovação, vínculos, arquivo cifrado, arquivamento, versões e concorrência MySQL |
+| Backend de cursos MS04 | `test_cursos_ms04.py` | 32 casos: autoria versionada, publicação, retomada, texto/vídeo, materiais, legado e concorrência real MySQL; sem frontend |
 | Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige MySQL |
 | Restauração funcional | `test_restauracao.py` | Superperfil, identidade, calendário, regras escolares, privacidade e aprovações |
 | Massa de teste manual | `test_manual_fixtures.py` | Repetição, preservação de contas e bloqueio de preparação fora do ambiente autorizado |
@@ -57,3 +58,13 @@ com SQLite em memória preservou 101 casos, sendo 86 aprovados e 15 exclusivos d
 MySQL ignorados; nenhuma falha. Workflow aprovado no actionlint 1.7.7. Log local:
 `.ci-results/diagnostico-2026-11-05/organizacao-sqlite.log`.
 A rodada MySQL da etapa anterior não foi repetida nesta movimentação dos testes.
+
+## Interface de cursos MS04
+
+`test_cursos_frontend.py` verifica HTML e formulários pelos mesmos serviços/API.
+A regressão `python .github/cicd/run_cursos_backend.py --suite regressao` inclui
+esses casos em SQLite/MySQL descartáveis. O navegador usa `Códigos/tests/verificar_cursos.cjs`
+somente na fixture `enem_demo_server.py --local` (5093), com `EDUFAST_ENEM_DEMO=1`,
+SQLite em memória e chaves sintéticas. Não executar o navegador automatizado na
+demo manual 5092, pois ele altera progresso, rascunhos e publicação.
+[Resultados e roteiro](../../../Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).

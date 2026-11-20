@@ -15,6 +15,18 @@ cursos_bp = Blueprint('cursos', __name__)
 def identidade(admin=False):
     from app.services.restauracao_context import get_identity
     principal = get_identity()
+    if request.method=='POST' and ((request.view_args or {}).get('curso_id') or request.endpoint=='cursos.revogar_oferta'):
+        from sqlalchemy import inspect
+        from app.models import CursoVersaoModel
+        from app.concurrency import MutationConflict
+        with get_session() as db:
+            target_id = (request.view_args or {}).get('curso_id')
+            if target_id is None:
+                offer = db.get(OfertaCursoModel,request.view_args['oferta_id'])
+                target_id = offer.curso_id if offer else None
+            if inspect(db.connection()).has_table('curso_versoes') and db.query(CursoVersaoModel.id).filter_by(
+                    curso_id=target_id).first():
+                raise MutationConflict('Este curso usa edição versionada pela API. O editor anterior não pode alterá-lo.')
     if principal.papel not in ({'admin', 'super_admin'} if admin else {'admin', 'super_admin', 'professor', 'aluno'}):
         abort(403)
     return principal.id, principal.papel
@@ -51,7 +63,14 @@ def conflito(exc):
 @cursos_bp.get('/cursos')
 def biblioteca():
     user_id, role = identidade()
+    from app.services.restauracao_context import get_identity
+    principal = get_identity()
     with get_session() as db:
+        from app.services.cursos_ms04.comum import habilitado
+        if habilitado(db,required=False):
+            from app.routes.cursos_web_routes import render_biblioteca
+            from app.services.restauracao_context import get_identity
+            return render_biblioteca(db,principal)
         if role == 'aluno':
             cards = []
             for oferta in db.query(OfertaCursoModel).filter_by(ativa=True):
@@ -104,8 +123,17 @@ def criar():
 @cursos_bp.get('/cursos/<int:curso_id>')
 def editor(curso_id):
     user_id, role = identidade()
+    from app.services.restauracao_context import get_identity
+    principal = get_identity()
     with get_session() as db:
+        from app.services.cursos_ms04.comum import habilitado
+        if habilitado(db,required=False):
+            from app.routes.cursos_web_routes import render_editor
+            from app.services.restauracao_context import get_identity
+            return render_editor(db,principal,curso_id)
         curso = service.autoria(db, curso_id, user_id, role)
+        if any(a.video_id is None for a in service.aulas_curso(db,curso_id)):
+            abort(409,'Este curso contém novos formatos disponíveis pela API; a interface será atualizada posteriormente.')
         ofertas = db.query(OfertaCursoModel, TurmaModel).join(TurmaDisciplinaModel,
             OfertaCursoModel.turma_disciplina_id == TurmaDisciplinaModel.id).join(TurmaModel,
             TurmaDisciplinaModel.turma_id == TurmaModel.id).filter(OfertaCursoModel.curso_id == curso_id).all()
@@ -258,9 +286,18 @@ def revogar_oferta(oferta_id):
 @cursos_bp.get('/aprender/<int:oferta_id>')
 def aprender(oferta_id):
     user_id, role = identidade()
+    from app.services.restauracao_context import get_identity
+    principal = get_identity()
     with get_session() as db:
+        from app.services.cursos_ms04.comum import habilitado
+        if habilitado(db,required=False):
+            from app.routes.cursos_web_routes import render_aprender
+            from app.services.restauracao_context import get_identity
+            return render_aprender(db,principal,oferta_id)
         oferta, curso, aluno = service.acesso_oferta(db, oferta_id, user_id, role)
         aulas = service.aulas_curso(db, curso.id)
+        if any(a.video_id is None for a in aulas):
+            abort(409,'Este curso contém novos formatos disponíveis pela API; a interface será atualizada posteriormente.')
         concluidas = {p.aula_id for p in db.query(ProgressoAulaModel).filter_by(aluno_id=aluno.id, oferta_id=oferta_id)}
         aula_id = request.args.get('aula', type=int)
         atual = next((a for a in aulas if a.id == aula_id), None) if aula_id else next((a for a in aulas if a.id not in concluidas), aulas[0] if aulas else None)

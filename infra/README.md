@@ -159,3 +159,9 @@ Referências: [Nginx proxy/buffering](https://nginx.org/en/docs/http/ngx_http_pr
 [limites de tráfego](https://docs.nginx.com/nginx/admin-guide/security-controls/controlling-access-proxied-http),
 [Gunicorn 23](https://docs.gunicorn.org/en/23.0.0/settings.html) e
 [pool SQLAlchemy 2.0](https://docs.sqlalchemy.org/en/20/core/pooling.html).
+
+## Demonstração local de cursos ENEM
+
+`node infra/enem-demo.cjs start` inicia uma demo nova na porta 5092 usando a
+imagem de testes local. Banco e arquivos são descartados ao parar/reiniciar.
+[Contas, roteiro e limites](../Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).

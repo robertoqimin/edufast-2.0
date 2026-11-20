@@ -3,7 +3,7 @@ import re
 from urllib.parse import urlsplit, parse_qs
 from flask import abort
 from sqlalchemy import func
-from app.models import (AlunoModel, AlunoTurmaModel, ProfessorModel, ProfessorDisciplinaModel,
+from app.models import (AlunoModel, AlunoTurmaModel, AlunoDisciplinaModel, ProfessorModel, ProfessorDisciplinaModel,
                         ProfessorTurmaModel, TurmaModel, TurmaDisciplinaModel)
 from app.models.curso_model import (CursoModel, CapituloModel, TemaModel, AulaModel,
     AtribuicaoDocenteModel, EstadoTurmaModel, OfertaCursoModel, ProgressoAulaModel, AuditoriaCursoModel)
@@ -134,7 +134,9 @@ def acesso_oferta(db, oferta_id, user_id, role):
     aluno = db.query(AlunoModel).filter_by(usuario_id=user_id).first()
     if (not aluno or not oferta.ativa or curso.estado != 'publicado'
             or not turma_ativa(db, vinculo.turma_id)
-            or str(aluno.status_matricula or '').lower() in {'inativo', 'inativa', 'cancelado', 'cancelada', 'trancado', 'trancada'}
+            or vinculo.disciplina_id != curso.disciplina_id
+            or str(aluno.status_matricula or '').strip().lower() in {'inativo', 'inativa', 'cancelado', 'cancelada', 'trancado', 'trancada'}
+            or not db.query(AlunoDisciplinaModel).filter_by(aluno_id=aluno.id, disciplina_id=vinculo.disciplina_id).first()
             or not db.query(AlunoTurmaModel).filter_by(aluno_id=aluno.id, turma_id=vinculo.turma_id).first()):
         abort(404)
     return oferta, curso, aluno

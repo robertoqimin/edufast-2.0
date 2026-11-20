@@ -39,6 +39,13 @@ def _items(identity):
             items[-1]['titulo'], items[-1]['campos'] = present(row.tipo, json.loads(row.payload))
             if row.tipo == 'publicar_material':
                 items[-1]['conteudo_url'] = url_for('estudos.conteudo',content_id=json.loads(row.payload)['conteudo_id'])
+            if row.tipo == 'publicar_curso':
+                from app.models import CursoModel
+                data = json.loads(row.payload)
+                course = db.get(CursoModel,data['curso_id'])
+                items[-1]['titulo'] = 'Publicar curso de aprendizagem'
+                items[-1]['campos'] = {'Curso':course.titulo if course else 'Curso indisponível','Edição enviada':data['versao']}
+                items[-1]['curso_url'] = url_for('cursos_web.editor',curso_id=data['curso_id'])
             if identity.admin and row.tipo == "cadastro":
                 user = db.get(UsuarioModel, row.solicitante_id)
                 profile = (db.query(ProfessorModel).filter_by(usuario_id=row.solicitante_id).first()

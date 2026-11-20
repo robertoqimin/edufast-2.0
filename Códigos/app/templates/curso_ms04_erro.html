@@ -1,0 +1,4 @@
+{% extends 'gestao_base.html' %}
+{% set page_title='Revisar solicitação' %}
+{% block page_class %}course-workspace{% endblock %}
+{% block content %}<section class="panel course-panel"><h1>Revise antes de continuar</h1><p>Volte à biblioteca e abra novamente o curso para conferir seu estado atual.</p><a class="button button-primary" href="{{ url_for('cursos_web.biblioteca') }}">Voltar à biblioteca</a></section>{% endblock %}

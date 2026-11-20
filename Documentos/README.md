@@ -4,6 +4,9 @@
 
 | Documento | Conteúdo |
 | --- | --- |
+| [Backend e API MS04 — 20/11](testes/API_CURSOS_MS04_2026-11-20.md) | Rascunhos, publicação, retomada, texto/vídeo, recursos privados, SQL 007 e testes sem frontend |
+| [Esqueleto MS04 e caminhos de implementação](planejamento/ESQUELETO_MS04_2026-11-20.md) | Serviços isolados, catálogo de rotas/aceite, modelo conceitual e início pelo lote A |
+| [Estudo MS04 — cursos modulares](planejamento/ESTUDO_MS04_CURSOS_MODULARES_2026-11-19.md) | Diagnóstico atual, hierarquia confirmada, retomada, autoria, aulas sem vídeo e proposta de implementação |
 | [Revisão para publicação — 19/11](testes/REVISAO_PRE_COMMIT_2026-11-19.md) | Compatibilidade com a main, API HTTP/Postman, regressão e validação visual atuais |
 | [Abas da disciplina — 19/11](testes/ABAS_DISCIPLINA_2026-11-19.md) | MS03: autoria, ordenação, arquivamento, histórico e proposta SQL 006 |
 | [Espaço da disciplina — 16/11](testes/ESPACO_DISCIPLINA_2026-11-16.md) | MS02: avisos, links, arquivos privados, publicação revisada e proposta SQL 005 |
@@ -50,3 +53,7 @@ Os documentos abaixo foram preservados como fontes históricas. Podem usar a ide
 - [Plano de negócios original](plano%20de%20negócios)
 
 Mantenha documentação técnica em `arquitetura`, decisões de experiência em `produto`, instruções de execução em `operacao` e propostas futuras em `planejamento`. Resultados de novos testes devem informar commit, ambiente, comando e data, sem sobrescrever evidências históricas.
+
+## Cursos MS04 — frontend e demonstração
+
+[Teste manual de aluno/professor e resultados do frontend ENEM](testes/FRONTEND_CURSOS_MS04_2026-11-20.md).

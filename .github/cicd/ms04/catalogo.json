@@ -1,0 +1,341 @@
+{
+  "etapa": "MS04",
+  "estado": "backend_api",
+  "ativado": true,
+  "roteiro": "Documentos/planejamento/ESQUELETO_MS04_2026-11-20.md",
+  "modelo_proposto": "Códigos/migrations/propostas/ms04_modelo.json",
+  "decisoes_confirmadas": [
+    "Curso > modulo > capitulo > aula",
+    "Retomar a ultima aula acessada"
+  ],
+  "rotulos": {
+    "CursoModel": "Curso",
+    "CapituloModel": "Modulo",
+    "TemaModel": "Capitulo",
+    "AulaModel": "Aula"
+  },
+  "servicos": [
+    {
+      "lote": "MS04-B",
+      "arquivo": "Códigos/app/services/cursos_ms04/autoria.py",
+      "funcao": "salvar_rascunho"
+    },
+    {
+      "lote": "MS04-B",
+      "arquivo": "Códigos/app/services/cursos_ms04/publicacao.py",
+      "funcao": "preparar_publicacao"
+    },
+    {
+      "lote": "MS04-C",
+      "arquivo": "Códigos/app/services/cursos_ms04/retomada.py",
+      "funcao": "registrar_abertura"
+    },
+    {
+      "lote": "MS04-D",
+      "arquivo": "Códigos/app/services/cursos_ms04/conteudo.py",
+      "funcao": "validar_aula"
+    }
+  ],
+  "rotas": [
+    {
+      "metodo": "GET",
+      "caminho": "/cursos",
+      "estado": "existente",
+      "lote": "MS04-E",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/cursos/<int:curso_id>",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos/<int:curso_id>/estrutura",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos/<int:curso_id>/duplicar",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos/<int:curso_id>/estado",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos/<int:curso_id>/ofertas",
+      "estado": "existente",
+      "lote": "MS04-A",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/cursos/ofertas/<int:oferta_id>/revogar",
+      "estado": "existente",
+      "lote": "MS04-A",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/aprender/<int:oferta_id>",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/aprender/<int:oferta_id>/aulas/<int:aula_id>/concluir",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "legado"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/cursos",
+      "estado": "existente",
+      "lote": "MS04-E",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/cursos/<int:curso_id>",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/cursos/<int:curso_id>/aulas/<int:aula_id>",
+      "estado": "existente",
+      "lote": "MS04-D",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/estrutura",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/duplicar",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/solicitar-publicacao",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/estado",
+      "estado": "existente",
+      "lote": "MS04-B",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/ofertas",
+      "estado": "existente",
+      "lote": "MS04-A",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/aprender/<int:oferta_id>",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/aprender/<int:oferta_id>/retomada",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/aprender/<int:oferta_id>/aulas/<int:aula_id>/abrir",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/aprender/<int:oferta_id>/aulas/<int:aula_id>/concluir",
+      "estado": "existente",
+      "lote": "MS04-C",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/aulas/<int:aula_id>/recursos",
+      "estado": "existente",
+      "lote": "MS04-D",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "POST",
+      "caminho": "/api/cursos/<int:curso_id>/aulas/<int:aula_id>/recursos/<int:recurso_id>/arquivar",
+      "estado": "existente",
+      "lote": "MS04-D",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/aprender/<int:oferta_id>/aulas/<int:aula_id>/recursos/<int:recurso_id>/arquivo",
+      "estado": "existente",
+      "lote": "MS04-D",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/cursos/<int:curso_id>/aulas/<int:aula_id>/recursos/<int:recurso_id>/arquivo",
+      "estado": "existente",
+      "lote": "MS04-D",
+      "contrato": "api_ms04"
+    },
+    {
+      "metodo": "GET",
+      "caminho": "/api/estudos/disciplinas/<int:pair_id>/cursos",
+      "estado": "existente",
+      "lote": "MS04-E",
+      "contrato": "api_ms04"
+    }
+  ],
+  "aceite": [
+    {
+      "id": "MS04-001",
+      "lote": "MS04-A",
+      "cenario": "Aluno sem vinculo com a disciplina nao abre oferta",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-002",
+      "lote": "MS04-A",
+      "cenario": "Aula de outro curso nao permite leitura, conclusao ou retomada",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-003",
+      "lote": "MS04-B",
+      "cenario": "Autor salva seu rascunho diretamente sem publica-lo",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-004",
+      "lote": "MS04-B",
+      "cenario": "Outro professor e vinculo revogado nao alteram rascunho",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-005",
+      "lote": "MS04-B",
+      "cenario": "Edicao ou reordenacao com versao antiga retorna conflito",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-006",
+      "lote": "MS04-B",
+      "cenario": "Aprovacao nao publica snapshot alterado depois do pedido",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-007",
+      "lote": "MS04-B",
+      "cenario": "Publicado permanece imutavel e copia nao herda progresso",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-008",
+      "lote": "MS04-C",
+      "cenario": "Ultima aula aberta e recuperada sem exigir conclusao",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-009",
+      "lote": "MS04-C",
+      "cenario": "Retomada nao se mistura entre alunos, ofertas ou dispositivos",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-010",
+      "lote": "MS04-C",
+      "cenario": "Concorrencia MySQL nao duplica conclusao nem sobrescreve versao antiga",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-011",
+      "lote": "MS04-C",
+      "cenario": "Sem JavaScript, formularios permitem abrir e registrar retomada",
+      "estado": "parcial"
+    },
+    {
+      "id": "MS04-012",
+      "lote": "MS04-D",
+      "cenario": "Texto sem video e YouTube legado coexistem sem ID ficticio",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-013",
+      "lote": "MS04-D",
+      "cenario": "Download exige oferta autorizada e recusa recurso alheio",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-014",
+      "lote": "MS04-D",
+      "cenario": "Falha ou repeticao de upload nao deixa arquivo orfao ou duplicado",
+      "estado": "implementado_backend"
+    },
+    {
+      "id": "MS04-015",
+      "lote": "MS04-E",
+      "cenario": "Biblioteca paginada e player sob demanda com consultas medidas",
+      "estado": "parcial"
+    },
+    {
+      "id": "MS04-016",
+      "lote": "MS04-E",
+      "cenario": "Desktop, mobile, teclado e regressao de aprovacoes permanecem corretos",
+      "estado": "parcial"
+    }
+  ],
+  "ativacao_persistente": "pendente_revisao_SQL_007",
+  "frontend": "implementado",
+  "testes_frontend": ".github/cicd/tests/test_cursos_frontend.py",
+  "testes_navegador": "Códigos/tests/verificar_cursos.cjs",
+  "contrato": "Documentos/testes/API_CURSOS_MS04_2026-11-20.md",
+  "testes_backend": ".github/cicd/tests/test_cursos_ms04.py"
+}

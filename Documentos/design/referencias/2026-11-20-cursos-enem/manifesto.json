@@ -1,0 +1,250 @@
+{
+  "base_commit": "aedf8ad4b81ee654857e82b40678086d12aebe72",
+  "relatorio": "Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md",
+  "data": "2026-11-20",
+  "capturas": [
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-biblioteca-aluno-desktop.png",
+      "sha256": "44f7af10b7f7d2f0085cfd905261b1902c31c48d322ac6f5a9b6e241c5eb7852",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-biblioteca-aluno-mobile.png",
+      "sha256": "67c416cc5c2dd4e98b89774b5132c4c5d955da8cbd2f938eaf87c4e800a0e866",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-aula-texto-desktop.png",
+      "sha256": "411ed73928784756fc6f522ea1adc494af48c8b79520c76178d2f56a6362da87",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-aula-texto-mobile.png",
+      "sha256": "a71bc908f76f2f64128e81dabfd3feb507d685089d520c6868785a7d6d688ab0",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-aula-concluida-desktop.png",
+      "sha256": "19e3c09fee4f24f10e6bf8351ad234254bb960798d8c9eb63bb18dfa04cd1d88",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-aula-concluida-mobile.png",
+      "sha256": "31c178d039b1d83db9eaf520c8b05dc246616bd4ee519dabeda72d37c4c19568",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-biblioteca-professor-desktop.png",
+      "sha256": "d8cb9bdb79b9711fe6c618f1fc7397c5b30bdb3842e4954489f7aed52f21a0ea",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-biblioteca-professor-mobile.png",
+      "sha256": "860a5fb5310c9d5c4c5db348e50a063cc9dbb334a25e15c13ebe769fce80585a",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-editor-professor-desktop.png",
+      "sha256": "53deb105419412f4d6bcb38ed2d3cbe85b61e1aef5d50042c227436647d67623",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-editor-professor-mobile.png",
+      "sha256": "160cdf3a4987a5d90a7724207030922295dc119c598f1db4ee7d88ad1cf8b4ee",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-editar-aula-desktop.png",
+      "sha256": "ae4a0b3b87b6f127ba8519cac2a220a9be965c43fdac0a30453165beb1e41099",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-editar-aula-mobile.png",
+      "sha256": "7db24c21b1181adc4674cf0bd102888cf35f06afb6a65f8f8bddd0fc42228469",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-curso-em-revisao-desktop.png",
+      "sha256": "ec89ca0aa055614e8efea923df9e36ffcb31909029b6fa90ffce25eb829dc545",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-curso-em-revisao-mobile.png",
+      "sha256": "a6deba85d2a5a668a378947f09177d61273d25785715da70d144043275634175",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-revisao-administracao-desktop.png",
+      "sha256": "9deffc7d3fd6cb78360dcca3e171340de4e91c80ffe2b70bdd59c34706905673",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-revisao-administracao-mobile.png",
+      "sha256": "1ebc2cb13a2cbfe4582d9890af87136807a49806465a3a2a21fae4bd56093b68",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-curso-publicado-desktop.png",
+      "sha256": "2dd8aafd386a00fb0d393bc909010422245a1321754e40c57f2de30b40b869e2",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-curso-publicado-mobile.png",
+      "sha256": "e90f758014300da0ff6684cc04077366d00bb27d9576c4241f1a9a6e1b590dcf",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-video-sob-demanda-desktop.png",
+      "sha256": "311a439e29b9b0c0f7daa86d71501212c15e1d759552988eb74947b2c64e0648",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-02-37-799Z",
+      "arquivo": "escuro-video-sob-demanda-mobile.png",
+      "sha256": "1647bd040db8c5a79e510d404a89971ef4ac24aafc343cdcacb9161fc3189c5e",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-biblioteca-aluno-desktop.png",
+      "sha256": "b494d28ae4ef99527d29fdab47445ea21935969ac0bb0632ab7be9173175fc42",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-biblioteca-aluno-mobile.png",
+      "sha256": "d8992803344b6db8cc1ad6547c90ec3558dd518d9c87f8c96a86f0a33aea9650",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-aula-texto-desktop.png",
+      "sha256": "8249a8124b4cb5a50ac649fe243d86b82afeef3b17f3d18f1c70c6796ce4037e",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-aula-texto-mobile.png",
+      "sha256": "640740d5d679e991ce39f2df5687bad60516dda69439a8ffa4e44e0583f2b4a4",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-aula-concluida-desktop.png",
+      "sha256": "8cc4e1a61c2e9fe331f371b64f7b662eb6f5b7fbe39cfb4ca0cf9b70f2c7fcc0",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-aula-concluida-mobile.png",
+      "sha256": "594d9ba26de8b9ab82dc639b123d9f00d8bab12602768bd7e9f1dda35cfdddd5",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-biblioteca-professor-desktop.png",
+      "sha256": "373ec56cea27a6966ca434ab2b4da2eb4ffd6820429263f33d86f37196bfa286",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-biblioteca-professor-mobile.png",
+      "sha256": "b998859bc96b8fb22f4359837d6141d1c1a8f23eddac7af5725357f3279941d5",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-editor-professor-desktop.png",
+      "sha256": "073d5ae726d7774f499b37d97b57c4822240e49affdb9a933bee97d059c4cc3e",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-editor-professor-mobile.png",
+      "sha256": "6b33d52e71a1dcad99794f213d3a55f53b8ef638f4ec2b4073179e58c0da4651",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-editar-aula-desktop.png",
+      "sha256": "63e48c5deabe9a2b48fa717b0b54840f9d527e53e27dad445058f6188392e2f7",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-editar-aula-mobile.png",
+      "sha256": "7f14108a24f7e8a7c6006c52871d4abfa8e54ba6a952eef4bdebfaabdb9199c2",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-curso-em-revisao-desktop.png",
+      "sha256": "45e6b04be2ff336913d8b646be20c1f3b5ad7bb9c66f4fd6e19d6ecd3e2fe6d4",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-curso-em-revisao-mobile.png",
+      "sha256": "799b35bb65721beaa21eba38837f9d0434c46b9750a845293b3b0581d32ba304",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-revisao-administracao-desktop.png",
+      "sha256": "9ff8a4d4c3734bf8ade2d288ac437369871cafa43a79e46fa29fde81a75f8c06",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-revisao-administracao-mobile.png",
+      "sha256": "cb2acdd6123de0a6ee4d7e32e358cbd6437bfa12156effb967512477e0585bff",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-curso-publicado-desktop.png",
+      "sha256": "2a67ba6cddc2d3b6439b518aa82e0dc2fa671e3d8253c3bfa61c73aca0a0bec1",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-curso-publicado-mobile.png",
+      "sha256": "88449826f4368f44caa61d42142f6146c7cbcb1b8f34d99541bea5c88042144d",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-video-sob-demanda-desktop.png",
+      "sha256": "a52983460ab874f6c8adb658c86a745894c2d413f49bf889a3697e1b5850a913",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-20T16-01-56-699Z",
+      "arquivo": "claro-video-sob-demanda-mobile.png",
+      "sha256": "0c191c416ac2db368c056487d43b9dab9a51bd588a8920d6ab6cc280df3fb27d",
+      "viewport": "390x844"
+    }
+  ],
+  "versao": "checkout local MS04 sem commit",
+  "app_source_sha256": "d5c3215d9bce5f852406bc858290942292656ff77955252bac379377da3d241a",
+  "app_source_scope": "C*/app: .py, .html, .css, .js, caminhos ordenados e bytes"
+}

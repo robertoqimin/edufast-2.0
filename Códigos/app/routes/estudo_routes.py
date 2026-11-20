@@ -120,7 +120,9 @@ def disciplina(pair_id):
         tabs = service.sections(db,pair.id) if enabled else []
         if wants_json():
             return jsonify(total=total,pagina=page,abas=[{'id':r.id,'nome':r.nome,'ordem':r.ordem,'estado':r.estado,'versao':r.versao} for r in tabs],conteudos=[{'id':r.id,'titulo':r.titulo,'tipo':r.tipo,'estado':r.estado} for r in rows])
+        from app.services.cursos_ms04.comum import habilitado as cursos_habilitados
         return render_template('estudo_disciplina.html',pair=pair,turma=classroom,disciplina=subject,
+            cursos_enabled=cursos_habilitados(db,required=False),
             rows=rows,tab=tab,page=page,total=total,has_next=page*service.PAGE_SIZE<total,identity=identity,
             sections=tabs,section=section,sections_enabled=enabled)
 

@@ -45,7 +45,7 @@ class AulaModel(Base):
     tema_id: Mapped[int] = mapped_column(ForeignKey('curso_temas.id'), nullable=False)
     titulo: Mapped[str] = mapped_column(String(150))
     descricao: Mapped[str] = mapped_column(Text, default='')
-    video_id: Mapped[str] = mapped_column(String(11))
+    video_id: Mapped[str | None] = mapped_column(String(11), nullable=True)
     posicao: Mapped[int] = mapped_column(Integer)
     __table_args__ = (UniqueConstraint('tema_id', 'posicao', name='uq_aula_posicao'),)
 

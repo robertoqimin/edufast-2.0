@@ -64,6 +64,7 @@ async function run(base) {
   assert.ok(csv.headers.get('content-type').includes('text/csv'));assert.ok(!csv.body.includes('.enc'));
   await request('professor nao exporta',query.replace('formato=json','formato=csv')+'&turma_disciplina_id=1',403,{token:teacher});
   checks.push(...await require('./estudos_http.cjs').run(base));
+  checks.push(...await require('./cursos_http.cjs').run(base));
   return checks;
 }
 module.exports={run};

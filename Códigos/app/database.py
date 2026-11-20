@@ -38,7 +38,8 @@ def init_db():
         # Optional new module: old installations keep their login until SQL review.
         # Existing optional tables are still checked; no startup DDL is performed.
         if table.name in {'estudo_conteudos', 'estudo_auditoria', 'estudo_secoes',
-                          'estudo_conteudo_secao', 'estudo_secao_auditoria'} and table.name not in tables:
+                          'estudo_conteudo_secao', 'estudo_secao_auditoria', 'curso_versoes',
+                          'curso_aula_conteudos', 'curso_retomadas', 'curso_aula_recursos'} and table.name not in tables:
             continue
         if table.name not in tables:
             raise RuntimeError(f"Esquema pendente de revisao/provisionamento: {table.name}")

@@ -8,7 +8,7 @@ import hashlib
 def verificar(root):
     app = root / 'Códigos/app'
     erros = []
-    for path in sorted([*(app / 'templates').glob('escola_*.html'), *(app / 'templates').glob('frequencia_*.html'), *(app / 'templates').glob('platform_*.html'), *(app / 'templates').glob('estudo_*.html')]):
+    for path in sorted([*(app / 'templates').glob('escola_*.html'), *(app / 'templates').glob('frequencia_*.html'), *(app / 'templates').glob('platform_*.html'), *(app / 'templates').glob('estudo_*.html'), *(app / 'templates').glob('curso_ms04_*.html')]):
         text = path.read_text(encoding='utf-8')
         if "extends 'gestao_base.html'" not in text:
             erros.append(f'{path.name}: não usa o layout compartilhado')

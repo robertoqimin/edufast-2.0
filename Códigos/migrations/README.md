@@ -1,5 +1,26 @@
 # Migração de concorrência — revisão pendente
 
+## Cursos MS04 — 007 pendente de revisão
+
+`007_cursos_backend_ms04.sql` foi compilado offline. Propõe tornar `video_id`
+opcional e criar quatro extensões: versões por curso, corpos/tipo de aula,
+retomada por aluno/oferta e apoios privados. Não altera IDs, títulos ou conclusões
+anteriores. O backend usa `/api`; o frontend dos novos formatos será integrado
+depois. Nenhum SQL foi executado em banco persistente nesta implementação.
+
+A API exige as quatro tabelas e a coluna com nulabilidade compatível; caso
+contrário responde 503. O startup não aplica DDL. Cursos legados sem versão
+continuam em seus contratos; a primeira gravação/duplicação pela nova API adota
+edição versionada e bloqueia gravação pelos caminhos antigos daquele curso.
+
+Revisar SQL, tipos/chaves/dados anteriores, backup consistente de banco/uploads
+e `DATA_ENCRYPTION_KEY`; ensaiar atualização e recuperação em ambiente isolado.
+Incluir `uploads/materiais_curso` no backup. Objetos binários são imutáveis e podem
+ter referências em mais de uma edição; não limpar arquivos por nome/idade sem
+conferir essas referências. Não repetir DDL após falha parcial sem inspeção.
+Código anterior não suporta texto sem vídeo, exigindo revisão antes de rollback
+após ativação. Contratos e testes: `Documentos/testes/API_CURSOS_MS04_2026-11-20.md`.
+
 ## Abas docentes — 006 pendente de revisão
 
 `006_abas_disciplina.sql` propõe três tabelas opcionais: `estudo_secoes`,

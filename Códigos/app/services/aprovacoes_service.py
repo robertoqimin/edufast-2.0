@@ -18,6 +18,7 @@ from app.models import (AlunoModel, AlunoTurmaModel, AtividadeModel, DisciplinaM
 from app.services.identidade_service import current_identity
 
 FIELDS = {
+    "publicar_curso": {"curso_id", "versao"},
     "publicar_material": {"conteudo_id", "versao"},
     "operacao_restaurada": {"endpoint", "params", "payload"},
     "criar_turma": {"nome", "codigo", "ano_letivo", "turno"},
@@ -82,6 +83,9 @@ def validate_proposal(db, user_id, kind, raw):
         raise MutationConflict("Operacao ou campos nao permitidos", 400)
     professor = _teacher(db, user_id)
     data = dict(raw)
+    if kind == 'publicar_curso':
+        from app.services.cursos_ms04.publicacao import preparar_publicacao
+        return preparar_publicacao(db,autor_id=user_id,curso_id=data.get('curso_id'),versao=data.get('versao'))
     if kind == 'publicar_material':
         from app.services.estudo_service import prepare_publication
         return prepare_publication(db,user_id,data)
@@ -161,6 +165,9 @@ def submit_proposal(kind, data, files=None):
     committed = False
     try:
         operation = 'proposta:' + kind
+        if kind == 'publicar_curso':
+            from app.services.cursos_ms04.comum import inteiro
+            operation += ':' + str(inteiro(data.get('curso_id')))
         if kind == 'publicar_material':
             from app.services.frequencia_service import integer
             operation += ':' + str(integer(data.get('conteudo_id')))
@@ -170,7 +177,7 @@ def submit_proposal(kind, data, files=None):
         raw = {k: v for k, v in dict(data).items() if k not in {"idempotency_key", "redirect_to", "csrf_token"}}
         normalized = validate_proposal(db, identity.id, kind, raw)
         file = files.get("arquivo") if files else None
-        if kind == 'publicar_material' and file:
+        if kind in {'publicar_material','publicar_curso'} and file:
             raise MutationConflict('Anexe o arquivo ao rascunho antes de pedir publicação.',400)
         if kind in {"enviar_documento", "responder_documento"} and (not file or not file.filename):
             raise MutationConflict("Arquivo obrigatorio", 400)
@@ -182,6 +189,8 @@ def submit_proposal(kind, data, files=None):
             os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
             file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
         resource = None
+        if kind == 'publicar_curso':
+            resource = f"curso:{normalized['curso_id']}:{normalized['versao']}"
         if kind == 'publicar_material':
             resource = f"estudo:{normalized['conteudo_id']}:{normalized['versao']}"
         if kind == "salvar_nota":
@@ -225,6 +234,11 @@ def can_review(db, identity, proposal):
 
 def _apply(db, proposal):
     data = json.loads(proposal.payload)
+    if proposal.tipo == 'publicar_curso':
+        from app.services.cursos_ms04.publicacao import preparar_publicacao
+        preparar_publicacao(db,autor_id=proposal.solicitante_id,curso_id=data['curso_id'],
+            versao=data['versao'],assinatura=data['snapshot'],aplicar=True)
+        return
     if proposal.tipo == 'publicar_material':
         from app.services.estudo_service import prepare_publication
         prepare_publication(db,proposal.solicitante_id,data,apply=True)

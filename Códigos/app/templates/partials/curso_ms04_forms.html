@@ -1,0 +1,22 @@
+{% macro hidden(versao=none) -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+{% if versao is not none %}<input type="hidden" name="versao" value="{{ versao }}">{% endif %}
+{%- endmacro %}
+{% macro open_lesson(oferta, aula, versao, label, current=false) -%}
+<form method="post" action="{{ url_for('cursos_api.progresso',oferta_id=oferta,aula_id=aula,action='abrir',interface='web') }}" class="course-open">
+{{ hidden(versao) }}<button class="button {{ 'button-primary' if current else 'button-secondary' }}" {% if current %}aria-current="step"{% endif %}>{{ label }}</button></form>
+{%- endmacro %}
+{% macro structure(curso,tipo,id,acao,label) -%}
+<form method="post" action="{{ url_for('cursos_api.editar',curso_id=curso.id,interface='web') }}">
+{{ hidden(curso.versao) }}<input type="hidden" name="tipo" value="{{ tipo }}"><input type="hidden" name="id" value="{{ id }}"><input type="hidden" name="acao" value="{{ acao }}"><button class="button button-secondary">{{ label }}</button></form>
+{%- endmacro %}
+{% macro add_group(curso,tipo,pai,label) -%}
+<form method="post" action="{{ url_for('cursos_api.editar',curso_id=curso.id,interface='web') }}" class="course-form">
+{{ hidden(curso.versao) }}<input type="hidden" name="tipo" value="{{ tipo }}"><input type="hidden" name="acao" value="adicionar"><input type="hidden" name="pai_id" value="{{ pai }}">
+<label>{{ label }}<input name="titulo" required maxlength="150"></label><button class="button button-secondary">Adicionar {{ 'módulo' if tipo=='capitulo' else 'capítulo' }}</button></form>
+{%- endmacro %}
+{% macro rename(curso,tipo,item,label) -%}
+<details><summary>Renomear {{ label }}</summary><form method="post" action="{{ url_for('cursos_api.editar',curso_id=curso.id,interface='web') }}" class="course-form">
+{{ hidden(curso.versao) }}<input type="hidden" name="tipo" value="{{ tipo }}"><input type="hidden" name="acao" value="editar"><input type="hidden" name="id" value="{{ item.id }}"><label>Título do {{ label }}<input name="titulo" value="{{ item.titulo }}" required maxlength="150"></label><button class="button button-secondary">Salvar título</button></form></details>
+{%- endmacro %}

@@ -23,8 +23,9 @@ as obrigações administrativas desses segmentos.
 
 **Decisão expressa sobre frequência:** o professor confirma diretamente; substitui
 a exigência anterior de aprovação administrativa para novas chamadas. Esta é uma
-mudança implementada no lote MS01, validada em SQLite/HTTP/navegador e ainda
-pendente de validação MySQL antes de liberação comercial. Não
+mudança implementada no lote MS01, validada em SQLite/HTTP/navegador e, no CI
+de 19/11, também em MySQL. Isso não ativa esquemas persistentes nem constitui
+aceite comercial completo. Não
 aprovar automaticamente chamadas antigas pendentes. Atestados continuam sob análise
 administrativa; falta justificada continua sendo falta, sem converter em presença.
 
@@ -89,15 +90,21 @@ Progresso de conteúdo não equivale a presença em chamada, nota ou certificaç
 | Ordem / ID | Implementação | Testes de aceite | Situação inicial |
 | --- | --- | --- | --- |
 | 0 / MS00 | Leitura eficiente da estrutura modular existente | Ordenação, grupos vazios, curso isolado, duplicação e consultas sem crescimento por capítulo/tema | Implementada e validada em SQLite; [evidência e limites](../testes/CURSOS_ESTRUTURA_2026-11-16.md) |
-| 1 / MS01 | Confirmar chamada diretamente pelo professor; consultar turma e elenco | Professor autorizado confirma; outro professor/aluno não grava; repetição não duplica; correção versionada preserva histórico; relatório reflete a confirmação | Implementada; SQLite/HTTP/navegador aprovados; [MySQL pendente e evidências](../testes/CHAMADA_DIRETA_2026-11-16.md) |
-| 2 / MS02 | Espaço da disciplina com Avisos e Materiais | Criar/editar conteúdo; aluno da oferta lê; outro aluno não acessa arquivo; campos escapados; erros não perdem o conteúdo persistido | Implementado em ambiente descartável; [evidências, SQL para revisão e limites](../testes/ESPACO_DISCIPLINA_2026-11-16.md) |
-| 3 / MS03 | Abas configuráveis com autonomia docente de organização | Criar, renomear, ordenar e arquivar; negar recurso alheio; rejeitar versão antiga; distinguir rascunho/publicação | Implementado em ambiente descartável; [evidências, proposta 006 e limites](../testes/ABAS_DISCIPLINA_2026-11-19.md); MySQL e ativação persistente pendentes |
-| 4 / MS04 | Consolidar cursos em módulos/capítulos/aulas e materiais | Professor organiza; aluno acessa oferta liberada, navega e retoma; edição preserva progresso e versão publicada | A fazer; reaproveitar base existente |
+| 1 / MS01 | Confirmar chamada diretamente pelo professor; consultar turma e elenco | Professor autorizado confirma; outro professor/aluno não grava; repetição não duplica; correção versionada preserva histórico; relatório reflete a confirmação | Implementada; SQLite/MySQL/HTTP aprovados no CI de 19/11; [evidências de implementação](../testes/CHAMADA_DIRETA_2026-11-16.md) |
+| 2 / MS02 | Espaço da disciplina com Avisos e Materiais | Criar/editar conteúdo; aluno da oferta lê; outro aluno não acessa arquivo; campos escapados; erros não perdem o conteúdo persistido | Implementado; SQLite/MySQL/HTTP aprovados no CI de 19/11; [proposta 005 e limites](../testes/ESPACO_DISCIPLINA_2026-11-16.md); ativação persistente pendente de revisão |
+| 3 / MS03 | Abas configuráveis com autonomia docente de organização | Criar, renomear, ordenar e arquivar; negar recurso alheio; rejeitar versão antiga; distinguir rascunho/publicação | Implementado; SQLite/MySQL/HTTP aprovados no CI de 19/11; [proposta 006 e limites](../testes/ABAS_DISCIPLINA_2026-11-19.md); ativação persistente pendente de revisão |
+| 4 / MS04 | Consolidar cursos em módulos/capítulos/aulas e materiais | Professor organiza; aluno acessa oferta liberada, navega e retoma; edição preserva progresso e versão publicada | [Backend/API](../testes/API_CURSOS_MS04_2026-11-20.md) e [frontend com demo ENEM para teste manual](../testes/FRONTEND_CURSOS_MS04_2026-11-20.md) implementados localmente; revisão/ativação persistente da proposta 007 e aceite manual pendentes |
 | 5 / MS05 | Revisar usabilidade e desempenho dos fluxos completos | Desktop/mobile, teclado, erros/vazios, jornada por perfil, tamanhos de assets, consultas, memória e tempos | A fazer |
 
 Cada entrega funcional inclui backend, interface, testes de permissão/transação e
 inspeção visual quando houver mudança de tela. Não acumular toda validação para MS05.
 Migrations podem ser propostas; executar somente após revisão do usuário conforme AGENTS.md.
+
+Atualização de evidências em 19/11: o commit `aedf8ad` passou no
+[CI completo SQLite/MySQL](https://github.com/Samucau1/edufast-2.0/actions/runs/44552908275)
+e no [piloto com APIs e central MySQL](https://github.com/Samucau1/edufast-2.0/actions/runs/44552900401).
+Os relatórios anteriores mantêm suas limitações históricas; as execuções de 19/11
+não são validação de funcionalidades futuras MS04/MS05 nem de ativação persistente.
 
 Ordem de trabalho proposta: hoje fechar contratos e iniciar MS00/MS01; em seguida
 concluir MS01 antes de MS02/MS03; consolidar MS04 e as jornadas com MS05. A agenda
