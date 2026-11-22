@@ -4,6 +4,8 @@
 
 | Documento | Conteúdo |
 | --- | --- |
+| [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
+| [A1 — Inventário de esquema — 22/11](testes/INVENTARIO_ESQUEMA_2026-11-22.md) | Relatório somente leitura de quais migrations estão aplicadas, parciais ou ausentes em cada banco |
 | [Backend e API MS04 — 20/11](testes/API_CURSOS_MS04_2026-11-20.md) | Rascunhos, publicação, retomada, texto/vídeo, recursos privados, SQL 007 e testes sem frontend |
 | [Esqueleto MS04 e caminhos de implementação](planejamento/ESQUELETO_MS04_2026-11-20.md) | Serviços isolados, catálogo de rotas/aceite, modelo conceitual e início pelo lote A |
 | [Estudo MS04 — cursos modulares](planejamento/ESTUDO_MS04_CURSOS_MODULARES_2026-11-19.md) | Diagnóstico atual, hierarquia confirmada, retomada, autoria, aulas sem vídeo e proposta de implementação |

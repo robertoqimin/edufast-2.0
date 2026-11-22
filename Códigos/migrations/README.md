@@ -1,5 +1,12 @@
 # Migração de concorrência — revisão pendente
 
+## Inventário antes de qualquer revisão
+
+Para saber quais propostas já estão presentes num banco, sem alterá-lo:
+`EDUFAST_REVIEW_DB_URL=... python schema_inventory.py` em `Códigos/` (banco central:
+`--central`). Mostra cada migration como aplicada, parcial ou ausente e alerta sobre
+estado parcial ou registro divergente. Detalhes: `Documentos/testes/INVENTARIO_ESQUEMA_2026-11-22.md`.
+
 ## Cursos MS04 — 007 pendente de revisão
 
 `007_cursos_backend_ms04.sql` foi compilado offline. Propõe tornar `video_id`

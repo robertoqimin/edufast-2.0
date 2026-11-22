@@ -40,7 +40,9 @@ def main():
                             *[c.is_not(None) for c in selected]).group_by(*selected).having(func.count() > 1).subquery()
                         check["duplicate_groups"] = connection.execute(select(func.count()).select_from(duplicates)).scalar_one()
                     item["unique_checks"].append(check)
-        print(json.dumps(report, indent=2))
+        from schema_inventory import inventory
+        report["migrations"] = inventory(engine)
+        print(json.dumps(report, indent=2, ensure_ascii=False))
     finally:
         engine.dispose()
 
