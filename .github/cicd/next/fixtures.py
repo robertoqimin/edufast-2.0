@@ -37,9 +37,9 @@ def assert_disposable(engine):
         raise RuntimeError('Recusado: use exclusivamente o executor TDD isolado.')
     url = engine.url
     memory = url.drivername == 'sqlite' and url.database == ':memory:'
-    mysql = (url.drivername == 'mysql+pymysql' and url.host == 'db' and
-             url.database == 'edufast_next' and url.username == 'next_ci')
-    if not (memory or mysql):
+    postgresql = (url.drivername == 'postgresql+psycopg' and url.host == 'db' and
+                  url.database == 'edufast_next' and url.username == 'next_ci')
+    if not (memory or postgresql):
         raise RuntimeError('Recusado: banco fora da lista descartável do TDD.')
 
 

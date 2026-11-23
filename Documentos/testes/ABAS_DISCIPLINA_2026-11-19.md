@@ -38,7 +38,7 @@ participam da mesma transação, com teste de rollback em falha sintética.
 
 ## Esquema proposto e compatibilidade
 
-[Proposta 006](../../Códigos/migrations/006_abas_disciplina.sql), compilada offline
+[Proposta 006](../../Codigos/migrations/006_abas_disciplina.sql), compilada offline
 do metadata MySQL, acrescenta `estudo_secoes`, `estudo_conteudo_secao` e
 `estudo_secao_auditoria`. Associação separada evita alterar as tabelas do MS02.
 Depende da proposta 005 e de usuários/ofertas existentes. Nenhuma migration foi
@@ -55,7 +55,7 @@ backup consistente de banco/uploads/chave e ensaio de recuperação. DDL MySQL p
 deixar estado parcial; não repetir às cegas. Reverter para código anterior ao MS03
 após ativação precisa de revisão, pois versões antigas não conhecem a restrição
 de arquivamento da aba. Não remover tabelas ou arquivos automaticamente.
-Procedimento: [migrations](../../Códigos/migrations/README.md).
+Procedimento: [migrations](../../Codigos/migrations/README.md).
 
 ## Verificação atual
 
@@ -101,20 +101,20 @@ menu, layout e componentes; nenhum CSS/JS ou pacote de interface novo.
 
 Usar o Python com dependências da aplicação/testes. Definir `DB_URL=sqlite:///:memory:`,
 `APP_ENV=development`, `SECRET_KEY` sintética de 32+ caracteres,
-`EDUFAST_TEST_DISPOSABLE=1` e `PYTHONPATH` com `Códigos`, `.github/cicd/tests` e a
+`EDUFAST_TEST_DISPOSABLE=1` e `PYTHONPATH` com `Codigos`, `.github/cicd/tests` e a
 dependência local `tzdata` quando necessária no Windows.
 
 ```powershell
 python -m unittest test_estudo_abas -v
 python -m unittest discover -s .github/cicd/tests -v
-python Códigos/tests/verificar_protocolo_design.py
-node --check Códigos/tests/verificar_estudos.cjs
+python Codigos/tests/verificar_protocolo_design.py
+node --check Codigos/tests/verificar_estudos.cjs
 ```
 
 Para navegador: iniciar fixture nova com `EDUFAST_FREQUENCIA_VISUAL=1`, SQLite em
 memória e chave Fernet sintética, conforme relatório MS02. Definir
 `PLAYWRIGHT_MODULE` para o Playwright local e executar
-`node Códigos/tests/verificar_estudos.cjs`. O executor cria dados; repetir apenas
+`node Codigos/tests/verificar_estudos.cjs`. O executor cria dados; repetir apenas
 com fixture nova. Evidências brutas permanecem em `.ci-results/estudos-visual`.
 
 ## Pendências e próxima tarefa

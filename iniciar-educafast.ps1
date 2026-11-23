@@ -12,10 +12,13 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$appDirectory = Join-Path $PSScriptRoot ('C' + [char]0x00f3 + 'digos')
-$manualName = if ($Ambiente -eq 'Restaurado') { 'manual-restaurado' } else { 'manual' }
-$manualProject = if ($Ambiente -eq 'Restaurado') { 'edufast-manual-restaurado' } else { 'edufast-manual' }
-if ($Ambiente -eq 'Atual' -and -not $PSBoundParameters.ContainsKey('Porta')) { $Porta = 5000 }
+$appDirectory = Join-Path $PSScriptRoot 'Codigos'
+if ($Ambiente -eq 'Atual') {
+    throw 'O ambiente anterior usa MySQL e foi preservado sem alteracoes (volumes intactos). O iniciador agora usa PostgreSQL: execute sem -Ambiente.'
+}
+# Ambiente PostgreSQL proprio: os ambientes MySQL anteriores (manual e manual-restaurado) nao sao tocados.
+$manualName = 'manual-postgres'
+$manualProject = 'edufast-manual-postgres'
 $localDirectory = Join-Path $PSScriptRoot ('.ci-results/' + $manualName)
 $envFile = Join-Path $localDirectory '.env'
 $composeFile = Join-Path $appDirectory 'docker-compose.yml'
@@ -63,11 +66,11 @@ if (-not (Test-Path -LiteralPath $envFile)) {
     $configuration = @(
         'SECRET_KEY=' + (New-LocalSecret)
         'DB_PASSWORD=' + (New-LocalSecret)
-        'MYSQL_ROOT_PASSWORD=' + (New-LocalSecret)
+        'POSTGRES_ADMIN_PASSWORD=' + (New-LocalSecret)
         'DATA_ENCRYPTION_KEY=' + (New-EncryptionKey)
         'DB_NAME=edufast_manual'
         'DB_USER=edufast_manual'
-        'DB_PORT=3306'
+        'DB_PORT=5432'
     ) -join "`n"
     # Never overwrite credentials, including on simultaneous launches.
     $stream = [System.IO.File]::Open($envFile, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write)

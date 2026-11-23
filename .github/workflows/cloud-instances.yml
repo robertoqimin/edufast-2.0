@@ -30,9 +30,9 @@ jobs:
           docker build --build-arg "VCS_REF=$GITHUB_SHA" -f .github/cicd/Dockerfile -t "$image" .
           mkdir -p .ci-results
           printf '%s' "$image" > .ci-results/image.txt
-      - name: Conferir dois clientes com MySQL e HTTPS
+      - name: Conferir dois clientes com PostgreSQL e HTTPS
         run: node infra/smoke_cloud.cjs
       - name: Testar API de frequencia em bancos descartaveis e HTTP real
         run: node .github/cicd/run_frequencia_api.cjs --image "$(cat .ci-results/image.txt)"
-      - name: Testar painel central e concorrencia em MySQL descartavel
+      - name: Testar painel central e concorrencia em PostgreSQL descartavel
         run: node .github/cicd/run_platform_api.cjs "$(cat .ci-results/image.txt)"

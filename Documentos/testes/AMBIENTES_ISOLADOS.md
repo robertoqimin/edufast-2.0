@@ -16,7 +16,7 @@ pool de conexões e arquitetura local/nuvem/híbrida. Guia: [`infra/README.md`](
 | `python -m unittest discover -s .github/cicd/tests -v` | 99 testes: 84 aprovados, 15 ignorados por exigirem MySQL |
 | Suíte `test_runtime_limits.py`, após reforçar teste com esgotamento real de QueuePool | 3 aprovados; pool volta a atender após liberar conexão |
 | Compilação dos Python alterados e novos | Aprovada |
-| `python Códigos/tests/verificar_protocolo_design.py` | Aprovado; sem alteração de interface |
+| `python Codigos/tests/verificar_protocolo_design.py` | Aprovado; sem alteração de interface |
 | `git diff --check` | Aprovado |
 
 Ambiente Python local: 3.14.3, venv descartável em `.ci-results/runtime-venv`,

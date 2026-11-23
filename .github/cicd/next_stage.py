@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--check', action='store_true', help='Verifica somente infraestrutura e revisão, sem Docker.')
     parser.add_argument('--list', action='store_true')
     parser.add_argument('--suite', choices=['unit', 'api', 'integration', 'performance', 'all'], default='all')
-    parser.add_argument('--database', choices=['sqlite', 'mysql', 'both'], default='both')
+    parser.add_argument('--database', choices=['sqlite', 'postgresql', 'both'], default='both')
     parser.add_argument('--smoke', action='store_true', help='Só para performance: não qualifica as metas.')
     parser.add_argument('--duration', type=int, default=600)
     args = parser.parse_args()
@@ -61,14 +61,14 @@ def main():
         run(['docker', 'build', '-f', str(PIPELINE/'Dockerfile'), '-t', image, '.'], 'build')
         suites = ['unit', 'api', 'integration'] if args.suite == 'all' else [args.suite]
         for suite in suites:
-            databases = ['sqlite'] if suite == 'unit' else (['mysql'] if suite == 'performance' else (['sqlite', 'mysql'] if args.database == 'both' else [args.database]))
+            databases = ['sqlite'] if suite == 'unit' else (['postgresql'] if suite == 'performance' else (['sqlite', 'postgresql'] if args.database == 'both' else [args.database]))
             for database in databases:
                 directory = report/database/suite
                 directory.mkdir(parents=True)
                 env.update(NEXT_REPORT_DIR=str(directory), NEXT_BACKEND=database,
-                           NEXT_DB_URL='sqlite:///:memory:' if database == 'sqlite' else 'mysql+pymysql://next_ci:next-fixture-only@db:3306/edufast_next')
-                if database == 'mysql':
-                    run(base+['up', '-d', '--wait', '--wait-timeout', '180', 'db'], 'mysql-start')
+                           NEXT_DB_URL='sqlite:///:memory:' if database == 'sqlite' else 'postgresql+psycopg://next_ci:next-fixture-only@db:5432/edufast_next')
+                if database == 'postgresql':
+                    run(base+['up', '-d', '--wait', '--wait-timeout', '180', 'db'], 'postgresql-start')
                 command = base+['run', '--rm', '--no-deps', 'tests', '--suite', suite]
                 if suite == 'performance':
                     command = base+['run', '--rm', '--no-deps', '--entrypoint', 'python', 'tests', '/next/benchmark.py', '--report-dir', '/reports', '--duration', str(args.duration)]

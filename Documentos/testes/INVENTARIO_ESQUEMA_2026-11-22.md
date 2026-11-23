@@ -14,8 +14,8 @@ segurança em várias escolas.
 
 | Arquivo | Mudança |
 | --- | --- |
-| `Códigos/schema_inventory.py` | Novo. Lê `migrations/NNN_*.sql`, extrai tabelas, colunas adicionadas, índices e colunas que passam a aceitar nulo; compara com a estrutura real do banco |
-| `Códigos/schema_preflight.py` | O relatório passa a incluir a chave `migrations` com o inventário |
+| `Codigos/schema_inventory.py` | Novo. Lê `migrations/NNN_*.sql`, extrai tabelas, colunas adicionadas, índices e colunas que passam a aceitar nulo; compara com a estrutura real do banco |
+| `Codigos/schema_preflight.py` | O relatório passa a incluir a chave `migrations` com o inventário |
 | `.github/cicd/tests/unit/test_schema_inventory.py` | Novo. 9 testes sem banco: leitura dos SQL e classificação |
 | `.github/cicd/tests/test_schema_inventory.py` | Novo. 4 testes SQLite + 2 MySQL (somente no runner descartável) |
 
@@ -35,7 +35,7 @@ segurança em várias escolas.
 ### Uso
 
 ```bash
-cd Códigos
+cd Codigos
 EDUFAST_REVIEW_DB_URL='mysql+pymysql://usuario:senha@host/banco' python schema_inventory.py
 EDUFAST_REVIEW_DB_URL='mysql+pymysql://usuario:senha@host/edufast_platform' python schema_inventory.py --central
 EDUFAST_REVIEW_DB_URL='...' python schema_preflight.py   # relatório completo, agora com "migrations"
@@ -46,13 +46,13 @@ Use um usuário de banco com permissão apenas de leitura.
 ## Validação executada
 
 Ambiente: Windows 11, Python 3.14.3; ambiente virtual temporário com
-`Códigos/requirements.txt` (Flask 3.1.0, SQLAlchemy 2.0.44). Docker Desktop
+`Codigos/requirements.txt` (Flask 3.1.0, SQLAlchemy 2.0.44). Docker Desktop
 não estava em execução.
 
 | Comando | Resultado |
 | --- | --- |
-| `PYTHONPATH=Códigos python -m unittest discover -s .github/cicd/tests/unit -v` | 12 testes, todos aprovados (9 novos + 3 existentes) |
-| `PYTHONPATH=Códigos python -S -m unittest discover -s .github/cicd/tests/unit` | Aprovado sem pacotes externos, como exige a pasta `unit/` |
+| `PYTHONPATH=Codigos python -m unittest discover -s .github/cicd/tests/unit -v` | 12 testes, todos aprovados (9 novos + 3 existentes) |
+| `PYTHONPATH=Codigos python -S -m unittest discover -s .github/cicd/tests/unit` | Aprovado sem pacotes externos, como exige a pasta `unit/` |
 | `python -m unittest test_schema_inventory -v` (SQLite em memória) | 4 aprovados, 2 ignorados (MySQL) |
 | `schema_inventory.py` num SQLite com todas as tabelas menos `estudo_secoes` e `curso_retomadas` | 001–005 aplicadas, 006 e 007 parciais com a falta listada, `versao_estrutural` 5, alerta de registro divergente |
 | `schema_inventory.py --central` no mesmo banco | `001_central.sql` ausente, como esperado |

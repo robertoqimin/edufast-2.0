@@ -21,10 +21,10 @@ Essa é uma recomendação para o projeto, não uma descrição de capacidade j�
 
 ## Evidência local e limites
 
-- `Códigos/app/models/usuario_model.py`: email único global, `tipo` global, estado e versão de autenticação; relações de aluno/professor com `uselist=False`. Isso precisa evoluir para participação por escola, preservando identidade e revogação.
+- `Codigos/app/models/usuario_model.py`: email único global, `tipo` global, estado e versão de autenticação; relações de aluno/professor com `uselist=False`. Isso precisa evoluir para participação por escola, preservando identidade e revogação.
 - Busca textual nos modelos por `escola_id`, `instituicao_id` e `tenant` não encontrou esses identificadores. Existir `escola_model.py` com identidade e políticas não comprova isolamento entre escolas.
-- `Códigos/app/database.py`: uma engine; em produção, `init_db()` inspeciona esquema sem executar DDL. Preservar essa garantia.
-- `Códigos/app/__init__.py`: fábrica Flask, tratamento de conflitos, CSRF e `/healthz` que consulta banco. Healthcheck não comprova funcionamento dos fluxos acadêmicos.
+- `Codigos/app/database.py`: uma engine; em produção, `init_db()` inspeciona esquema sem executar DDL. Preservar essa garantia.
+- `Codigos/app/__init__.py`: fábrica Flask, tratamento de conflitos, CSRF e `/healthz` que consulta banco. Healthcheck não comprova funcionamento dos fluxos acadêmicos.
 - `Documentos/planejamento/PROXIMA_VERSAO.md` já propõe conta global, participação local, integridade institucional e testes de duas escolas.
 - `Documentos/arquitetura/ARQUITETURA.md` contém trechos históricos sobre CDN, criação automática de tabelas e ausência de entidades restauradas. Não usar esses trechos como inventário atual sem revisão específica.
 

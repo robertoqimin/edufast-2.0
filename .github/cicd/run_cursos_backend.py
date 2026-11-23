@@ -1,4 +1,4 @@
-"""Executa backend em SQLite/MySQL novos, sem URLs de banco externo."""
+"""Executa backend em SQLite/PostgreSQL novos, sem URLs de banco externo."""
 import argparse
 import json
 import os
@@ -13,6 +13,14 @@ import urllib.request
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[2]
+# Mesmo papel sem superusuario usado em producao: o teste falha se depender de privilegio extra.
+POSTGRES_APP_ROLE = r'''psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -v app_user="$APP_DB_USER" -v app_password="$APP_DB_PASSWORD" -v app_db="$POSTGRES_DB" <<'SQL'
+CREATE ROLE :"app_user" LOGIN PASSWORD :'app_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+ALTER DATABASE :"app_db" OWNER TO :"app_user";
+REVOKE ALL ON DATABASE :"app_db" FROM PUBLIC;
+GRANT CONNECT, TEMPORARY ON DATABASE :"app_db" TO :"app_user";
+SQL
+'''
 
 
 def main():
@@ -31,7 +39,7 @@ def main():
         'results':[]}
     def source_hash():
         digest = hashlib.sha256()
-        for path in sorted([*(ROOT/'Códigos').rglob('*.py'),*(ROOT/'.github/cicd/tests').rglob('*.py'),
+        for path in sorted([*(ROOT/'Codigos').rglob('*.py'),*(ROOT/'.github/cicd/tests').rglob('*.py'),
                             *(ROOT/'.github/cicd').glob('*.cjs'),Path(__file__).resolve()]):
             digest.update(path.relative_to(ROOT).as_posix().encode())
             digest.update(path.read_bytes())
@@ -39,28 +47,31 @@ def main():
     summary['source_sha256'] = source_hash()
     with tempfile.TemporaryDirectory(prefix=project+'-') as temp:
         compose = {'services':{
-            'db-ms04-test':{'image':'mysql:8.4','environment':{'MYSQL_DATABASE':'edufast_ms04_disposable',
-                'MYSQL_USER':'disposable','MYSQL_PASSWORD':'synthetic-ms04-only','MYSQL_ROOT_PASSWORD':uuid4().hex},
-                'networks':['isolated'],'tmpfs':['/var/lib/mysql'],
-                'healthcheck':{'test':['CMD-SHELL','MYSQL_PWD=$$MYSQL_PASSWORD mysql -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e "SELECT 1" >/dev/null'],
+            'db-ms04-test':{'image':'postgres:17-alpine','environment':{'POSTGRES_DB':'edufast_ms04_disposable',
+                'POSTGRES_USER':'postgres','POSTGRES_PASSWORD':uuid4().hex,
+                'APP_DB_USER':'disposable','APP_DB_PASSWORD':'synthetic-ms04-only'},
+                'configs':[{'source':'postgres-app-role','target':'/docker-entrypoint-initdb.d/10-app-role.sh'}],
+                'networks':['isolated'],'tmpfs':['/var/lib/postgresql/data'],
+                'healthcheck':{'test':['CMD-SHELL','PGPASSWORD="$$APP_DB_PASSWORD" psql -h 127.0.0.1 -U "$$APP_DB_USER" -d "$$POSTGRES_DB" -tAc "SELECT 1" >/dev/null'],
                     'interval':'2s','timeout':'3s','retries':60}},
             'tests':{'image':args.image,'working_dir':'/repo','networks':['isolated'],
                 'volumes':[{'type':'bind','source':str(ROOT),'target':'/repo','read_only':True}],
-                'environment':{'DB_URL':'mysql+pymysql://disposable:synthetic-ms04-only@db-ms04-test:3306/edufast_ms04_disposable',
+                'environment':{'DB_URL':'postgresql+psycopg://disposable:synthetic-ms04-only@db-ms04-test:5432/edufast_ms04_disposable',
                     'EDUFAST_TEST_DISPOSABLE':'1','PYTHON_DOTENV_DISABLED':'1','APP_ENV':'development',
                     'PYTHONDONTWRITEBYTECODE':'1','SECRET_KEY':'synthetic-ms04-backend-only-key-2026-32chars',
-                    'PYTHONPATH':'/repo/Códigos:/repo/.github/cicd/tests'},
+                    'PYTHONPATH':'/repo/Codigos:/repo/.github/cicd/tests'},
                 'entrypoint':['python','-m','unittest','discover','-s','/repo/.github/cicd/tests','-p',pattern,'-v']},
             'http':{'image':args.image,'working_dir':'/repo','networks':['http'],
                 'volumes':[{'type':'bind','source':str(ROOT),'target':'/repo','read_only':True}],
                 'ports':['127.0.0.1::8000'],'tmpfs':['/tmp'],
                 'entrypoint':['python','/repo/.github/cicd/tests/frequencia_visual_fixture.py'],
                 'environment':{'DB_URL':'sqlite:////tmp/frequencia-visual.db','APP_ENV':'development',
-                    'PYTHONPATH':'/repo/Códigos:/repo/.github/cicd/tests','PYTHONDONTWRITEBYTECODE':'1',
+                    'PYTHONPATH':'/repo/Codigos:/repo/.github/cicd/tests','PYTHONDONTWRITEBYTECODE':'1',
                     'EDUFAST_FREQUENCIA_VISUAL':'1','PYTHON_DOTENV_DISABLED':'1','UPLOAD_FOLDER':'/tmp/uploads',
                     'SECRET_KEY':'synthetic-ms04-http-only-secret-32characters',
                     'DATA_ENCRYPTION_KEY':base64.urlsafe_b64encode(os.urandom(32)).decode()}}
-        },'networks':{'isolated':{'internal':True},'http':{}}}
+        },'networks':{'isolated':{'internal':True},'http':{}},
+        'configs':{'postgres-app-role':{'content':POSTGRES_APP_ROLE.replace('$','$$')}}}
         config = Path(temp)/'compose.json'
         config.write_text(json.dumps(compose),encoding='utf-8')
         base = ['docker','compose','-p',project,'-f',str(config)]
@@ -73,9 +84,9 @@ def main():
         try:
             command(base+['run','--rm','--no-deps','-e','DB_URL=sqlite:///:memory:','tests'],'sqlite')
             summary['results'].append('SQLite')
-            command(base+['up','-d','--wait','--wait-timeout','180','db-ms04-test'],'mysql-start')
-            command(base+['run','--rm','--no-deps','tests'],'mysql')
-            summary['results'].append('MySQL e concorrencia real')
+            command(base+['up','-d','--wait','--wait-timeout','180','db-ms04-test'],'postgresql-start')
+            command(base+['run','--rm','--no-deps','tests'],'postgresql')
+            summary['results'].append('PostgreSQL e concorrencia real')
             command(base+['up','-d','http'],'http-start')
             port_result = subprocess.run(base+['port','http','8000'],cwd=ROOT,capture_output=True,text=True,check=True)
             port = int(port_result.stdout.strip().rsplit(':',1)[1])

@@ -4,7 +4,7 @@
 
 ## Executor HTTP preparado
 
-O executor [benchmark.py](../../../.github/cicd/next/benchmark.py) chama Gunicorn por HTTP real dentro do container e usa o MySQL descartável. Não substitui respostas por mocks nem usa o cliente Flask para calcular tempos.
+O executor [benchmark.py](../../../.github/cicd/next/benchmark.py) chama Gunicorn por HTTP real dentro do container e usa o PostgreSQL descartável. Não substitui respostas por mocks nem usa o cliente Flask para calcular tempos.
 
 ```bash
 # Ensaio curto do executor; não aprova desempenho:
@@ -18,7 +18,7 @@ Massa proposta: 5 escolas e 1.000 alunos por escola. Carga: 1, 10 e 25 sessões;
 
 Relatórios incluem quantidade de amostras, mediana, p95, erros, duração e limites do ambiente. O ensaio completo exige ao menos 100 amostras bem-sucedidas de cada tipo por patamar, sem erros, p95 até 500 ms para leitura/busca e 1 s para gravação. São metas propostas para revisão, ainda não resultados obtidos.
 
-Limites configurados: container de testes 1 CPU/768 MiB e MySQL 1 CPU/1 GiB. Gerador de carga e Gunicorn compartilham o primeiro container; isso deve ser considerado ao interpretar resultados. O pico de memória registrado nesse container inclui os dois processos. O proxy não participa deste ensaio, e o hardware físico do host não é equivalente a um computador antigo apenas por limitar CPU/RAM.
+Limites configurados: container de testes 1 CPU/768 MiB e PostgreSQL 1 CPU/1 GiB. Gerador de carga e Gunicorn compartilham o primeiro container; isso deve ser considerado ao interpretar resultados. O pico de memória registrado nesse container inclui os dois processos. O proxy não participa deste ensaio, e o hardware físico do host não é equivalente a um computador antigo apenas por limitar CPU/RAM.
 
 O modo smoke verifica apenas a capacidade de completar requisições. Seu relatório tem `qualified: false`. Os recursos futuros ainda ausentes também impedem esse modo de passar hoje; isso não é um benchmark de desempenho ruim da versão atual.
 

@@ -2,7 +2,7 @@
 
 Uma VM Linux com Docker Compose 2.24.4+, Node 20+ e gateway Nginx HTTPS atende
 vários clientes. Cada cliente possui aplicação Flask/Gunicorn (frontend Jinja/React
-e backend), MySQL, redes privadas, volumes e segredos próprios. Contas e permissões
+e backend), PostgreSQL, redes privadas, volumes e segredos próprios. Contas e permissões
 continuam locais. Clientes acessam pelo navegador, sem acesso ao Docker/SSH.
 Host e gateway são compartilhados: sua falha pode afetar todos os clientes.
 
@@ -10,7 +10,7 @@ Host e gateway são compartilhados: sua falha pode afetar todos os clientes.
 
 Reservar IP estável, configurar DNS, firewall (443 pública, administração restrita),
 armazenamento persistente, backup fora da VM e monitoramento de recursos/TLS.
-Não publicar MySQL ou o socket/API Docker. Não instalar outro proxy na mesma 443.
+Não publicar PostgreSQL ou o socket/API Docker. Não instalar outro proxy na mesma 443.
 
 Copiar `infra/cloud.example.json` para um manifesto **privado**. Informar domínios
 reais e digest da imagem aprovada pelo CI. O formato/repositório são validados,
@@ -38,9 +38,9 @@ usam 0700 e arquivos 0600; no Windows, restringir também as ACLs.
 node infra/manage.cjs run /srv/edufast/r1 database cliente-a
 ```
 
-Isso inicia somente o MySQL de A. **Não cria tabelas da aplicação.** Revisar o
+Isso inicia somente o PostgreSQL de A. **Não cria tabelas da aplicação.** Revisar o
 provisionamento de banco novo ou as migrations aplicáveis em
-`Códigos/migrations/README.md` antes de executar SQL. O aplicativo em produção
+`Codigos/migrations/README.md` antes de executar SQL. O aplicativo em produção
 recusa esquema pendente. Não há comando de migration neste gerenciador.
 
 Após esquema revisado e preparado, iniciar A:
@@ -114,7 +114,7 @@ segredos. `run` valida Compose silenciosamente antes da ação.
 ## Backup e restauração
 
 `backup` exige pasta de saída nova. Verifica se A está rodando, para sua aplicação,
-gera dump MySQL e arquivo de uploads, guarda **somente** os quatro segredos de A
+gera dump PostgreSQL (`pg_dump --clean --if-exists`) e arquivo de uploads, guarda **somente** os quatro segredos de A
 e os metadados de release/domínio/projeto. Retoma o container existente caso o tenha
 parado, inclusive em falha de captura. Não atualiza imagem ao retomar. Suspender
 escritores externos/tarefas e não executar atualizações simultaneamente; o script
@@ -141,8 +141,8 @@ bash infra/verify.sh
 ```
 
 O CI também executa `node infra/smoke_cloud.cjs` após criar sua imagem descartável.
-Esse piloto usa dois MySQL novos, certificado de teste validado, HTTPS, login,
-rejeição cruzada de JWT/cookie, conexão MySQL bloqueada entre clientes, backup e
+Esse piloto usa dois PostgreSQL novos, certificado de teste validado, HTTPS, login,
+rejeição cruzada de JWT/cookie, conexão PostgreSQL bloqueada entre clientes, backup e
 persistência de upload após recriar A sem recriar B. O override de imagem local e
 a exclusão de volumes existem apenas no projeto temporário com UUID desse teste.
 Não são comandos de produção. Não substituem restauração ensaiada, teste de carga,

@@ -11,12 +11,12 @@ MySQL 8.4 descartável, SQLite descartável e Edge headless em perfil isolado.
 | API central em MySQL: `node .github/cicd/run_platform_api.cjs edufast-platform:test` | 18 aprovados, sem ignorados; inclui gravações concorrentes reais |
 | SQLite: `python -m unittest test_restauracao test_two_school_demo test_control_plane -v` | 36 executados, 33 aprovados, três cenários exclusivos de MySQL ignorados |
 | Infra: `node --test infra/test_environments.cjs infra/test_manage.cjs infra/test_demo.cjs infra/test_platform.cjs` | 20 aprovados |
-| Navegador: `node Códigos/tests/verificar_plataforma.cjs` | Login/logout móvel, escolas, pessoas, paginação e totais aprovados; oito capturas |
+| Navegador: `node Codigos/tests/verificar_plataforma.cjs` | Login/logout móvel, escolas, pessoas, paginação e totais aprovados; oito capturas |
 | Protocolo de design e actionlint | Aprovados |
 
 Os testes Python exigem `EDUFAST_TEST_DISPOSABLE=1`. Para repetir SQLite no Docker,
 montar o checkout somente para leitura em `/repo`, usar diretório `/repo`,
-`PYTHONPATH=/repo/Códigos:/repo/.github/cicd/tests`, `DB_URL=sqlite:///:memory:` e
+`PYTHONPATH=/repo/Codigos:/repo/.github/cicd/tests`, `DB_URL=sqlite:///:memory:` e
 uma `SECRET_KEY` sintética de importação escolar com pelo menos 32 caracteres.
 O painel recebe sua própria chave nos fixtures, independente da escolar.
 Não executar os testes contra bancos de escolas ou o banco central persistente.
@@ -57,6 +57,6 @@ As telas escolares tiveram regressão HTTP, sem nova inspeção visual escolar.
 Apenas a identidade padrão central foi inspecionada, pois não há personalização
 visual do painel nesta versão.
 
-O esquema central permanece como [proposta SQL](../../Códigos/control_plane/migrations/001_central.sql)
+O esquema central permanece como [proposta SQL](../../Codigos/control_plane/migrations/001_central.sql)
 para revisão do usuário. Nenhuma migration foi aplicada a bancos persistentes,
 incluindo os ambientes Teste 01 e 02 existentes.

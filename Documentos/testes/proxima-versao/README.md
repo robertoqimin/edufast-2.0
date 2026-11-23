@@ -36,7 +36,7 @@ Os documentos API/UNITARIOS e [casos.json](casos.json) são gerados do mesmo cat
 | Painel, buscas e exportação | API-068 a 071; UNIT-033 a 036 |
 | Auditoria | API-072, junto da verificação de gravação no banco |
 | Compatibilidade e cache | API-073 a 077, 080 a 082, 084; UNIT-041 a 044 |
-| Migração de instalação existente | INT-001 a 005; esquema legado congelado em SQLite/MySQL |
+| Migração de instalação existente | INT-001 a 005; esquema legado congelado em SQLite/MySQL (snapshot histórico) |
 | Desempenho em hardware modesto | Executor HTTP com limites; roteiro de navegador/equipamento real |
 
 São cenários iniciais de aceite, não garantia de cobertura exaustiva. Novas regras descobertas na revisão devem receber testes antes de serem implementadas.
@@ -75,9 +75,9 @@ Os resultados são salvos em `.ci-results/next/edufast-next-<id>/`: logs, JSON p
 ## Isolamento do ambiente
 
 - Compose exclusivo: [compose.next.yml](../../../.github/cicd/compose.next.yml).
-- Projeto aleatório `edufast-next-*`, rede interna sem portas publicadas e volume MySQL próprio.
+- Projeto aleatório `edufast-next-*`, rede interna sem portas publicadas e volume PostgreSQL próprio.
 - Dados totalmente fictícios; nenhum email é enviado a serviços externos.
-- A rotina destrutiva exige flag de teste e aceita somente SQLite em memória ou o MySQL `edufast_next`, usuário `next_ci`, host interno `db`.
+- A rotina destrutiva exige flag de teste e aceita somente SQLite em memória ou o PostgreSQL `edufast_next`, usuário `next_ci`, host interno `db`.
 - Não usa `.env`, uploads, bancos ou volumes do ambiente manual/produção.
 - Ao terminar, remove somente os containers e volumes do projeto criado pelo executor. Relatórios permanecem para leitura.
 - O container de testes usa root apenas para gravar relatórios do runner; não monta o socket Docker nem diretórios pessoais. A imagem de produção continua com seu usuário sem root.

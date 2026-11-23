@@ -58,7 +58,7 @@ class TwoSchoolDemoTests(unittest.TestCase):
     def test_cli_requires_explicit_local_database_and_opt_in(self):
         env = {'EDUFAST_TEST_SCHOOL': 'teste01', 'EDUFAST_TWO_SCHOOLS_TEST': '1'}
         config = SimpleNamespace(APP_ENV='development', DB_URL='')
-        url = make_url('mysql+pymysql://edufast:synthetic@db-teste01/edufast_teste01')
+        url = make_url('postgresql+psycopg://edufast:synthetic@db-teste01/edufast_teste01')
         self.assertEqual(validate_target(config, url, env), 'teste01')
         for wrong_config, wrong_url, wrong_env in [
             (SimpleNamespace(APP_ENV='production', DB_URL=''), url, env),

@@ -22,7 +22,7 @@ class PlatformTest(unittest.TestCase):
     def setUp(self):
         target = os.getenv('PLATFORM_TEST_DATABASE_URL', 'sqlite:///:memory:')
         parsed = make_url(target)
-        if target != 'sqlite:///:memory:' and not (parsed.get_backend_name() == 'mysql' and parsed.host == 'db-platform-test' and parsed.database == 'edufast_platform_disposable'):
+        if target != 'sqlite:///:memory:' and not (parsed.get_backend_name() == 'postgresql' and parsed.host == 'db-platform-test' and parsed.database == 'edufast_platform_disposable'):
             raise RuntimeError('Permitido somente banco central descartavel do executor.')
         self.app = create_app(dict(TESTING=True, DATABASE_URL=target,
             SECRET_KEY='central-only-synthetic-secret-' + 'x' * 32,
@@ -273,9 +273,9 @@ class PlatformTest(unittest.TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:
             return list(pool.map(run, actions))
 
-    def test_mysql_concurrent_finance_cannot_duplicate_request(self):
-        if self.engine.dialect.name != 'mysql':
-            self.skipTest('Concorrencia real exige MySQL do executor descartavel')
+    def test_postgresql_concurrent_finance_cannot_duplicate_request(self):
+        if self.engine.dialect.name != 'postgresql':
+            self.skipTest('Concorrencia real exige PostgreSQL do executor descartavel')
         sid = self.school()
         data = dict(kind='receita', amount='500', day=today().isoformat(), description='Concorrencia', request_key=str(uuid4()))
         actions = [(f'/escolas/{sid}/movimentos', data)] * 2
@@ -284,9 +284,9 @@ class PlatformTest(unittest.TestCase):
         self.assertTrue(all(code in {200, 409} for code in statuses), statuses)
         self.assertEqual(self.client.get('/?formato=json').json['totals']['receita'], 50000)
 
-    def test_mysql_concurrent_school_edits_conflict(self):
-        if self.engine.dialect.name != 'mysql':
-            self.skipTest('Concorrencia real exige MySQL do executor descartavel')
+    def test_postgresql_concurrent_school_edits_conflict(self):
+        if self.engine.dialect.name != 'postgresql':
+            self.skipTest('Concorrencia real exige PostgreSQL do executor descartavel')
         sid = self.school()
         body = dict(name='Edicao concorrente', monthly='100', state='ativa', version=1)
         self.assertEqual(sorted(self.parallel_posts([(f'/escolas/{sid}', body)] * 2)), [200, 409])

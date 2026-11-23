@@ -4,11 +4,11 @@ LABEL org.opencontainers.image.source="https://github.com/Samucau1/edufast-2.0" 
       org.opencontainers.image.revision=$VCS_REF
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
-COPY Códigos/requirements.txt /tmp/app-requirements.txt
+COPY Codigos/requirements.txt /tmp/app-requirements.txt
 COPY .github/cicd/requirements.txt /tmp/server-requirements.txt
 RUN pip install --no-cache-dir -r /tmp/app-requirements.txt -r /tmp/server-requirements.txt \
     && useradd --uid 10001 --create-home edufast
-COPY --chown=edufast:edufast Códigos/ /app/
+COPY --chown=edufast:edufast Codigos/ /app/
 RUN mkdir -p /app/uploads && chown edufast:edufast /app/uploads
 USER edufast
 EXPOSE 8000

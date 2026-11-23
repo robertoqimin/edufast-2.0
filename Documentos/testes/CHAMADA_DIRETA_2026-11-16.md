@@ -56,7 +56,7 @@ Uploads ficaram em diretório temporário do processo. Nenhum banco escolar foi 
 | `test_frequencia test_restauracao test_approvals_security test_course_outline` | 76 testes: 71 aprovados, 5 exclusivos de MySQL ignorados; 48,732 s |
 | Frequência dentro dessa rodada | 32 testes: 29 aprovados e 3 exclusivos de MySQL ignorados |
 | HTTP real, `.github/cicd/frequencia_http.cjs` | 30 verificações aprovadas: login, confirmação, correção, conflitos, multipart, download e CSV |
-| `node Códigos/tests/verificar_frequencia.cjs` | Fluxo completo aprovado; 14 capturas, nenhum erro JavaScript e sem overflow horizontal na página |
+| `node Codigos/tests/verificar_frequencia.cjs` | Fluxo completo aprovado; 14 capturas, nenhum erro JavaScript e sem overflow horizontal na página |
 | Teclado, rodada complementar no mesmo ambiente | Tab entre seletores de alunos e validação nativa de campos obrigatórios aprovados |
 | Protocolo estático de design, sintaxe dos dois scripts Node e `git diff --check` | Aprovados |
 
@@ -72,20 +72,20 @@ Usar Python com as dependências da aplicação/testes instaladas. Nesta execuç
 `.ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe`.
 
 ```powershell
-$env:PYTHONPATH = "$PWD/Códigos;$PWD/.github/cicd/tests"
+$env:PYTHONPATH = "$PWD/Codigos;$PWD/.github/cicd/tests"
 $env:DB_URL = 'sqlite:///:memory:'
 $env:APP_ENV = 'development'
 $env:SECRET_KEY = 'attendance-synthetic-key-for-isolated-tests-only'
 $env:EDUFAST_TEST_DISPOSABLE = '1'
 & .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe -m unittest test_frequencia test_restauracao test_approvals_security test_course_outline -v
-& .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe Códigos/tests/verificar_protocolo_design.py
+& .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe Codigos/tests/verificar_protocolo_design.py
 ```
 
 Para o servidor visual local, manter `DB_URL=sqlite:///:memory:`, definir
 `EDUFAST_FREQUENCIA_VISUAL=1`, gerar `DATA_ENCRYPTION_KEY` sintética com Fernet e
 executar `python .github/cicd/tests/frequencia_visual_fixture.py --local`.
 Em outro terminal, definir `PLAYWRIGHT_MODULE` para o Playwright instalado e rodar
-`node Códigos/tests/verificar_frequencia.cjs`. Usar servidor novo para repetir
+`node Codigos/tests/verificar_frequencia.cjs`. Usar servidor novo para repetir
 o navegador ou o teste HTTP, pois ambos criam sua própria chamada do dia.
 O modo local recusa conexão persistente e não aceita destino externo.
 

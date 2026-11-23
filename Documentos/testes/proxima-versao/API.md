@@ -101,7 +101,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `GET /api/v1/escolas`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -113,7 +113,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `GET /api/v1/escolas`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -127,7 +127,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `dupla`. **Requisição:** `GET /api/v1/escolas`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -142,7 +142,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `sem_vinculo`. **Requisição:** `GET /api/v1/escolas`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -154,7 +154,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `plataforma`. **Requisição:** `POST /api/v1/escolas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -181,7 +181,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/escolas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -206,7 +206,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/contexto`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -223,7 +223,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/contexto`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -238,7 +238,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `dupla`. **Requisição:** `POST /api/v1/escolas/2/turmas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -256,7 +256,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -278,7 +278,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -305,7 +305,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `plataforma`. **Requisição:** `GET /api/v1/escolas/1/alunos`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -317,7 +317,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/escolas/1/convites`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -346,7 +346,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/convites`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -362,7 +362,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `convidado`. **Requisição:** `POST /api/v1/convites/aceitar`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -395,7 +395,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `convidado`. **Requisição:** `POST /api/v1/convites/aceitar`.
 
-**Resposta esperada:** `410`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `410`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -419,7 +419,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `sem_vinculo`. **Requisição:** `POST /api/v1/convites/aceitar`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -434,7 +434,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `convidado`. **Requisição:** `POST /api/v1/convites/aceitar`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -469,7 +469,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/periodos`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -488,7 +488,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/periodos`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -505,7 +505,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/periodos/2`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -517,7 +517,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_a`. **Requisição:** `POST /api/v1/escolas/1/periodos/1/fechar`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -548,7 +548,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos?q=Aluno`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -567,7 +567,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/2`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -579,7 +579,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `PATCH /api/v1/escolas/1/alunos/2`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -604,7 +604,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/1`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -618,7 +618,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/3`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -630,7 +630,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/professores`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -647,7 +647,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/alunos`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -676,7 +676,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/alunos`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -703,7 +703,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `gestor_b`. **Requisição:** `POST /api/v1/escolas/2/alunos`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -722,7 +722,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/alunos`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -739,7 +739,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -754,7 +754,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -775,7 +775,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -801,7 +801,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -818,7 +818,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas/1/arquivar`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -841,7 +841,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `coordenacao_a`. **Requisição:** `POST /api/v1/escolas/1/disciplinas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -860,7 +860,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `coordenacao_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -877,7 +877,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `coordenacao_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -897,7 +897,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -927,7 +927,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -954,7 +954,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -971,7 +971,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -997,7 +997,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `409`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `409`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1023,7 +1023,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas/1/transferir`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1057,7 +1057,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas/1/transferir`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1083,7 +1083,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `coordenacao_a`. **Requisição:** `POST /api/v1/escolas/1/atribuicoes`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1102,7 +1102,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `coordenacao_a`. **Requisição:** `POST /api/v1/escolas/1/atribuicoes`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1118,7 +1118,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/atribuicoes`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1134,7 +1134,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/notas`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1177,7 +1177,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/3/notas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1193,7 +1193,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/notas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1218,7 +1218,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/notas`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1234,7 +1234,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/atividades`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1277,7 +1277,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `POST /api/v1/escolas/1/ofertas/1/atividades`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1292,7 +1292,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/solicitacoes-documentos`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1311,7 +1311,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `POST /api/v1/escolas/1/solicitacoes-documentos/1/arquivo`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1343,7 +1343,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/documentos/2/arquivo`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1358,7 +1358,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `POST /api/v1/escolas/1/solicitacoes-documentos/3/arquivo`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1375,7 +1375,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `POST /api/v1/escolas/1/solicitacoes-documentos/1/arquivo`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1392,7 +1392,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `POST /api/v1/escolas/1/solicitacoes-documentos/1/arquivo`.
 
-**Resposta esperada:** `413`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `413`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1409,7 +1409,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/documentos/1/arquivo`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1424,7 +1424,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/2/foto`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1436,7 +1436,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/comunicados`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1455,7 +1455,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/comunicados/3`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1467,7 +1467,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/comunicados`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1485,7 +1485,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/painel`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1502,7 +1502,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos?page=1&per_page=1`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1521,7 +1521,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos?page=0`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1533,7 +1533,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/exportacao`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1552,7 +1552,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas/1/arquivar`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1575,7 +1575,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /admin/alunos/2`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1589,7 +1589,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `professor_a`. **Requisição:** `GET /alunos/busca?termo=Aluno`.
 
-**Resposta esperada:** `200`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `200`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1603,7 +1603,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `GET /arquivos/download/documento-beta.pdf`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1617,7 +1617,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `POST /cadastro`.
 
-**Resposta esperada:** `400`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `400`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1644,7 +1644,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `dupla`. **Requisição:** `GET /api/v1/escolas/2/painel`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1663,7 +1663,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/matriculas`.
 
-**Resposta esperada:** `[201, 409]`. **Bancos:** mysql.
+**Resposta esperada:** `[201, 409]`. **Bancos:** postgresql.
 
 ```json
 {
@@ -1691,7 +1691,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `convidado`. **Requisição:** `POST /api/v1/convites/aceitar`.
 
-**Resposta esperada:** `[200, 409]`. **Bancos:** mysql.
+**Resposta esperada:** `[200, 409]`. **Bancos:** postgresql.
 
 ```json
 {
@@ -1717,7 +1717,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `GET /arquivos/perfil/perfil_beta.png`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1731,7 +1731,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /arquivos/download/documento-beta.pdf`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1745,7 +1745,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `GET /arquivos/perfil/perfil_beta.png`.
 
-**Resposta esperada:** `404`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `404`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1759,7 +1759,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/professores`.
 
-**Resposta esperada:** `201`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `201`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1796,7 +1796,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `POST /cadastro`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1831,7 +1831,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `secretaria_a`. **Requisição:** `POST /api/v1/escolas/1/turmas`.
 
-**Resposta esperada:** `403`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `403`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1858,7 +1858,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1877,7 +1877,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1896,7 +1896,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `não autenticado`. **Requisição:** `POST /api/v1/auth/login`.
 
-**Resposta esperada:** `422`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `422`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1914,7 +1914,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/1`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {
@@ -1927,7 +1927,7 @@ Os testes chamam a aplicação real pelo cliente HTTP do Flask e verificam respo
 
 **Perfil:** `aluno_a`. **Requisição:** `GET /api/v1/escolas/1/alunos/1`.
 
-**Resposta esperada:** `401`. **Bancos:** sqlite, mysql.
+**Resposta esperada:** `401`. **Bancos:** sqlite, postgresql.
 
 ```json
 {

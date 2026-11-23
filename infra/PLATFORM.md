@@ -29,7 +29,7 @@ node infra/platform.cjs add /srv/edufast/plataforma teste02 teste02.seudominio.c
 node infra/platform.cjs list /srv/edufast/plataforma
 ```
 
-`init` exige pasta nova. `add` prepara uma revisão com aplicação, MySQL, uploads,
+`init` exige pasta nova. `add` prepara uma revisão com aplicação, PostgreSQL, uploads,
 redes, cookie e segredos separados por escola. O frontend é servido pela aplicação
 de cada escola. O cadastro preserva as escolas anteriores e recusa IDs/domínios
 duplicados. Não inicia containers, não cria tabelas ou contas e não configura DNS.
@@ -53,8 +53,8 @@ node infra/platform.cjs plan /srv/edufast/plataforma database teste01
 node infra/platform.cjs run /srv/edufast/plataforma database teste01
 ```
 
-Isso inicia só o MySQL. **Revisar com o usuário o esquema/migrations antes de
-executar qualquer SQL**, conforme [migrations](../Códigos/migrations/README.md).
+Isso inicia só o PostgreSQL. **Revisar com o usuário o esquema/migrations antes de
+executar qualquer SQL**, conforme [migrations](../Codigos/migrations/README.md).
 Não há execução de migrations neste comando. Depois do banco preparado e revisado:
 
 ```bash

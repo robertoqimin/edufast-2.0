@@ -37,7 +37,7 @@ def smoke():
     url, context = checks.https_login(ci)
     backup_checks.database(ci)
     backup_checks.uploads(ci, url, context)
-    print('HTTPS, CA, HSTS, login, backup/restauração MySQL e persistência de uploads: OK', flush=True)
+    print('HTTPS, CA, HSTS, login, backup/restauração PostgreSQL e persistência de uploads: OK', flush=True)
 
 
 def main():

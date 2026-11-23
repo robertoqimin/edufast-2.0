@@ -51,7 +51,7 @@ Os dois testes novos de configuração passaram na regressão SQLite. A asserç�
 $env:GITHUB_SHA = git rev-parse HEAD
 py .github/cicd/ci.py
 py .github/cicd/test_ci_characterization.py
-py Códigos/tests/verificar_protocolo_design.py
+py Codigos/tests/verificar_protocolo_design.py
 node --test .github/cicd/test_submission.cjs
 & ./.ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe .github/cicd/run_postman.py --newman .ci-results/diagnostico-2026-11-05/tools/node_modules/newman/bin/newman.js
 ```

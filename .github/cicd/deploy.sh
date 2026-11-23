@@ -34,7 +34,7 @@ trap recover ERR
 "${compose[@]}" stop app
 # As variáveis são expandidas dentro do container, não no shell do servidor.
 # shellcheck disable=SC2016
-"${compose[@]}" exec -T db sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF -u"$MYSQL_USER" "$MYSQL_DATABASE"' > "backups/$stamp.sql.partial"
+"${compose[@]}" exec -T db sh -c 'PGPASSWORD="$APP_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U "$APP_DB_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --no-privileges' > "backups/$stamp.sql.partial"
 EDUFAST_IMAGE="$previous" "${compose[@]}" run --rm --no-deps --entrypoint tar app -czf - -C /app uploads > "backups/$stamp-uploads.tar.gz.partial"
 [[ -s "backups/$stamp.sql.partial" && -s "backups/$stamp-uploads.tar.gz.partial" ]]
 gzip -t "backups/$stamp-uploads.tar.gz.partial"

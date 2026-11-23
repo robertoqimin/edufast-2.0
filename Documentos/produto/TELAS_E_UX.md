@@ -31,7 +31,7 @@ esse design. Login, painéis, superperfil e solicitações usam a identidade ori
 | Área do aluno | `/aluno/dashboard` | `aluno_painel.html` |
 | Disciplina do aluno | `/aluno/disciplinas/<id>` | `aluno_disciplina.html` |
 
-As rotas protegidas exigem o perfil correspondente. Os templates estão em `Códigos/app/templates/`. O catálogo foi conferido no código, sem declarar teste de navegação de todos os fluxos.
+As rotas protegidas exigem o perfil correspondente. Os templates estão em `Codigos/app/templates/`. O catálogo foi conferido no código, sem declarar teste de navegação de todos os fluxos.
 
 ## Protótipos de apresentação
 

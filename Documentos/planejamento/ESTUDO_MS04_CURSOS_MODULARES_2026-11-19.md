@@ -43,11 +43,11 @@ Não é necessário começar uma nova plataforma de cursos nem criar uma tabela
 | Materiais | MS02 tem links/arquivos privados por oferta, fora da árvore de cursos | Reaproveitar padrões de proteção; definir autorização própria dos materiais de aula |
 | Leveza | Estrutura do curso usa até três SELECTs; biblioteca percorre ofertas e busca dados por oferta | Preservar melhoria MS00, evitar leituras repetidas e paginar a biblioteca |
 
-Fontes: [modelos](../../Códigos/app/models/curso_model.py),
-[rotas](../../Códigos/app/routes/curso_routes.py),
-[serviço](../../Códigos/app/services/cursos.py),
-[interceptador](../../Códigos/app/restauracao.py),
-[transação de aprovação](../../Códigos/app/services/restauracao_context.py) e
+Fontes: [modelos](../../Codigos/app/models/curso_model.py),
+[rotas](../../Codigos/app/routes/curso_routes.py),
+[serviço](../../Codigos/app/services/cursos.py),
+[interceptador](../../Codigos/app/restauracao.py),
+[transação de aprovação](../../Codigos/app/services/restauracao_context.py) e
 templates `curso_biblioteca.html`, `curso_editor.html`, `curso_aprender.html`.
 
 ### Verificação dirigida nesta tarefa

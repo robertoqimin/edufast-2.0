@@ -1,7 +1,7 @@
 # Estrutura de cursos — primeiro lote de leveza
 
 Data: 16/11/2026. Base: `7e996a167c5f40657eab12d9bde36e8af223e030`
-mais as alterações locais em `Códigos/app/services/cursos.py` e
+mais as alterações locais em `Codigos/app/services/cursos.py` e
 `.github/cicd/tests/test_course_outline.py`. Não representa um commit publicado.
 Entrega MS00 do [plano de ensino médio e superior](../planejamento/ENSINO_MEDIO_SUPERIOR_2026-11-16.md).
 
@@ -25,13 +25,13 @@ habilitadas; a regressão de restauração usa `DB_URL=sqlite:///:memory:` e opt
 descartável. Nenhum teste conecta a banco escolar persistente.
 
 ```powershell
-$env:PYTHONPATH = "$PWD/Códigos;$PWD/.github/cicd/tests"
+$env:PYTHONPATH = "$PWD/Codigos;$PWD/.github/cicd/tests"
 $env:DB_URL = 'sqlite:///:memory:'
 $env:APP_ENV = 'development'
 $env:SECRET_KEY = 'course-outline-synthetic-key-for-isolated-tests-only'
 $env:EDUFAST_TEST_DISPOSABLE = '1'
 & .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe -m unittest test_course_outline test_restauracao -v
-& .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe Códigos/tests/verificar_protocolo_design.py
+& .ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe Codigos/tests/verificar_protocolo_design.py
 ```
 
 O caminho do Python é local e ignorado pelo Git; em outro checkout, usar um

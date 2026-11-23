@@ -30,5 +30,5 @@ def main(ci):
             (ci.REPORT / 'containers.log').write_bytes(logs)
         finally:
             ci.compose('down', '-v', '--remove-orphans')
-        (ci.REPORT / 'summary.json').write_text(ci.json.dumps({'passed': successful, 'project': ci.PROJECT, 'scope': ['SQLite', 'MySQL', 'production image', 'HTTPS', 'backup restore', 'uploads persistence', 'deploy guards']}, indent=2))
+        (ci.REPORT / 'summary.json').write_text(ci.json.dumps({'passed': successful, 'project': ci.PROJECT, 'scope': ['SQLite', 'PostgreSQL', 'production image', 'HTTPS', 'backup restore', 'uploads persistence', 'deploy guards']}, indent=2))
     return 0 if successful else 1

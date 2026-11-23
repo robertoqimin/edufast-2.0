@@ -30,7 +30,7 @@ O mapeamento visual continua previsto: `CapituloModel` é módulo e `TemaModel`
 
 Sem as quatro tabelas opcionais ou sem `video_id` aceitar NULL, a API retorna
 503. O startup não cria/altera tabelas. O esquema é preparado pela
-[proposta SQL 007](../../Códigos/migrations/007_cursos_backend_ms04.sql),
+[proposta SQL 007](../../Codigos/migrations/007_cursos_backend_ms04.sql),
 **pendente de revisão e não executada em banco persistente**.
 
 ## Autenticação e respostas
@@ -235,7 +235,7 @@ rollback de aplicação após novos formatos exige avaliar essa incompatibilidad
 Suíte focada: `.github/cicd/tests/test_cursos_ms04.py`. Usa apenas fixtures com
 `EDUFAST_TEST_DISPOSABLE=1`; não executar descoberta contra o banco da aplicação.
 Para repetir em SQLite em memória, usar chave sintética, `APP_ENV=development`,
-`PYTHON_DOTENV_DISABLED=1` e `PYTHONPATH` com `Códigos`/`.github/cicd/tests`.
+`PYTHON_DOTENV_DISABLED=1` e `PYTHONPATH` com `Codigos`/`.github/cicd/tests`.
 
 ```powershell
 python -m unittest test_cursos_ms04 -v

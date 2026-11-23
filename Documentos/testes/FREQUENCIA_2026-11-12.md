@@ -8,7 +8,7 @@ O usuário adiou a aplicação da migration; a publicação do código/PR não a
 alterar os bancos Teste 01/02.
 
 Estado: código preparado e testado em ambientes descartáveis. A migration
-[`004_frequencia.sql`](../../Códigos/migrations/004_frequencia.sql) **não foi
+[`004_frequencia.sql`](../../Codigos/migrations/004_frequencia.sql) **não foi
 executada nas escolas Teste 01/02 nem em produção**. Base: commit `7c39bc0` mais
 os arquivos deste módulo. Alterações anteriores nos contratos da próxima versão
 foram preservadas e não integram esta entrega.
@@ -90,7 +90,7 @@ migra tabelas. Sem o esquema, o módulo informa indisponibilidade e preserva log
 e telas anteriores. O iniciador das duas escolas reconhece o módulo já instalado
 sem recriar tabelas, senhas ou dados.
 
-Seguir [o procedimento de revisão](../../Códigos/migrations/README.md), revisar o
+Seguir [o procedimento de revisão](../../Codigos/migrations/README.md), revisar o
 SQL e fazer backup de banco/uploads/chave antes de pedir a execução em cada escola.
 Os testes usam bancos novos e descartáveis, não migrations nas escolas existentes.
 

@@ -23,7 +23,7 @@ def validate():
             assert assertion['table'] in REQUIRED, case['id']
             assert set(assertion['where']).issubset(REQUIRED[assertion['table']]), case['id']
         if 'concurrent' in case:
-            assert case['backends'] == ['mysql'] and len(case['status']) == case['concurrent']
+            assert case['backends'] == ['postgresql'] and len(case['status']) == case['concurrent']
     for case in UNIT:
         assert ('result' in case)+('error' in case)+('different_from' in case) == 1, case['id']
         if 'error' in case:
@@ -59,7 +59,7 @@ class InfrastructureTests(unittest.TestCase):
         from unittest.mock import patch
         from types import SimpleNamespace
         from fixtures import assert_disposable
-        url = SimpleNamespace(drivername='mysql+pymysql', host='production.example.test', database='school', username='root')
+        url = SimpleNamespace(drivername='postgresql+psycopg', host='production.example.test', database='school', username='postgres')
         with patch.dict('os.environ', {'EDUFAST_TEST_NEXT': '1'}, clear=True), self.assertRaises(RuntimeError):
             assert_disposable(SimpleNamespace(url=url))
 
@@ -72,7 +72,7 @@ class InfrastructureTests(unittest.TestCase):
     def test_all_contracts_are_discoverable(self):
         import os
         backend = os.environ.get('NEXT_BACKEND', 'sqlite')
-        expected = len([case for case in API if backend in case.get('backends', ['sqlite', 'mysql'])])
+        expected = len([case for case in API if backend in case.get('backends', ['sqlite', 'postgresql'])])
         self.assertEqual(unittest.defaultTestLoader.loadTestsFromName('test_api').countTestCases(), expected)
         self.assertEqual(unittest.defaultTestLoader.loadTestsFromName('test_unit').countTestCases(), len(UNIT))
         self.assertEqual(unittest.defaultTestLoader.loadTestsFromName('test_integration').countTestCases(), 10)

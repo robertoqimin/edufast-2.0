@@ -10,7 +10,7 @@ from pathlib import Path
 
 def repository_root():
     for candidate in Path(__file__).resolve().parents:
-        if (candidate / 'AGENTS.md').is_file() and (candidate / 'Códigos/app').is_dir():
+        if (candidate / 'AGENTS.md').is_file() and (candidate / 'Codigos/app').is_dir():
             return candidate
     raise ValueError('Informe --root com o checkout do projeto.')
 
@@ -38,7 +38,7 @@ def validate(root):
         local_file(proposal['arquivo_sql'])
         local_file(catalog['contrato'])
         local_file(catalog['testes_backend'])
-    models = ast.parse(local_file('Códigos/app/models/curso_model.py').read_text(encoding='utf-8'))
+    models = ast.parse(local_file('Codigos/app/models/curso_model.py').read_text(encoding='utf-8'))
     names = {node.name for node in models.body if isinstance(node,ast.ClassDef)}
     if set(catalog['rotulos']) - names:
         raise ValueError('Mapeamento da hierarquia não corresponde aos modelos existentes.')
@@ -47,7 +47,7 @@ def validate(root):
         if service['funcao'] not in {n.name for n in tree.body if isinstance(n,ast.FunctionDef)}:
             raise ValueError(f"Ponto de implementação ausente: {service['funcao']}")
     routes = set()
-    for source in (root / 'Códigos/app/routes').rglob('*.py'):
+    for source in (root / 'Codigos/app/routes').rglob('*.py'):
         for node in ast.walk(ast.parse(source.read_text(encoding='utf-8'))):
             if not isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef)):
                 continue
@@ -82,7 +82,7 @@ def validate(root):
     allowed = {'pendente','parcial','implementado_backend'} if backend else {'pendente'}
     if any(case['estado'] not in allowed or not case['cenario'].strip() for case in cases):
         raise ValueError('O catálogo não pode substituir os testes de aceite por estado manual.')
-    for source in (root / 'Códigos/app').rglob('*.py'):
+    for source in (root / 'Codigos/app').rglob('*.py'):
         if backend:
             break
         if 'cursos_ms04' in source.parts:

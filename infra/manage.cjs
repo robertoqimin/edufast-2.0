@@ -114,7 +114,7 @@ function backup(directory, client, output, runner = spawnSync) {
   try {
     if (running) { execute([[...base, 'stop', app]], runner); stopped = true; }
     capture('database.sql', [...base, 'exec', '-T', db, 'sh', '-c',
-      'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --user="$MYSQL_USER" --single-transaction --no-tablespaces --set-gtid-purged=OFF "$MYSQL_DATABASE"']);
+      'PGPASSWORD="$APP_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U "$APP_DB_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --no-privileges']);
     capture('uploads.tar.gz', [...base, 'run', '--rm', '--no-deps', '-T', '--entrypoint', 'tar', app,
       '-C', '/app/uploads', '-czf', '-', '.']);
     const prefix = client.toUpperCase().replaceAll('-', '_') + '_';

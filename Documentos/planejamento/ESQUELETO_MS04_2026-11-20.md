@@ -21,7 +21,7 @@ startup ou pelos modelos. O funcionamento atual permanece como base de comparaç
 ## Estrutura de arquivos
 
 ```text
-Códigos/app/services/
+Codigos/app/services/
 ├── cursos.py                         base existente e contratos legados
 └── cursos_ms04/
     ├── __init__.py                   fronteira do esqueleto ainda isolado
@@ -30,7 +30,7 @@ Códigos/app/services/
     ├── retomada.py                   registrar_abertura
     └── conteudo.py                   validar_aula
 
-Códigos/migrations/propostas/
+Codigos/migrations/propostas/
 └── ms04_modelo.json                  proposta conceitual, sem SQL executável
 
 .github/cicd/ms04/
@@ -48,17 +48,17 @@ inclusive quando o serviço participa da transação de uma aprovação.
 
 | Arquivo atual | Alteração prevista | Lote |
 | --- | --- | --- |
-| `Códigos/app/services/cursos.py` | Conferir aluno na turma e disciplina; manter autoria, edição imutável e ordem da árvore | A |
-| `Códigos/app/routes/curso_routes.py` | Coordenar os serviços novos mantendo caminhos e contratos legados | B–E |
-| `Códigos/app/restauracao.py` | Tratar somente operações autorizadas de rascunhos; preservar interceptação acadêmica | B |
-| `Códigos/app/services/restauracao_context.py` | Compatibilizar snapshots e propostas docentes anteriores | B |
-| `Códigos/app/services/aprovacoes_service.py` | Novo pedido de publicação da versão exata, sem ampliar revisores | B |
-| `Códigos/app/models/curso_model.py` | Versão de agregado, tipo/corpo de aula e referência aos novos registros | B–D, após desenho do esquema |
-| `Códigos/app/templates/curso_biblioteca.html` | Biblioteca paginada e entrada de retomada por oferta | C/E |
-| `Códigos/app/templates/curso_editor.html` | Módulos/capítulos, versão e estados de revisão | B/D |
-| `Códigos/app/templates/curso_aprender.html` | Abertura explícita, conclusão separada e renderização por tipo | C/D |
-| `Códigos/app/routes/estudo_routes.py` | Ligação da disciplina para oferta autorizada de curso | E |
-| `Códigos/app/static/css/escola.css` | Apenas ajustes necessários nos componentes compartilhados | E |
+| `Codigos/app/services/cursos.py` | Conferir aluno na turma e disciplina; manter autoria, edição imutável e ordem da árvore | A |
+| `Codigos/app/routes/curso_routes.py` | Coordenar os serviços novos mantendo caminhos e contratos legados | B–E |
+| `Codigos/app/restauracao.py` | Tratar somente operações autorizadas de rascunhos; preservar interceptação acadêmica | B |
+| `Codigos/app/services/restauracao_context.py` | Compatibilizar snapshots e propostas docentes anteriores | B |
+| `Codigos/app/services/aprovacoes_service.py` | Novo pedido de publicação da versão exata, sem ampliar revisores | B |
+| `Codigos/app/models/curso_model.py` | Versão de agregado, tipo/corpo de aula e referência aos novos registros | B–D, após desenho do esquema |
+| `Codigos/app/templates/curso_biblioteca.html` | Biblioteca paginada e entrada de retomada por oferta | C/E |
+| `Codigos/app/templates/curso_editor.html` | Módulos/capítulos, versão e estados de revisão | B/D |
+| `Codigos/app/templates/curso_aprender.html` | Abertura explícita, conclusão separada e renderização por tipo | C/D |
+| `Codigos/app/routes/estudo_routes.py` | Ligação da disciplina para oferta autorizada de curso | E |
+| `Codigos/app/static/css/escola.css` | Apenas ajustes necessários nos componentes compartilhados | E |
 
 Antes de tocar telas, ler `Documentos/PROTOCOLO_DESIGN.md` e preservar fontes,
 tokens, menu e layout. Nenhuma nova página ou identidade visual é necessária para
@@ -99,7 +99,7 @@ endpoints devem ser fechados com os contratos HTTP ao implementar cada lote.
 | 2 / B | Rascunhos próprios, versão e publicação revisada | `.github/cicd/tests/test_cursos_autoria.py`, `test_cursos_publicacao.py` | Fechar política de autoria e proposta de versão |
 | 3 / C | Última aula acessada por aluno/oferta, anterior/próxima e conclusão | `.github/cicd/tests/test_cursos_retomada.py` | Proposta de tabela de retomada e contrato sem JavaScript |
 | 4 / D | Texto, YouTube legado e apoios privados | `.github/cicd/tests/test_cursos_conteudo.py` | Definir formatos, limites e duplicação de arquivos |
-| 5 / E | Disciplina/biblioteca, percurso e leveza | `.github/cicd/cursos_http.cjs`, `Códigos/tests/verificar_cursos.cjs` | Lotes anteriores, protocolo e inspeção desktop/mobile |
+| 5 / E | Disciplina/biblioteca, percurso e leveza | `.github/cicd/cursos_http.cjs`, `Codigos/tests/verificar_cursos.cjs` | Lotes anteriores, protocolo e inspeção desktop/mobile |
 
 Esses caminhos de testes futuros não são arquivos vazios com aprovação simulada.
 Os 16 cenários do catálogo estão **pendentes**. Ao implementar cada um, criar
@@ -113,7 +113,7 @@ Depois dele, consolidar o desenho de esquema B–D antes de gerar migrations.
 
 ## Evolução de banco
 
-O [modelo conceitual](../../Códigos/migrations/propostas/ms04_modelo.json) descreve:
+O [modelo conceitual](../../Codigos/migrations/propostas/ms04_modelo.json) descreve:
 versão positiva em curso; tipo/corpo e vídeo condicional em aula; retomada única
 por aluno/oferta; recursos privados de aula se incluídos. Ele não é uma migration
 e não reserva automaticamente a numeração 007.
@@ -152,7 +152,7 @@ Não houve execução de migrations, mudanças de tela ou nova rodada geral MySQ
 
 Para comparar a base de cursos e aprovações, usar ambiente descartável com
 `DB_URL=sqlite:///:memory:`, `EDUFAST_TEST_DISPOSABLE=1`, chave sintética de 32+
-caracteres e `PYTHONPATH` com `Códigos` e `.github/cicd/tests`:
+caracteres e `PYTHONPATH` com `Codigos` e `.github/cicd/tests`:
 
 ```powershell
 python -m unittest test_course_outline test_restauracao -v

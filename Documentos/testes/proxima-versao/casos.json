@@ -1427,7 +1427,7 @@
       },
       "concurrent": 2,
       "backends": [
-        "mysql"
+        "postgresql"
       ],
       "conflict_error": "duplicate_enrollment",
       "db": [
@@ -1457,7 +1457,7 @@
       },
       "concurrent": 2,
       "backends": [
-        "mysql"
+        "postgresql"
       ],
       "conflict_error": "invitation_used",
       "db": [

@@ -12,7 +12,7 @@ function docker(args){const r=spawnSync('docker',args,{stdio:'inherit',cwd:root}
 if(!fs.existsSync(file)){
  if(action!=='start')throw Error('Demonstração ainda não preparada.');
  const compose={services:{web:{image:'edufast-platform:test',working_dir:'/app',
-  volumes:[{type:'bind',source:path.join(root,'Códigos'),target:'/app',read_only:true}],
+  volumes:[{type:'bind',source:path.join(root,'Codigos'),target:'/app',read_only:true}],
   ports:['127.0.0.1:5092:8000'],tmpfs:['/tmp'],
   environment:{PYTHON_DOTENV_DISABLED:'1',PYTHONDONTWRITEBYTECODE:'1',APP_ENV:'development',
    EDUFAST_ENEM_DEMO:'1',DB_URL:'sqlite:////tmp/edufast-enem-demo.sqlite',

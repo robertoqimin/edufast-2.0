@@ -8,13 +8,16 @@ Manutenção (consolidação de documentos, migração de controllers antigos) f
 Este é um plano de trabalho, não uma promessa de prazo. Migrations continuam sendo
 propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`.
 
+> **Atualização em 22/11/2026:** o banco foi trocado para **PostgreSQL 17** antes da A2,
+> a pedido do usuário. Ver [relatório da troca](../testes/MIGRACAO_POSTGRESQL_2026-11-22.md).
+
 ## 1. Diagnóstico
 
 | # | Constatação | Evidência | Impacto |
 | --- | --- | --- | --- |
 | D1 | MS01–MS04 e o painel Supremo só funcionam em bancos de demonstração | Migrations 002–007 e `control_plane/migrations/001_central.sql` pendentes; módulos respondem 503 sem as tabelas | Nada do que foi entregue desde outubro está disponível numa instalação persistente |
 | D2 | Não há registro confiável da versão do esquema | `educafast_migracoes` (criada pela 003) tem apenas `versao`; 004–007 não gravam nela; cada módulo confere suas tabelas isoladamente | Impossível dizer com segurança em que versão cada escola está; atualizar várias escolas fica arriscado |
-| D3 | Banco novo exige aplicar 7 scripts em sequência | `Códigos/migrations/001`–`007` | Instalar um cliente novo é lento e sujeito a erro |
+| D3 | Banco novo exige aplicar 7 scripts em sequência | `Codigos/migrations/001`–`007` | Instalar um cliente novo é lento e sujeito a erro |
 | D4 | Dois sistemas de notas convivem | Painéis de professor/aluno usam `NotaModel` (`notas`, sem período); o módulo acadêmico usa `academico_notas` com períodos, avaliações e boletim, mais uma tela de reconciliação | Professor pode lançar no lugar errado; aluno pode ver números divergentes |
 | D5 | Dois sistemas de cursos convivem | `curso_routes.py` (estrutura antiga) e `cursos_web_routes.py`/`cursos_api_routes.py` (MS04), com troca por `cursos_ms04.comum.habilitado` | Duas interfaces para a mesma tarefa; dívida dobrada |
 | D6 | Superior sem matrícula por disciplina como regra de acesso | `alunos_disciplinas` existe, mas o acesso ao conteúdo exige turma **e** disciplina (MS02) | Não dá para vender o superior com oferta por disciplina sem turma fixa |
@@ -26,7 +29,7 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 
 Ao final de 18/12/2026, ter uma **versão candidata identificada** que:
 
-1. Pode ser instalada do zero em MySQL por um caminho único e registra sua versão de esquema.
+1. Pode ser instalada do zero em PostgreSQL por um caminho único e registra sua versão de esquema.
 2. Tem um caminho de atualização revisado e ensaiado em cópia para as escolas que já existem.
 3. Tem um único sistema de notas e um único sistema de cursos em uso nas telas.
 4. Tem jornadas por perfil medidas e corrigidas (MS05) e o desenho do superior definido.
@@ -38,7 +41,7 @@ Ao final de 18/12/2026, ter uma **versão candidata identificada** que:
 | --- | --- | --- | --- |
 | A1 | Inventário de esquema somente leitura: estender `schema_preflight.py` para detectar quais das propostas 001–007 estão presentes, parciais ou ausentes | Relatório por instalação, sem expor dados pessoais | Detecta corretamente bancos sintéticos em cada estágio (vazio, até 003, até 007, parcial) |
 | A2 | Propor **008 — registro de versão**: completar `educafast_migracoes` (descrição, checksum, data de aplicação) e fazer cada migration registrar sua linha | SQL proposto e regra de verificação na inicialização | App recusa iniciar com esquema mais novo que o código ou com checksum divergente; nada é executado sem revisão |
-| A3 | **Esquema base para banco novo**: gerar um SQL único equivalente a 001–008 aplicadas em sequência | `migrations/base/esquema_v8.sql` | CI compara o resultado da base com o resultado sequencial em MySQL e não encontra diferenças |
+| A3 | **Esquema base para banco novo**: gerar um SQL único equivalente a 001–008 aplicadas em sequência | `migrations/base/esquema_v8.sql` | CI compara o resultado da base com o resultado sequencial em PostgreSQL e não encontra diferenças |
 | A4 | Ensaio de atualização: aplicar 002–008 numa **cópia** dos volumes das escolas Teste 01/02 e do banco central | Relatório com tempos, problemas e rollback ensaiado | Regressão completa passa sobre a cópia; backup/restauração de banco + uploads + `DATA_ENCRYPTION_KEY` recupera os dados |
 | A5 | **Sessão de revisão com o usuário**: uma ficha por migration (o que cria, riscos, dados afetados, como reverter) | Fichas + decisão registrada | Usuário aprova, rejeita ou pede ajuste em cada uma. Execução em banco persistente só depois disso |
 
@@ -82,7 +85,7 @@ tarefa em `Documentos/testes/`, com commit, ambiente e comando.
 
 ## 7. Critérios de aceite do ciclo
 
-- CI completo (SQLite + MySQL + HTTP + protocolo de design) aprovado na versão candidata.
+- CI completo (SQLite + PostgreSQL + HTTP + protocolo de design) aprovado na versão candidata.
 - Instalação do zero pelo esquema base e atualização pela sequência 002–008 resultam no mesmo esquema.
 - Backup e restauração ensaiados com banco, uploads e chave de criptografia.
 - Nenhuma tela grava em `notas` nem usa a edição antiga de cursos quando o MS04 está habilitado.
@@ -111,7 +114,7 @@ antes de iniciar, para que o ciclo parta de uma `main` atualizada.
 | Unificação de notas altera números exibidos | Testes de caracterização antes de mudar; reconciliação explícita, sem conversão silenciosa |
 | MS05 encontra problemas maiores que o tempo disponível | Corrigir P0/P1 e registrar o restante com números para o próximo ciclo |
 | Escopo do superior crescer | B4 limitado a estudo e contratos neste ciclo |
-| DDL MySQL sem rollback transacional | Sempre aplicar em cópia primeiro, com backup consistente e inspeção antes de repetir |
+| Migration com falha no meio | PostgreSQL desfaz a proposta inteira (BEGIN/COMMIT); ainda assim aplicar em cópia primeiro, com backup consistente |
 
 ## 10. Fora deste ciclo
 

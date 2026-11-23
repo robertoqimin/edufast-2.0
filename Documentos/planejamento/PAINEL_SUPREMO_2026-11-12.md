@@ -103,7 +103,7 @@ node infra/manage.cjs run /srv/edufast/r3 database plataforma-central
 ```
 
 **Revisão obrigatória antes de aplicar SQL:**
-[001_central.sql](../../Códigos/control_plane/migrations/001_central.sql) é uma
+[001_central.sql](../../Codigos/control_plane/migrations/001_central.sql) é uma
 proposta de seis tabelas para o banco **central vazio**. Não aplicar em bancos
 escolares. Não há migrations automáticas na inicialização. O painel recusa esquema
 pendente. Nenhuma migration foi aplicada em banco persistente nesta entrega.
@@ -174,5 +174,5 @@ central e as imagens das escolas existentes.
 ## Verificação
 
 [Relatório da entrega](../testes/PAINEL_SUPREMO_2026-11-12.md). A proposta SQL pode
-ser regenerada offline com `PYTHONPATH=Códigos python -m control_plane.schema`;
+ser regenerada offline com `PYTHONPATH=Codigos python -m control_plane.schema`;
 esse comando somente imprime SQL, não conecta nem aplica alterações.

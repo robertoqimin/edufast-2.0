@@ -124,7 +124,7 @@ def build():
             raw={'versao':0}, extra_headers=[{'key':'X-CSRF-Token','value':'{{csrf}}'}])]
     collection = {"info": {"name": "EduFast - concorrencia e idempotencia",
                             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-                            "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite MySQL; este fluxo verifica contratos HTTP e repeticao sequencial."},
+                            "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite PostgreSQL; este fluxo verifica contratos HTTP e repeticao sequencial."},
                   "variable": [{"key": "run_key", "value": ""}], "item": items}
     values = {"base_url": "http://127.0.0.1:5000", "admin_email": "u1@example.test",
               "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "superadmin_email": "u5@example.test", "password": "",

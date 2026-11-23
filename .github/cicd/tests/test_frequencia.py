@@ -364,7 +364,7 @@ class FrequenciaTests(unittest.TestCase):
         self.assertEqual(before,inspect(engine).get_table_names())
         self.assertEqual(self.clients[1].get('/admin/dashboard').status_code,200)
 
-    @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
+    @unittest.skipUnless(engine.dialect.name == 'postgresql', 'Concorrência exige PostgreSQL descartável')
     def test_two_simultaneous_submissions_have_one_confirmed_call(self):
         barrier = threading.Barrier(2)
         body = {'turma_disciplina_id':1,'dia':self.day,'aula':1,'presencas':{'1':'presente','2':'falta'}}
@@ -380,7 +380,7 @@ class FrequenciaTests(unittest.TestCase):
             self.assertEqual(db.query(ChamadaModel).count(),1)
             self.assertEqual(db.query(ChamadaModel).one().estado,'aprovada')
 
-    @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
+    @unittest.skipUnless(engine.dialect.name == 'postgresql', 'Concorrência exige PostgreSQL descartável')
     def test_two_simultaneous_corrections_have_one_current_revision(self):
         rid = self.proposal().json['id']
         barrier = threading.Barrier(2)
@@ -398,7 +398,7 @@ class FrequenciaTests(unittest.TestCase):
             self.assertEqual(db.query(ChamadaModel).filter_by(estado='aprovada').count(),1)
             self.assertEqual(db.get(ChamadaModel,rid).estado,'substituida')
 
-    @unittest.skipUnless(engine.dialect.name == 'mysql', 'Concorrência exige MySQL descartável')
+    @unittest.skipUnless(engine.dialect.name == 'postgresql', 'Concorrência exige PostgreSQL descartável')
     def test_two_simultaneous_decisions_have_one_approval(self):
         rid = self.legacy_pending().json['id']
         barrier = threading.Barrier(2)

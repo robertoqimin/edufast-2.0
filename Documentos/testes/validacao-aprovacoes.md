@@ -49,7 +49,7 @@ real. Não há alegação de ausência de toda vulnerabilidade possível.
 
 A implantação depende da revisão humana de `002_aprovacoes_e_permissoes.sql`,
 especialmente da quarentena dos professores legados. Consultar
-`Documentos/seguranca-aprovacoes.md` e `Códigos/migrations/README.md`.
+`Documentos/seguranca-aprovacoes.md` e `Codigos/migrations/README.md`.
 
 ## Atualização: iniciador manual e contas locais
 

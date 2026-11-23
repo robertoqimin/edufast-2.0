@@ -1,4 +1,4 @@
-"""Carga HTTP real em Gunicorn local e MySQL descartável; não simula navegador."""
+"""Carga HTTP real em Gunicorn local e PostgreSQL descartável; não simula navegador."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
@@ -37,8 +37,8 @@ def main():
         from werkzeug.security import generate_password_hash
         assert_disposable(engine)
         app = create_app()
-        if engine.dialect.name != 'mysql':
-            raise ValueError('Benchmark exige MySQL descartável; SQLite não homologa produção.')
+        if engine.dialect.name != 'postgresql':
+            raise ValueError('Benchmark exige PostgreSQL descartável; SQLite não homologa produção.')
         metadata = schema(engine)
         password_hash = generate_password_hash(PASSWORD)
         seed(engine, metadata, app.config['UPLOAD_FOLDER'], password_hash)
@@ -145,7 +145,7 @@ def main():
                     passed = passed and group['samples'] >= 100 and group['p95'] <= limit
         report.update(passed=passed, qualified=passed and not args.smoke, initial_students=5000,
                       limits={'tests_cpu': 1, 'tests_memory_mib': 768, 'database_cpu': 1, 'database_memory_mib': 1024},
-                      scope='HTTP local Gunicorn + MySQL; gerador e servidor compartilham CPU; sem navegador, proxy, rede limitada ou homologação do host físico')
+                      scope='HTTP local Gunicorn + PostgreSQL; gerador e servidor compartilham CPU; sem navegador, proxy, rede limitada ou homologação do host físico')
         peak = Path('/sys/fs/cgroup/memory.peak')
         report['generator_and_app_peak_memory_bytes'] = int(peak.read_text().strip()) if peak.exists() else None
     except Exception as error:

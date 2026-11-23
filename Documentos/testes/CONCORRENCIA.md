@@ -73,7 +73,7 @@ A comparação usa o HEAD do momento; para reproduzir a versão anterior, acresc
 ## Banco existente e implantação
 
 **Migration preparada para revisão, não executada no banco existente.** Ver
-[`Códigos/migrations/README.md`](../../Códigos/migrations/README.md).
+[`Codigos/migrations/README.md`](../../Codigos/migrations/README.md).
 Os testes criam esquemas novos e sintéticos, sem executar o arquivo de migration.
 
 Não foi inspecionado banco real nem afirmada ausência de duplicados nele. O preflight

@@ -3,7 +3,7 @@
   "estado": "backend_api",
   "ativado": true,
   "roteiro": "Documentos/planejamento/ESQUELETO_MS04_2026-11-20.md",
-  "modelo_proposto": "Códigos/migrations/propostas/ms04_modelo.json",
+  "modelo_proposto": "Codigos/migrations/propostas/ms04_modelo.json",
   "decisoes_confirmadas": [
     "Curso > modulo > capitulo > aula",
     "Retomar a ultima aula acessada"
@@ -17,22 +17,22 @@
   "servicos": [
     {
       "lote": "MS04-B",
-      "arquivo": "Códigos/app/services/cursos_ms04/autoria.py",
+      "arquivo": "Codigos/app/services/cursos_ms04/autoria.py",
       "funcao": "salvar_rascunho"
     },
     {
       "lote": "MS04-B",
-      "arquivo": "Códigos/app/services/cursos_ms04/publicacao.py",
+      "arquivo": "Codigos/app/services/cursos_ms04/publicacao.py",
       "funcao": "preparar_publicacao"
     },
     {
       "lote": "MS04-C",
-      "arquivo": "Códigos/app/services/cursos_ms04/retomada.py",
+      "arquivo": "Codigos/app/services/cursos_ms04/retomada.py",
       "funcao": "registrar_abertura"
     },
     {
       "lote": "MS04-D",
-      "arquivo": "Códigos/app/services/cursos_ms04/conteudo.py",
+      "arquivo": "Codigos/app/services/cursos_ms04/conteudo.py",
       "funcao": "validar_aula"
     }
   ],
@@ -292,7 +292,7 @@
     {
       "id": "MS04-010",
       "lote": "MS04-C",
-      "cenario": "Concorrencia MySQL nao duplica conclusao nem sobrescreve versao antiga",
+      "cenario": "Concorrencia PostgreSQL nao duplica conclusao nem sobrescreve versao antiga",
       "estado": "implementado_backend"
     },
     {
@@ -335,7 +335,7 @@
   "ativacao_persistente": "pendente_revisao_SQL_007",
   "frontend": "implementado",
   "testes_frontend": ".github/cicd/tests/test_cursos_frontend.py",
-  "testes_navegador": "Códigos/tests/verificar_cursos.cjs",
+  "testes_navegador": "Codigos/tests/verificar_cursos.cjs",
   "contrato": "Documentos/testes/API_CURSOS_MS04_2026-11-20.md",
   "testes_backend": ".github/cicd/tests/test_cursos_ms04.py"
 }

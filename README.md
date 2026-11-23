@@ -48,7 +48,7 @@ módulo responde 503 e o restante da aplicação continua funcionando.
 | Aprovações | Propostas docentes com idempotência, decisão transacional, conflito em segunda decisão | Presente (migration 002) |
 | Documentos e comunicação | Solicitações, envio/download autorizado, comunicados | Presente |
 | Identidade e gestão escolar | Nome, cores, tema, calendário, políticas, diário/boletim, privacidade | Presente (migration 003) |
-| Chamada — MS01 | Professor confirma a chamada da própria oferta; correção versionada; atestados com análise administrativa | CI SQLite/MySQL aprovado (migration 004) |
+| Chamada — MS01 | Professor confirma a chamada da própria oferta; correção versionada; atestados com análise administrativa | CI SQLite/MySQL aprovado em 19/11; regressão em PostgreSQL em 22/11 (migration 004) |
 | Espaço da disciplina — MS02 | Avisos, links e arquivos de estudo cifrados por turma/disciplina | CI aprovado (migration 005) |
 | Abas docentes — MS03 | Criar, renomear, ordenar e arquivar seções, preservando histórico | CI aprovado (migration 006) |
 | Cursos modulares — MS04 | Biblioteca → curso → módulos → capítulos → aulas de texto ou vídeo, materiais, publicação revisada, retomada e progresso | Implementado; demo ENEM; aceite manual pendente (migration 007) |
@@ -65,7 +65,7 @@ passando pelo fluxo de aprovação.
 ## Arquitetura
 
 Monólito **Flask** em camadas, com frontend **Jinja + CSS + React 18 local** servido
-pela própria aplicação e persistência **SQLAlchemy/MySQL 8.4**.
+pela própria aplicação e persistência **SQLAlchemy/PostgreSQL 17**.
 
 ```mermaid
 flowchart LR
@@ -74,13 +74,13 @@ flowchart LR
     R --> S[Controllers e services]
     S --> Rep[Repositories]
     Rep --> M[Models SQLAlchemy]
-    M --> DB[(MySQL da escola)]
+    M --> DB[(PostgreSQL da escola)]
     S --> F[Uploads cifrados]
 ```
 
-**Uma instalação por escola.** Cada cliente tem aplicação, MySQL, uploads, contas,
+**Uma instalação por escola.** Cada cliente tem aplicação, PostgreSQL, uploads, contas,
 segredos e domínio próprios. Um gateway HTTPS encaminha cada domínio à instância
-correta. O **painel Supremo** (`Códigos/control_plane`) é outra aplicação Flask, com
+correta. O **painel Supremo** (`Codigos/control_plane`) é outra aplicação Flask, com
 banco central próprio, e recebe das escolas apenas o diretório de pessoas
 (nome, e-mail, perfil e situação), sem senhas, notas ou documentos.
 
@@ -89,9 +89,9 @@ flowchart TB
     A[escola-a.dominio] --> G[Gateway HTTPS]
     B[escola-b.dominio] --> G
     P[painel.dominio] --> G
-    G --> AA[App escola A] --> DA[(MySQL A)]
-    G --> AB[App escola B] --> DB[(MySQL B)]
-    G --> AP[Painel Supremo] --> DP[(MySQL central)]
+    G --> AA[App escola A] --> DA[(PostgreSQL A)]
+    G --> AB[App escola B] --> DB[(PostgreSQL B)]
+    G --> AP[Painel Supremo] --> DP[(PostgreSQL central)]
     AA -. diretório por HTTPS .-> AP
     AB -. diretório por HTTPS .-> AP
 ```
@@ -99,7 +99,7 @@ flowchart TB
 Garantias preservadas em todas as entregas: autorização conferida no banco a cada
 requisição, CSRF, idempotência, controle de versão contra edição concorrente,
 arquivos privados e cifrados, e **nenhuma DDL executada ao iniciar**. Migrations
-são propostas versionadas em `Códigos/migrations/` e só são aplicadas após revisão.
+são propostas versionadas em `Codigos/migrations/` e só são aplicadas após revisão.
 
 Detalhes: [arquitetura](Documentos/arquitetura/ARQUITETURA.md),
 [instâncias por cliente](Documentos/planejamento/INSTANCIAS_POR_CLIENTE_2026-11-11.md),
@@ -113,7 +113,7 @@ Teste-de-software/
 ├── .github/
 │   ├── workflows/            # ci, cloud-instances, deploy (manual), tdd
 │   └── cicd/                 # Executor do CI, imagem, produção, testes HTTP/Postman
-├── Códigos/                  # Aplicação
+├── Codigos/                  # Aplicação
 │   ├── app/
 │   │   ├── routes/           # Rotas e guards
 │   │   ├── controllers/      # Operações legadas da aplicação
@@ -162,9 +162,9 @@ Nunca as use em produção.
   [cursos ENEM](Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md) e
   [painel Supremo](Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md).
 
-**Instalação própria:** copie `Códigos/.env.example` para `Códigos/.env`, defina
-`SECRET_KEY` (32+ caracteres), `DB_PASSWORD` e `MYSQL_ROOT_PASSWORD`, revise o
-[procedimento de banco](Códigos/migrations/README.md) e execute em `Códigos/`:
+**Instalação própria:** copie `Codigos/.env.example` para `Codigos/.env`, defina
+`SECRET_KEY` (32+ caracteres), `DB_PASSWORD` e `POSTGRES_ADMIN_PASSWORD`, revise o
+[procedimento de banco](Codigos/migrations/README.md) e execute em `Codigos/`:
 
 ```bash
 docker compose up -d --build
@@ -178,10 +178,10 @@ Mais comandos e solução de problemas: [guia de execução](Documentos/operacao
 ## Testes e CI/CD
 
 ```bash
-python .github/cicd/ci.py                                   # SQLite + MySQL + imagem + HTTPS, ambiente descartável
+python .github/cicd/ci.py                                   # SQLite + PostgreSQL + imagem + HTTPS, ambiente descartável
 python .github/cicd/run_cursos_backend.py --suite regressao # Regressão e MS04 em containers isolados
 node --test infra/test_*.cjs                                # Geração, operação e cadastro de instâncias
-python Códigos/tests/verificar_protocolo_design.py          # Protocolo visual
+python Codigos/tests/verificar_protocolo_design.py          # Protocolo visual
 ```
 
 O workflow `ci.yml` executa a regressão, os fluxos HTTP por perfil, o painel
@@ -200,7 +200,7 @@ em banco persistente.**
 | --- | --- |
 | Interface | HTML, Jinja, CSS com tokens, JavaScript, React 18 local, fonte DM Sans local |
 | Aplicação | Python 3.12, Flask 3.1, Gunicorn |
-| Dados | SQLAlchemy 2.0, PyMySQL, MySQL 8.4; `cryptography` para arquivos e textos cifrados |
+| Dados | SQLAlchemy 2.0, psycopg 3, PostgreSQL 17; `cryptography` para arquivos e textos cifrados |
 | Infraestrutura | Docker Compose, Nginx (instâncias) e Caddy (instalação única), scripts Node |
 | Testes | unittest, Node test runner, Playwright, Postman/Newman, GitHub Actions |
 

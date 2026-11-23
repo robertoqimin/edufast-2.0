@@ -34,7 +34,7 @@ jobs:
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck rhysd/actionlint:1.7.7 .github/cicd/deploy.sh .github/cicd/remote.sh
       - name: Validar regras unitarias sem banco
         shell: bash
-        run: PYTHONPATH=Códigos python -m unittest discover -s .github/cicd/tests/unit -v
+        run: PYTHONPATH=Codigos python -m unittest discover -s .github/cicd/tests/unit -v
       - name: Executar o mesmo CI local e remoto
         shell: bash
         run: python .github/cicd/ci.py 2>&1 | tee ci-run.log
@@ -44,21 +44,25 @@ jobs:
         run: |
           node --version
           npm ci --prefix "$GITHUB_WORKSPACE/.github/cicd/http" --no-audit --no-fund
-          python -m pip install -r Códigos/requirements.txt
+          python -m pip install -r Codigos/requirements.txt
       - name: Validar fluxos HTTP e persistencia por perfil
         shell: bash
         run: |
           mkdir -p .ci-results/mutations
           python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js 2>&1 | tee .ci-results/mutations/http.log
+      - name: Validar fluxos HTTP por perfil em PostgreSQL descartavel
+        shell: bash
+        run: |
+          python .github/cicd/run_postman.py --newman .github/cicd/http/node_modules/newman/bin/newman.js --database postgresql 2>&1 | tee .ci-results/mutations/http-postgresql.log
       - name: Testar painel exclusivo do proprietario em bancos descartaveis
         env:
           EDUFAST_TEST_DISPOSABLE: '1'
-          PYTHONPATH: Códigos
+          PYTHONPATH: Codigos
           DB_URL: 'sqlite:///:memory:'
           SECRET_KEY: 'synthetic-school-import-only-ci-2026-not-a-runtime-key'
         run: python -m unittest discover -s .github/cicd/tests -p test_control_plane.py -v
       - name: Conferir protocolo original de design
-        run: python Códigos/tests/verificar_protocolo_design.py
+        run: python Codigos/tests/verificar_protocolo_design.py
       - name: Validar protecao de envio na interface
         run: node --test .github/cicd/test_submission.cjs
       - name: Validar isolamento dos ambientes gerados

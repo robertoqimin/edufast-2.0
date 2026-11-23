@@ -8,7 +8,7 @@ from app.database import Base, engine as app_engine
 from app import models  # noqa: F401 — registra todas as tabelas da escola
 from schema_inventory import APLICADA, AUSENTE, PARCIAL, inventory, load_migrations
 
-MYSQL = app_engine.dialect.name == 'mysql'
+REAL_DB = app_engine.dialect.name == 'postgresql'
 
 
 def table_count(engine):
@@ -60,8 +60,8 @@ class SqliteInventoryTests(TestCase):
             self.assertEqual(connection.execute(text('SELECT COUNT(*) FROM educafast_migracoes')).scalar_one(), 1)
 
 
-@skipUnless(MYSQL, 'Inventario MySQL requer o runner descartavel')
-class MysqlInventoryTests(TestCase):
+@skipUnless(REAL_DB, 'Inventario PostgreSQL requer o runner descartavel')
+class PostgresInventoryTests(TestCase):
     @classmethod
     def setUpClass(cls):
         if os.getenv('EDUFAST_TEST_DISPOSABLE') != '1':
@@ -71,16 +71,16 @@ class MysqlInventoryTests(TestCase):
         Base.metadata.drop_all(app_engine)
         Base.metadata.create_all(app_engine)
 
-    def test_mysql_reflection_matches_every_proposed_migration(self):
+    def test_postgresql_reflection_matches_every_proposed_migration(self):
         report = inventory(app_engine)
         not_applied = [item for item in report['migrations'] if item['situacao'] != APLICADA]
         self.assertEqual(not_applied, [])
         self.assertEqual(report['versao_estrutural'], load_migrations()[-1]['versao'])
 
-    def test_mysql_not_null_video_is_detected_as_pending_007(self):
+    def test_postgresql_not_null_video_is_detected_as_pending_007(self):
         with app_engine.begin() as connection:
             connection.execute(text('DELETE FROM curso_aulas'))
-            connection.execute(text('ALTER TABLE curso_aulas MODIFY COLUMN video_id VARCHAR(11) NOT NULL'))
+            connection.execute(text('ALTER TABLE curso_aulas ALTER COLUMN video_id SET NOT NULL'))
         item = {i['versao']: i for i in inventory(app_engine)['migrations']}[7]
         self.assertEqual(item['situacao'], PARCIAL)
         self.assertEqual(item['faltando'], ['coluna curso_aulas.video_id aceita nulo'])

@@ -1,4 +1,4 @@
-"""HTTP contracts; real concurrency is required on disposable MySQL, never mocked DB."""
+"""HTTP contracts; real concurrency is required on disposable PostgreSQL, never mocked DB."""
 import io
 import os
 from pathlib import Path
@@ -22,7 +22,7 @@ from app.models import (AlunoModel, ProfessorModel, UsuarioModel, TurmaModel,
                         AtividadeModel, IdempotenciaModel, SolicitacaoAlteracaoModel)
 
 
-MYSQL = engine.dialect.name == "mysql"
+REAL_DB = engine.dialect.name == "postgresql"
 
 
 class MutationApiTests(TestCase):
@@ -259,12 +259,12 @@ class MutationApiTests(TestCase):
             run_seed()
         self.assertEqual(self.count(UsuarioModel), 4)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_student_document(self):
         self.statuses(self.pair("/aluno/documentos/upload", lambda _: self.upload(solicitacao_id="1"), user=2), [302, 409])
         self.assert_document_winner(1)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_teacher_document(self):
         self.statuses(self.pair("/professor/documentos/upload", lambda i: self.upload(solicitacao_id="2", idempotency_key=f"teacher-doc-{i}"), user=3), [302, 409])
         self.assertEqual(self.count(DocumentoModel), 0)
@@ -279,7 +279,7 @@ class MutationApiTests(TestCase):
             self.assertEqual(row.status, "enviado")
             self.assertEqual(row.documento_id, db.query(DocumentoModel).one().id)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_student_edit_with_photo(self):
         hook = self.version_hook("app.controllers.admin_controller")
         self.statuses(self.pair("/admin/alunos/1/editar", lambda _: self.student_edit(
@@ -289,7 +289,7 @@ class MutationApiTests(TestCase):
             self.assertTrue((Path(self.folder.name) / db.get(AlunoModel, 1).foto_perfil).exists())
         self.assertEqual(len(self.files()), 1)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_teacher_edit_with_photo(self):
         self.statuses(self.pair("/admin/professores/1/editar", lambda _: self.teacher_edit(
             foto_perfil=(io.BytesIO(b"synthetic-photo"), "new.png")),
@@ -299,7 +299,7 @@ class MutationApiTests(TestCase):
             self.assertTrue((Path(self.folder.name) / db.get(ProfessorModel, 1).foto_perfil).exists())
         self.assertEqual(len(self.files()), 1)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_existing_grade(self):
         with get_session() as db:
             db.add(NotaModel(aluno_id=1, disciplina_id=1, professor_id=1, nota=5))
@@ -311,14 +311,14 @@ class MutationApiTests(TestCase):
             self.assertEqual(note.versao, 2)
             self.assertEqual(float(note.nota), 8)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_new_grade(self):
         self.statuses(self.pair("/professor/notas/salvar", lambda i: self.grade(idempotency_key=f"new-grade-{i}"), user=3), [302, 409])
         self.assertEqual(self.count(NotaModel), 0)
         self.approve_all()
         self.assertEqual(self.count(NotaModel), 1)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_repeated_creations(self):
         cases = [
             ("/admin/comunicados", 1, lambda: {"titulo": "Aviso", "mensagem": "Texto"}, ComunicadoModel, 1),
@@ -338,7 +338,7 @@ class MutationApiTests(TestCase):
                 self.assertEqual(self.count(model), expected)
         self.assertEqual(len(self.files()), 3)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_distinct_uploads_create_one_geral(self):
         self.statuses(self.pair("/arquivos/upload", lambda i: self.upload(aluno_id="1", idempotency_key=f"intent-{i}")), [201, 201])
         with get_session() as db:
@@ -346,7 +346,7 @@ class MutationApiTests(TestCase):
         self.assertEqual(self.count(DocumentoModel), 2)
         self.assertEqual(len(self.files()), 2)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_distinct_teachers_share_one_class_subject(self):
         with get_session() as db:
             db.query(ProfessorTurmaModel).delete()
@@ -361,7 +361,7 @@ class MutationApiTests(TestCase):
         self.assertEqual(self.count(ProfessorTurmaModel), 2)
         self.assertEqual(self.count(TurmaDisciplinaModel), 2)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_unique_registrations_and_links(self):
         cases = [
             ("/cadastro/alunos", lambda _: {"nome": "Novo", "email": "new@example.test", "senha": "test-password-123", "matricula": "M2"}, UsuarioModel, 5),
@@ -379,7 +379,7 @@ class MutationApiTests(TestCase):
                 self.assertEqual(sum(r.status_code in {201, 302} for r in responses), 1)
                 self.assertEqual(self.count(model), expected)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_create_admin_preserves_accounts(self):
         barrier = threading.Barrier(2)
         def create(_):
@@ -392,7 +392,7 @@ class MutationApiTests(TestCase):
         self.assertEqual(sorted(r.returncode for r in results), [0, 1])
         self.assertEqual(self.count(UsuarioModel), 5)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_distinct_accounts_share_unique_profile_fields(self):
         cases = [
             ("/cadastro/alunos", lambda i: {"nome": "Novo", "email": f"cpf{i}@example.test", "senha": "test-password-123", "matricula": f"CPF{i}", "cpf": "55555555555"}, AlunoModel),
@@ -406,7 +406,7 @@ class MutationApiTests(TestCase):
                 self.assertEqual(self.count(UsuarioModel), before_users + 1)
                 self.assertEqual(self.count(model), before_profiles + 1)
 
-    @skipUnless(MYSQL, "Concurrency requires the MySQL runner")
+    @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_key_with_different_payloads_has_one_winner(self):
         responses = self.pair("/admin/comunicados", lambda i: {
             "titulo": "Aviso", "mensagem": f"Mensagem {i}", "idempotency_key": "conflicting-key"})

@@ -29,7 +29,7 @@ function configuration() {
     Object.assign(app.environment, {APP_ENV: 'development', PYTHON_DOTENV_DISABLED: '1',
       DB_URL: '', DB_NAME: `edufast_${id}`, EDUFAST_TWO_SCHOOLS_TEST: '1', EDUFAST_TEST_SCHOOL: id,
       TRUSTED_HOSTS: `${host},localhost,127.0.0.1`, RELEASE_ID: IMAGE});
-    db.environment.MYSQL_DATABASE = `edufast_${id}`;
+    db.environment.POSTGRES_DB = `edufast_${id}`;
   }
   return result;
 }

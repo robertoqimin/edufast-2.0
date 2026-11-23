@@ -25,11 +25,13 @@ class ParseMigrationTests(unittest.TestCase):
             CREATE INDEX ix_solicitacoes_id ON solicitacoes (id);
             ALTER TABLE curso_aulas MODIFY COLUMN video_id VARCHAR(11) NULL;
             ALTER TABLE outra MODIFY COLUMN nome VARCHAR(10) NOT NULL;
+            ALTER TABLE aulas ALTER COLUMN resumo DROP NOT NULL;
+            ALTER TABLE aulas ALTER COLUMN titulo SET NOT NULL;
         """)
         self.assertEqual(parsed['tables'], ['solicitacoes'])
         self.assertEqual(parsed['columns'], [('usuarios', 'estado'), ('usuarios', 'auth_version')])
         self.assertEqual(parsed['indexes'], [('solicitacoes', 'ix_solicitacoes_id')])
-        self.assertEqual(parsed['nullable'], [('curso_aulas', 'video_id')])
+        self.assertEqual(parsed['nullable'], [('curso_aulas', 'video_id'), ('aulas', 'resumo')])
 
     def test_repository_migrations_are_ordered_and_detectable(self):
         found = load_migrations()

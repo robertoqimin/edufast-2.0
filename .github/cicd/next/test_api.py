@@ -146,5 +146,5 @@ def make_test(case):
 
 BACKEND = os.environ.get('NEXT_BACKEND', 'sqlite')
 for case in API:
-    if BACKEND in case.get('backends', ['sqlite', 'mysql']):
+    if BACKEND in case.get('backends', ['sqlite', 'postgresql']):
         setattr(ApiTests, 'test_'+case['id'].replace('-', '_'), make_test(case))

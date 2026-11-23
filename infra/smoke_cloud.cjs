@@ -68,7 +68,7 @@ async function main() {
     assert.equal((await request('a.example.test', '/admin/dashboard', 'GET', null, {Cookie: cookie})).status, 200);
     assert.ok([401, 403].includes((await request('b.example.test', '/admin/dashboard', 'GET', null, {Cookie: cookie})).status));
     docker('exec', '-T', 'app-cliente-a', 'python', '-c',
-      "import socket; blocked=False\ntry:\n socket.create_connection(('db-cliente-b',3306),timeout=3).close()\nexcept OSError:\n blocked=True\nassert blocked, 'MySQL B acessivel por A'");
+      "import socket; blocked=False\ntry:\n socket.create_connection(('db-cliente-b',5432),timeout=3).close()\nexcept OSError:\n blocked=True\nassert blocked, 'PostgreSQL B acessivel por A'");
     docker('exec', '-T', 'app-cliente-a', 'python', '-c', "from pathlib import Path; Path('/app/uploads/probe.txt').write_text('cliente-a')");
     const beforeB = docker('ps', '-q', 'app-cliente-b').trim();
     backup(dir, 'cliente-a', path.join(root, 'backup'));
@@ -79,7 +79,7 @@ async function main() {
     assert.equal(docker('exec', '-T', 'app-cliente-a', 'cat', '/app/uploads/probe.txt').trim(), 'cliente-a');
     assert.equal(docker('ps', '-q', 'app-cliente-b').trim(), beforeB);
     assert.equal((await request('b.example.test', '/healthz')).status, 200);
-    console.log('Piloto sintetico: HTTPS, login, rejeicao cruzada de JWT/cookie, rede MySQL, backup e persistencia aprovados.');
+    console.log('Piloto sintetico: HTTPS, login, rejeicao cruzada de JWT/cookie, rede PostgreSQL, backup e persistencia aprovados.');
   } finally {
     // UUID criado acima; nunca recebe nome de projeto ou diretório externo.
     docker('down', '-v', '--remove-orphans');

@@ -15,25 +15,25 @@ REPORT = ROOT / ".ci-results" / "mutations"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mysql", action="store_true", help="Require disposable RACE_TEST_DB_URL")
+    parser.add_argument("--postgresql", action="store_true", help="Require disposable RACE_TEST_DB_URL")
     parser.add_argument("--base-ref", default="HEAD", help="Immutable comparison base, default HEAD")
     args = parser.parse_args()
     REPORT.mkdir(parents=True, exist_ok=True)
     baseline = REPORT / "baseline"
     baseline.mkdir(exist_ok=True)
     base_commit = subprocess.check_output(["git", "rev-parse", "--verify", "--end-of-options", args.base_ref + "^{commit}"], cwd=ROOT, text=True).strip()
-    archive = subprocess.check_output(["git", "archive", "--format=zip", base_commit, "Códigos", ".github/cicd"], cwd=ROOT)
+    archive = subprocess.check_output(["git", "archive", "--format=zip", base_commit, "Codigos", ".github/cicd"], cwd=ROOT)
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         source.extractall(baseline)
     report = {"base_commit": base_commit,
-              "backend": "mysql" if args.mysql else "sqlite", "stages": []}
+              "backend": "postgresql" if args.postgresql else "sqlite", "stages": []}
     with tempfile.TemporaryDirectory(prefix="edufast-mutations-") as folder:
-        url = os.environ.get("RACE_TEST_DB_URL") if args.mysql else "sqlite:///" + (Path(folder) / "tests.sqlite").as_posix()
-        if args.mysql:
+        url = os.environ.get("RACE_TEST_DB_URL") if args.postgresql else "sqlite:///" + (Path(folder) / "tests.sqlite").as_posix()
+        if args.postgresql:
             from sqlalchemy.engine import make_url
             parsed = make_url(url or "")
-            if parsed.get_backend_name() != "mysql" or not (parsed.database or "").startswith("race_ci_"):
-                raise RuntimeError("MySQL database name must start with race_ci_; use an empty disposable DB")
+            if parsed.get_backend_name() != "postgresql" or not (parsed.database or "").startswith("race_ci_"):
+                raise RuntimeError("PostgreSQL database name must start with race_ci_; use an empty disposable DB")
         env = {**os.environ, "DB_URL": url, "EDUFAST_TEST_DISPOSABLE": "1",
                "APP_ENV": "testing", "SECRET_KEY": "synthetic-test-secret-with-at-least-32-characters",
                "UPLOAD_FOLDER": str(Path(folder) / "uploads"), "PYTHONIOENCODING": "utf-8",
@@ -42,7 +42,7 @@ def main():
                   ("new-api", ROOT, "test_concurrency.py"),
                   ("regression-existing", ROOT, "test_application.py")]
         for name, checkout, pattern in stages:
-            env["PYTHONPATH"] = str(checkout / "Códigos") + os.pathsep + os.environ.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = str(checkout / "Codigos") + os.pathsep + os.environ.get("PYTHONPATH", "")
             result = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
                                      str(checkout / ".github/cicd/tests"), "-p", pattern, "-v"],
                                     env=env, cwd=folder, capture_output=True)

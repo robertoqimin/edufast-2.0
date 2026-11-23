@@ -1,4 +1,4 @@
-"""Contratos de integração em banco descartável, executados em SQLite e MySQL."""
+"""Contratos de integração em banco descartável, executados em SQLite e PostgreSQL."""
 import io
 import unittest
 from unittest.mock import patch

@@ -1,0 +1,65 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask_app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      FLASK_BIND_HOST: "0.0.0.0"
+      FLASK_DEBUG: "0"
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
+      UPLOAD_FOLDER: ${UPLOAD_FOLDER:-uploads}
+      DB_HOST: db
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-app_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+      DB_NAME: ${DB_NAME:-app_web}
+    volumes:
+      - .:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Defina POSTGRES_ADMIN_PASSWORD no arquivo .env}
+      POSTGRES_DB: ${DB_NAME:-app_web}
+      APP_DB_USER: ${DB_USER:-app_user}
+      APP_DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+    configs:
+      - source: postgres-app-role
+        target: /docker-entrypoint-initdb.d/10-app-role.sh
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=\"$$APP_DB_PASSWORD\" psql -h 127.0.0.1 -U \"$$APP_DB_USER\" -d \"$$POSTGRES_DB\" -tAc 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+configs:
+  postgres-app-role:
+    # Superusuario so administra o servidor; a aplicacao usa papel proprio, dono apenas do banco.
+    content: |
+      psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" \
+        -v app_user="$$APP_DB_USER" -v app_password="$$APP_DB_PASSWORD" -v app_db="$$POSTGRES_DB" <<'SQL'
+      CREATE ROLE :"app_user" LOGIN PASSWORD :'app_password' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+      ALTER DATABASE :"app_db" OWNER TO :"app_user";
+      REVOKE ALL ON DATABASE :"app_db" FROM PUBLIC;
+      GRANT CONNECT, TEMPORARY ON DATABASE :"app_db" TO :"app_user";
+      SQL

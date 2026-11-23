@@ -18,11 +18,11 @@ try {
     $launcher = Join-Path $temporary 'iniciar-educafast.ps1'
     $env:EDUFAST_MANUAL_PORT = '5999'
     & $launcher -PrepararBancoNovo -SemNavegador -Porta 5050
-    $configPath = Join-Path $temporary '.ci-results/manual-restaurado/.env'
+    $configPath = Join-Path $temporary '.ci-results/manual-postgres/.env'
     $first = [IO.File]::ReadAllText($configPath)
     $lines = $first.Trim().Split("`n")
     Assert-True ($lines.Count -eq 7) 'Expected seven separate configuration values.'
-    foreach ($name in @('SECRET_KEY', 'DB_PASSWORD', 'MYSQL_ROOT_PASSWORD')) {
+    foreach ($name in @('SECRET_KEY', 'DB_PASSWORD', 'POSTGRES_ADMIN_PASSWORD')) {
         Assert-True ($first -match "(?m)^$name=[a-f0-9]{64}`r?$") "Invalid generated secret: $name"
     }
     Assert-True ($env:EDUFAST_MANUAL_PORT -eq '5999') 'Caller environment was not restored.'

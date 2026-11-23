@@ -2,7 +2,7 @@
 
 [Início da revisão](README.md)
 
-Os testes executam SQL e transações reais em SQLite e MySQL descartáveis. Os casos concorrentes usam MySQL; SQLite em memória não representa a concorrência do servidor de produção.
+Os testes executam SQL e transações reais em SQLite e PostgreSQL descartáveis. Os casos concorrentes usam PostgreSQL; SQLite em memória não representa a concorrência do servidor de produção.
 
 ## Cenários de integração
 
@@ -25,7 +25,7 @@ O legado é reconstruído a partir de snapshots SQL de SQLite/MySQL capturados d
 
 Vínculos legados ambíguos não podem conceder novas atribuições docentes automaticamente. A migração deve registrar pendências de revisão quando não houver uma relação inequívoca. O teste de preservação de nota não autoriza inferir acesso docente futuro a partir de dados históricos.
 
-## Concorrência HTTP no MySQL
+## Concorrência HTTP no PostgreSQL
 
 | ID | Execução | Resultado |
 | --- | --- | --- |
@@ -34,14 +34,14 @@ Vínculos legados ambíguos não podem conceder novas atribuições docentes aut
 
 Os clientes começam por uma barreira de sincronização e consultam o mesmo banco real. Não são duas chamadas sequenciais nem duas respostas simuladas.
 
-Esses dois casos não são descobertos no perfil SQLite. O manifesto informa o banco de cada cenário; isso não é `skip` convertido em aprovação. A execução MySQL permanece obrigatória para validar essa parte do contrato.
+Esses dois casos não são descobertos no perfil SQLite. O manifesto informa o banco de cada cenário; isso não é `skip` convertido em aprovação. A execução PostgreSQL permanece obrigatória para validar essa parte do contrato.
 
 ## Recuperação e arquivos
 
-O CI existente já exercita dump/restauração MySQL e backup/restauração de uploads descartáveis. Estes testes novos acrescentam a migração de conteúdo e as referências aos arquivos. O ensaio de restauração em um servidor real continua necessário antes do uso operacional.
+O CI existente já exercita dump/restauração PostgreSQL e backup/restauração de uploads descartáveis. Estes testes novos acrescentam a migração de conteúdo e as referências aos arquivos. O ensaio de restauração em um servidor real continua necessário antes do uso operacional.
 
 ## Limites e evolução
 
-SQLite precisa ter verificação de chaves estrangeiras habilitada durante os ensaios de integridade. MySQL é a referência final de concorrência e DDL. A implementação não pode contornar testes de integridade desligando restrições.
+SQLite precisa ter verificação de chaves estrangeiras habilitada durante os ensaios de integridade. PostgreSQL é a referência final de concorrência e DDL. A implementação não pode contornar testes de integridade desligando restrições.
 
 Ao descobrir uma estrutura legada adicional ou ambígua, acrescentar uma fixture e o cenário correspondente. O snapshot atual representa o esquema existente, mas a massa inicial não cobre todas as combinações possíveis de uma instalação em uso.

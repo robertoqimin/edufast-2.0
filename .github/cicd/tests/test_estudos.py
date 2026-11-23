@@ -237,7 +237,7 @@ class StudyTests(TestCase):
         self.assertTrue(all(r['estado']=='publicado' for r in first['conteudos']))
 
     def test_missing_optional_schema_is_503_and_startup_does_not_apply_ddl(self):
-        # Drop dependent MS03 tables first, including on strict MySQL FK checks.
+        # Drop dependent MS03 tables first; PostgreSQL enforces FKs on DROP.
         for model in (AuditoriaSecaoEstudoModel,ConteudoSecaoEstudoModel,SecaoEstudoModel):
             model.__table__.drop(engine)
         AuditoriaEstudoModel.__table__.drop(engine)
@@ -291,19 +291,18 @@ class StudyTests(TestCase):
         with get_session() as db:
             db.add(ConteudoEstudoModel(turma_disciplina_id=1,autor_id=3,tipo='arquivo',
                 titulo='Inválido',arquivo='a'*32+'.enc',mime='application/pdf',tamanho=None))
-            # PyMySQL classifies CHECK error 3819 as OperationalError; SQLite
-            # uses IntegrityError. Require the specific constraint in both.
+            # PostgreSQL reports CHECK as SQLSTATE 23514 (IntegrityError), as
+            # SQLite does. Require the specific constraint in both.
             with self.assertRaises((IntegrityError,OperationalError)) as rejected:
                 db.flush()
             self.assertIn('ck_estudo_recurso',str(rejected.exception.orig))
-            if engine.dialect.name == 'mysql':
-                self.assertEqual(rejected.exception.orig.args[0],3819)
-            else:
-                self.assertIsInstance(rejected.exception,IntegrityError)
+            self.assertIsInstance(rejected.exception,IntegrityError)
+            if engine.dialect.name == 'postgresql':
+                self.assertEqual(rejected.exception.orig.sqlstate,'23514')
             db.rollback()
             self.assertEqual(db.query(ConteudoEstudoModel).count(),0)
 
-    @skipUnless(engine.dialect.name=='mysql','Concorrência exige MySQL descartável')
+    @skipUnless(engine.dialect.name=='postgresql','Concorrência exige PostgreSQL descartável')
     def test_concurrent_draft_edits_have_one_effect(self):
         rid=self.create().json['id']
         barrier=threading.Barrier(2)

@@ -9,9 +9,9 @@
 | API e persistência | `test_application.py` | Login real, JWT, perfis, cadastros e turmas em banco descartável |
 | Contratos administrativos | `test_admin_characterization.py` | Formatos, consultas e validações; combina regras e integração com fixtures |
 | Aprovações e permissões | `test_approvals_security.py` | Autorização, propostas, revogação e propriedade de documentos |
-| Espaço da disciplina e abas | `test_estudos.py`, `test_estudo_abas.py` | Rascunhos, aprovação, vínculos, arquivo cifrado, arquivamento, versões e concorrência MySQL |
-| Backend de cursos MS04 | `test_cursos_ms04.py` | 32 casos: autoria versionada, publicação, retomada, texto/vídeo, materiais, legado e concorrência real MySQL; sem frontend |
-| Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige MySQL |
+| Espaço da disciplina e abas | `test_estudos.py`, `test_estudo_abas.py` | Rascunhos, aprovação, vínculos, arquivo cifrado, arquivamento, versões e concorrência PostgreSQL |
+| Backend de cursos MS04 | `test_cursos_ms04.py` | 32 casos: autoria versionada, publicação, retomada, texto/vídeo, materiais, legado e concorrência real PostgreSQL; sem frontend |
+| Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige PostgreSQL |
 | Restauração funcional | `test_restauracao.py` | Superperfil, identidade, calendário, regras escolares, privacidade e aprovações |
 | Massa de teste manual | `test_manual_fixtures.py` | Repetição, preservação de contas e bloqueio de preparação fora do ambiente autorizado |
 | Fluxos HTTP encadeados | `../run_postman.py`, `Documentos/testes/postman/` na raiz | Newman, servidor e SQLite temporários; logins por perfil, propostas/aprovações e efeitos finais |
@@ -25,13 +25,14 @@ Os arquivos existentes combinam camadas quando necessário para verificar um com
 Na raiz, unitários puros em PowerShell:
 
 ```powershell
-$env:PYTHONPATH = Join-Path (Get-Location) 'Códigos'
+$env:PYTHONPATH = Join-Path (Get-Location) 'Codigos'
 python -m unittest discover -s .github/cicd/tests/unit -v
 ```
 
-Em Bash: `PYTHONPATH=Códigos python -m unittest discover -s .github/cicd/tests/unit -v`.
+Em Bash: `PYTHONPATH=Codigos python -m unittest discover -s .github/cicd/tests/unit -v`.
 
-Regressão completa isolada em SQLite e MySQL: `python .github/cicd/ci.py`.
+Regressão completa isolada em SQLite e PostgreSQL: `python .github/cicd/ci.py`.
+Aplicação real das migrations PostgreSQL sobre o esquema legado: `test_migrations_postgresql.py`.
 Esse executor também valida imagem, HTTPS, restauração e persistência de uploads.
 O CI executa os unitários antes da construção e volta a descobri-los na regressão
 completa: a repetição é intencional para oferecer feedback rápido e validar o runtime.
@@ -63,7 +64,7 @@ A rodada MySQL da etapa anterior não foi repetida nesta movimentação dos test
 
 `test_cursos_frontend.py` verifica HTML e formulários pelos mesmos serviços/API.
 A regressão `python .github/cicd/run_cursos_backend.py --suite regressao` inclui
-esses casos em SQLite/MySQL descartáveis. O navegador usa `Códigos/tests/verificar_cursos.cjs`
+esses casos em SQLite/PostgreSQL descartáveis. O navegador usa `Codigos/tests/verificar_cursos.cjs`
 somente na fixture `enem_demo_server.py --local` (5093), com `EDUFAST_ENEM_DEMO=1`,
 SQLite em memória e chaves sintéticas. Não executar o navegador automatizado na
 demo manual 5092, pois ele altera progresso, rascunhos e publicação.

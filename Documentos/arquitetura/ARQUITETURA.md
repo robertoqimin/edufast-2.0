@@ -2,7 +2,7 @@
 
 [Início](../../README.md) · [Documentação](../README.md)
 
-Este documento descreve o código presente em `Códigos/`. Propostas futuras são identificadas separadamente. Revisão documental: 26/10/2026.
+Este documento descreve o código presente em `Codigos/`. Propostas futuras são identificadas separadamente. Revisão documental: 26/10/2026.
 
 ## Organização atual
 
@@ -10,7 +10,7 @@ O sistema é um monólito Flask em camadas. A aplicação atende páginas HTML/J
 
 | Componente | Responsabilidade | Local |
 | --- | --- | --- |
-| Entrada | Cria a aplicação e inicia o servidor de desenvolvimento | `Códigos/app.py` |
+| Entrada | Cria a aplicação e inicia o servidor de desenvolvimento | `Codigos/app.py` |
 | Fábrica | Carrega configuração, inicializa banco e registra blueprints | `app/__init__.py` |
 | Configuração | Lê ambiente e monta a conexão do banco | `config.py` |
 | Rotas | Recebem requisições, aplicam guards e escolhem a resposta | `app/routes/` |
@@ -22,7 +22,7 @@ O sistema é um monólito Flask em camadas. A aplicação atende páginas HTML/J
 | Estáticos | Estilos e interações compartilhadas ou por página | `app/static/` |
 | Autenticação | Geração e leitura de JWT e regras auxiliares | `app/auth.py` |
 
-Os caminhos `app/...` desta tabela são relativos a `Códigos/`. Algumas rotas realizam operações de banco diretamente; a separação em camadas ainda não é uniforme.
+Os caminhos `app/...` desta tabela são relativos a `Codigos/`. Algumas rotas realizam operações de banco diretamente; a separação em camadas ainda não é uniforme.
 
 ## Fluxo de uma requisição
 
@@ -32,7 +32,7 @@ sequenceDiagram
     participant Tela as Navegador
     participant Rota as Flask / guard
     participant Controle as Controller
-    participant Dados as SQLAlchemy / MySQL
+    participant Dados as SQLAlchemy / PostgreSQL
     Pessoa->>Tela: Abre uma tela ou envia formulário
     Tela->>Rota: HTTP + sessão ou Bearer JWT
     Rota->>Rota: Verifica perfil conforme a rota
@@ -84,21 +84,21 @@ Notas têm unicidade por aluno e disciplina, sem dimensão de período no contra
 
 `database.py` cria tabelas com `Base.metadata.create_all()` e executa ajustes pontuais de colunas em bases antigas. Isso não constitui um histórico de migrações versionadas. A evolução deve introduzir migrações revisáveis antes de mudanças complexas.
 
-Uploads são gravados no diretório configurado por `UPLOAD_FOLDER`. No Compose, `uploads_data` persiste arquivos e `mysql_data` persiste o banco. Banco e arquivos precisam de backup coordenado. O repositório não deve armazenar uploads reais.
+Uploads são gravados no diretório configurado por `UPLOAD_FOLDER`. No Compose, `uploads_data` persiste arquivos e `postgres_data` persiste o banco. Banco e arquivos precisam de backup coordenado. O repositório não deve armazenar uploads reais.
 
 ## Ambiente de execução
 
 ```mermaid
 flowchart TB
     Browser[Navegador] -->|localhost:5000| App[Container app / Flask]
-    App -->|rede Docker: db:3306| DB[(Container db / MySQL 8.4)]
+    App -->|rede Docker: db:5432| DB[(Container db / PostgreSQL 17)]
     App --> Upload[(Volume uploads_data)]
-    DB --> Volume[(Volume mysql_data)]
+    DB --> Volume[(Volume postgres_data)]
     Env[Arquivo .env local] --> App
     Env --> DB
 ```
 
-O Compose de `Códigos/` é de desenvolvimento. A configuração de produção está centralizada em [`.github/cicd`](../../.github/cicd/README.md): imagem Gunicorn sem root, proxy Caddy com HTTPS, banco sem porta publicada e volumes persistentes. `/healthz` verifica o banco e identifica a release. O servidor real ainda precisa ser provisionado.
+O Compose de `Codigos/` é de desenvolvimento. A configuração de produção está centralizada em [`.github/cicd`](../../.github/cicd/README.md): imagem Gunicorn sem root, proxy Caddy com HTTPS, banco sem porta publicada e volumes persistentes. `/healthz` verifica o banco e identifica a release. O servidor real ainda precisa ser provisionado.
 
 ## Evolução proposta
 

@@ -48,6 +48,6 @@ A prévia restaurada usa o projeto Docker `edufast-manual-restaurado` e a porta
 5050, com volume novo. O projeto/volume anterior foi preservado. Somente dados
 sintéticos foram provisionados no ambiente novo; o esquema anterior não foi atualizado.
 
-`Códigos/migrations/003_restauracao_educafast.sql` é proposta para revisão humana:
+`Codigos/migrations/003_restauracao_educafast.sql` é proposta para revisão humana:
 24 tabelas novas, sem apagar registros ou deduzir vínculos históricos.
 Credenciais de infraestrutura e DATA_ENCRYPTION_KEY permanecem fora do Git.

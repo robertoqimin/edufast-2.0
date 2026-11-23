@@ -16,7 +16,7 @@ def generated():
     for case in API:
         api += ['', f'## {case["id"]} — {case["title"]}', '',
                 f'**Perfil:** `{case["actor"] or "não autenticado"}`. **Requisição:** `{case["method"]} {case["path"]}`.', '',
-                f'**Resposta esperada:** `{case["status"]}`. **Bancos:** {", ".join(case.get("backends", ["sqlite", "mysql"]))}.', '']
+                f'**Resposta esperada:** `{case["status"]}`. **Bancos:** {", ".join(case.get("backends", ["sqlite", "postgresql"]))}.', '']
         detail = {k: v for k, v in case.items() if k not in ('id', 'area', 'title', 'actor', 'method', 'path', 'status', 'backends')}
         if detail:
             api += ['```json', json.dumps(detail, ensure_ascii=False, indent=2), '```']

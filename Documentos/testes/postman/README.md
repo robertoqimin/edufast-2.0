@@ -16,7 +16,7 @@ Executar tudo de forma isolada, sem preparar banco manualmente:
 O CI principal já executa este fluxo antes da publicação da imagem. Para instalar
 o executor versionado localmente, executar `npm ci` em `.github/cicd/http` (Node 22+).
 Na raiz, usar o caminho `.github/cicd/http/node_modules/newman/bin/newman.js` no
-comando abaixo. As dependências Python de `Códigos/requirements.txt` devem estar
+comando abaixo. As dependências Python de `Codigos/requirements.txt` devem estar
 instaladas no interpretador utilizado.
 
 ```powershell
@@ -29,7 +29,7 @@ destino e não executa migrations. A senha sintética fica apenas no ambiente te
 
 A coleção verifica contratos HTTP, repetição sequencial, conflito de conteúdo e
 versões antigas. Os testes com duas requisições simultâneas estão em
-`.github/cicd/tests/test_concurrency.py` e precisam de MySQL descartável.
+`.github/cicd/tests/test_concurrency.py` e precisam de PostgreSQL descartável.
 
 Para regenerar os JSONs: `python .github/cicd/build_postman.py`.
 

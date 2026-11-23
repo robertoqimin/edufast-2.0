@@ -28,7 +28,7 @@ proxy que já ocupe a porta 443 sem planejar a entrada única.
 
 1. Copiar `environments.example.json` para um manifesto local em `.ci-results/`.
 2. Informar domínios reais e digest da imagem aprovada pelo CI **contendo**
-   `Códigos/gunicorn.conf.py` e estas alterações. O gerador valida formato e
+   `Codigos/gunicorn.conf.py` e estas alterações. O gerador valida formato e
    repositório; não verifica a aprovação criptograficamente. Conferir release pelo
    procedimento de `.github/cicd/README.md`.
 3. Na raiz, executar:
@@ -52,7 +52,7 @@ Não copiar segredos de outra escola nem perder a chave de criptografia.
 5. Validar configurações com `bash infra/verify.sh` em ambiente de desenvolvimento.
    Essa verificação cria certificado fictício e valida apenas sintaxe, não o TLS real.
 6. Provisionar cada banco somente após revisão humana conforme
-   `Códigos/migrations/README.md`. O gerador não cria esquema e não aplica SQL.
+   `Codigos/migrations/README.md`. O gerador não cria esquema e não aplica SQL.
    Em banco vazio o app pode reiniciar indicando esquema pendente; isso é esperado
    até concluir o provisionamento revisado. Iniciar banco isoladamente, usar processo
    explícito de provisionamento e só então iniciar app e gateway.
@@ -82,7 +82,7 @@ Não existe execução automática de migrations ou exclusão de ambientes.
 - Gunicorn: perfil inicial 1 processo, 4 threads, 64 conexões e backlog 64, com
   reciclagem de workers. A configuração é usada explicitamente pelos ambientes
   gerados; o comando padrão da imagem anterior permanece compatível.
-- MySQL: até 30 conexões; app com pool de 4 e zero overflow por processo.
+- PostgreSQL: até 30 conexões (`max_connections=30`, `shared_buffers=128MB`); app com pool de 4 e zero overflow por processo.
   Esgotamento do pool retorna 503 com `Retry-After: 5`, sem repetir gravações.
   Com P processos e R réplicas, reservar pelo menos `P * R * (pool + overflow)`
   conexões, mais manutenção/healthchecks. Réplicas não estão habilitadas neste perfil.
@@ -120,7 +120,7 @@ CDN, túnel ou balanceador requer reavaliar IP real e limites por cliente.
 
 No híbrido, cada escola tem **um único ambiente autorizado a gravar**. Backups na
 nuvem ajudam a recuperar, mas não tornam o sistema automaticamente disponível na
-queda da internet ou do servidor. Não usar MySQL sobre WAN como caminho síncrono
+queda da internet ou do servidor. Não usar PostgreSQL sobre WAN como caminho síncrono
 normal sem projeto específico de latência e segurança.
 
 Procedimento de contingência proposto:
@@ -146,7 +146,7 @@ para notas, matrículas e aprovações; não basta copiar tabelas.
 
 Inventário deve registrar domínio, instalação, versão, proprietário operacional,
 capacidade, último backup e último ensaio de recuperação por escola. Alertas devem
-cobrir 5xx/429, p95, RAM, disco, conexões MySQL e certificado próximo de expirar.
+cobrir 5xx/429, p95, RAM, disco, conexões PostgreSQL e certificado próximo de expirar.
 Ainda não há coletor central de métricas/alertas instalado nesta etapa.
 
 Atualizações são por escola: backup consistente, digest revisado, verificação de

@@ -178,7 +178,7 @@ class RestoredTests(TestCase):
             db.commit()
         self.assertEqual(self.post('/admin/usuarios/6/permissoes',{'papel':'admin'}).status_code,403)
 
-    @skipUnless(engine.dialect.name=='mysql','Concurrent updates require disposable MySQL')
+    @skipUnless(engine.dialect.name=='postgresql','Concurrent updates require disposable PostgreSQL')
     def test_two_identity_updates_have_one_effect(self):
         barrier=threading.Barrier(2)
         def update(name):

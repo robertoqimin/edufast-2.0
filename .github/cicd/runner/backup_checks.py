@@ -1,11 +1,16 @@
+PSQL = 'PGPASSWORD="$APP_DB_PASSWORD" psql -v ON_ERROR_STOP=1 -h 127.0.0.1 -U "$APP_DB_USER" -d "$POSTGRES_DB"'
+PG_DUMP = ('PGPASSWORD="$APP_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U "$APP_DB_USER" -d "$POSTGRES_DB" '
+           '--clean --if-exists --no-owner --no-privileges')
+
+
 def database(ci):
-    ci.compose('exec', '-T', 'db', 'sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -e "CREATE TABLE ci_backup_probe (id INT PRIMARY KEY); INSERT INTO ci_backup_probe VALUES (42);"')
-    result = ci.subprocess.run(ci.COMPOSE + ['exec', '-T', 'db', 'sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF -u"$MYSQL_USER" "$MYSQL_DATABASE"'], env=ci.ENV, cwd=ci.ROOT, capture_output=True, check=True)
+    ci.compose('exec', '-T', 'db', 'sh', '-c', PSQL + ' -c "CREATE TABLE ci_backup_probe (id INT PRIMARY KEY); INSERT INTO ci_backup_probe VALUES (42);"')
+    result = ci.subprocess.run(ci.COMPOSE + ['exec', '-T', 'db', 'sh', '-c', PG_DUMP], env=ci.ENV, cwd=ci.ROOT, capture_output=True, check=True)
     backup = result.stdout
     assert len(backup) > 100
-    ci.compose('exec', '-T', 'db', 'sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -e "DROP TABLE ci_backup_probe;"')
-    ci.compose('exec', '-T', 'db', 'sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"', input=backup)
-    restored = ci.compose('exec', '-T', 'db', 'sh', '-c', 'MYSQL_PWD="$MYSQL_PASSWORD" mysql -N -u"$MYSQL_USER" "$MYSQL_DATABASE" -e "SELECT id FROM ci_backup_probe"', capture=True)
+    ci.compose('exec', '-T', 'db', 'sh', '-c', PSQL + ' -c "DROP TABLE ci_backup_probe;"')
+    ci.compose('exec', '-T', 'db', 'sh', '-c', PSQL + ' --single-transaction -q', input=backup)
+    restored = ci.compose('exec', '-T', 'db', 'sh', '-c', PSQL + ' -tAc "SELECT id FROM ci_backup_probe"', capture=True)
     assert restored.strip() == b'42'
 
 def uploads(ci, url, context):

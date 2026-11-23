@@ -26,19 +26,19 @@ Hipótese inicial para organizar o piloto: **um cliente = uma escola = uma insta
 
 | Área | Evidência | Situação e ação necessária |
 | --- | --- | --- |
-| Backend | `Códigos/app/__init__.py`, `Códigos/gunicorn.conf.py` | Flask/Gunicorn; pode ser executado por cliente |
-| Frontend | `Códigos/app/templates/`, `Códigos/app/static/` | HTML/Jinja e componentes React locais, servidos pelo Flask; não existe aplicação frontend autônoma |
-| Banco | `Códigos/config.py`, `Códigos/app/database.py` | Uma engine configurada por processo; combina com banco fixo por instalação, sem selecionar conexão pelo navegador |
+| Backend | `Codigos/app/__init__.py`, `Codigos/gunicorn.conf.py` | Flask/Gunicorn; pode ser executado por cliente |
+| Frontend | `Codigos/app/templates/`, `Codigos/app/static/` | HTML/Jinja e componentes React locais, servidos pelo Flask; não existe aplicação frontend autônoma |
+| Banco | `Codigos/config.py`, `Codigos/app/database.py` | Uma engine configurada por processo; combina com banco fixo por instalação, sem selecionar conexão pelo navegador |
 | Geração | `infra/generate.cjs`, `infra/environments.example.json` | Gera app, MySQL, duas redes, volumes e quatro segredos por escola |
 | Entrada HTTPS | Nginx gerado por `infra/generate.cjs` | Encaminhamento por domínio, rejeição de host desconhecido e limites; TLS precisa ser disponibilizado e renovado operacionalmente |
 | Persistência | Serviços gerados em `infra/generate.cjs` | Volume MySQL e volume de uploads próprios; falta comprovar backup/restauração por cliente em execução |
-| Autenticação | `Códigos/app/auth.py`, `Códigos/config.py` | JWT usa `SECRET_KEY`; preservar chaves diferentes e verificar rejeição cruzada de tokens e sessões |
-| Esquema | `Códigos/app/database.py`, `Códigos/migrations/README.md` | Inicialização em produção verifica esquema; provisionamento é explícito e exige revisão |
+| Autenticação | `Codigos/app/auth.py`, `Codigos/config.py` | JWT usa `SECRET_KEY`; preservar chaves diferentes e verificar rejeição cruzada de tokens e sessões |
+| Esquema | `Codigos/app/database.py`, `Codigos/migrations/README.md` | Inicialização em produção verifica esquema; provisionamento é explícito e exige revisão |
 | Entrega | `.github/cicd/`, `infra/README.md` | Deploy existente é de instalação única; falta entrega operacional dirigida a um cliente da frota |
 
 No gerador, `front-escola-a` é o **nome de uma rede**, não um container de frontend. Os nomes `DB_NAME=edufast` e `DB_USER=edufast` se repetem em servidores MySQL distintos; essa repetição não compartilha banco, desde que destino, rede, volume e senha permaneçam separados.
 
-O Compose direto de `Códigos/docker-compose.yml` possui nomes fixos de containers e portas locais. Não deve ser multiplicado sem adaptação; a base de separação é `infra/`.
+O Compose direto de `Codigos/docker-compose.yml` possui nomes fixos de containers e portas locais. Não deve ser multiplicado sem adaptação; a base de separação é `infra/`.
 
 ## 3. Arquitetura proposta
 

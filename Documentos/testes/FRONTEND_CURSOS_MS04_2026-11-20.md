@@ -121,7 +121,7 @@ Fingerprint de fontes/testes Python e scripts HTTP do runner:
 `6fdcbbe82c350dd3d243c29dcf07f65c862e6917f41410e5e11edee419130163`.
 
 O manifesto visual registra também o hash de caminhos e bytes de `.py`, `.html`,
-`.css` e `.js` em `Códigos/app`:
+`.css` e `.js` em `Codigos/app`:
 `d5c3215d9bce5f852406bc858290942292656ff77955252bac379377da3d241a`.
 Nenhuma mudança de runtime foi feita após essas validações. O catálogo ainda
 mantém cenários parciais para medição de desempenho e aceite manual pelo usuário;

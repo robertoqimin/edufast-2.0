@@ -2,6 +2,15 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+// Superusuario so administra o servidor; a aplicacao usa papel proprio, dono apenas do banco.
+const POSTGRES_APP_ROLE = [
+  'psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" \\',
+  '  -v app_user="$$APP_DB_USER" -v app_password="$$APP_DB_PASSWORD" -v app_db="$$POSTGRES_DB" <<\'SQL\'',
+  'CREATE ROLE :"app_user" LOGIN PASSWORD :\'app_password\' NOSUPERUSER NOCREATEDB NOCREATEROLE;',
+  'ALTER DATABASE :"app_db" OWNER TO :"app_user";',
+  'REVOKE ALL ON DATABASE :"app_db" FROM PUBLIC;',
+  'GRANT CONNECT, TEMPORARY ON DATABASE :"app_db" TO :"app_user";',
+  'SQL', ''].join('\n');
 const imagePattern = /^ghcr\.io\/samucau1\/edufast-2\.0@sha256:[a-f0-9]{64}$/;
 
 function validate(input) {
@@ -39,6 +48,7 @@ function render(input, previousEnv = '') {
     if (at < 1) throw new Error('Arquivo de segredos invalido.');
     return [line.slice(0, at), line.slice(at + 1)];
   }));
+  compose.configs = {'postgres-app-role': {content: POSTGRES_APP_ROLE}};
   const gatewayNetworks = [];
   for (const {id, host, image = input.image, central} of clients(input)) {
     const prefix = id.toUpperCase().replaceAll('-', '_');
@@ -53,7 +63,7 @@ function render(input, previousEnv = '') {
     compose.networks[front] = {internal: true};
     compose.networks[back] = {internal: true};
     gatewayNetworks.push(front);
-    const uploads = `uploads-${id}`, data = `mysql-${id}`;
+    const uploads = `uploads-${id}`, data = `postgres-${id}`;
     compose.volumes[uploads] = {}; compose.volumes[data] = {};
     compose.services[app] = {
       image, restart: 'unless-stopped',
@@ -74,11 +84,13 @@ function render(input, previousEnv = '') {
       logging: {driver: 'json-file', options: {'max-size': '10m', 'max-file': '3'}},
     };
     compose.services[db] = {
-      image: 'mysql:8.4', restart: 'unless-stopped',
-      command: ['--max-connections=30', '--innodb-buffer-pool-size=134217728'],
-      environment: {MYSQL_DATABASE: 'edufast', MYSQL_USER: 'edufast', MYSQL_PASSWORD: variable('DB_PASSWORD'), MYSQL_ROOT_PASSWORD: variable('ROOT_PASSWORD')},
-      volumes: [`${data}:/var/lib/mysql`], networks: [back],
-      healthcheck: {test: ['CMD-SHELL', 'MYSQL_PWD=$$MYSQL_PASSWORD mysql --protocol=tcp -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e "SELECT 1" >/dev/null'], interval: '10s', timeout: '5s', retries: 20, start_period: '30s'},
+      image: 'postgres:17-alpine', restart: 'unless-stopped',
+      command: ['postgres', '-c', 'max_connections=30', '-c', 'shared_buffers=128MB'],
+      environment: {POSTGRES_DB: 'edufast', POSTGRES_USER: 'postgres', POSTGRES_PASSWORD: variable('ROOT_PASSWORD'),
+        APP_DB_USER: 'edufast', APP_DB_PASSWORD: variable('DB_PASSWORD')},
+      configs: [{source: 'postgres-app-role', target: '/docker-entrypoint-initdb.d/10-app-role.sh'}],
+      volumes: [`${data}:/var/lib/postgresql/data`], networks: [back],
+      healthcheck: {test: ['CMD-SHELL', 'PGPASSWORD="$$APP_DB_PASSWORD" psql -h 127.0.0.1 -U "$$APP_DB_USER" -d "$$POSTGRES_DB" -tAc "SELECT 1" >/dev/null'], interval: '10s', timeout: '5s', retries: 20, start_period: '30s'},
       mem_limit: '768m', cpus: '1.0', pids_limit: 256,
       security_opt: ['no-new-privileges:true'],
       logging: {driver: 'json-file', options: {'max-size': '10m', 'max-file': '3'}},
@@ -88,9 +100,9 @@ function render(input, previousEnv = '') {
       compose.services[app].environment = {
         PLATFORM_ENV:'production', PLATFORM_SECRET_KEY:variable('SECRET_KEY'),
         PLATFORM_TRUSTED_HOSTS:`${host},localhost`,
-        PLATFORM_DATABASE_URL:`mysql+pymysql://edufast:${variable('DB_PASSWORD')}@${db}:3306/edufast_platform`,
+        PLATFORM_DATABASE_URL:`postgresql+psycopg://edufast:${variable('DB_PASSWORD')}@${db}:5432/edufast_platform`,
       };
-      compose.services[db].environment.MYSQL_DATABASE = 'edufast_platform';
+      compose.services[db].environment.POSTGRES_DB = 'edufast_platform';
     }
     servers.push(`  server {
     listen 443 ssl;

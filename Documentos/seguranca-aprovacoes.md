@@ -71,7 +71,7 @@ envio docente pendente, admissão aprovada e acesso restrito a arquivos/CPF.
 
 Suítes: `test_ci_characterization.py`, `tests/test_admin_characterization.py`,
 `tests/test_approvals_security.py`, `tests/test_concurrency.py`, testes existentes
-de API e deploy, testes Node de envio, CI com SQLite/MySQL e Postman/Newman.
+de API e deploy, testes Node de envio, CI com SQLite/PostgreSQL e Postman/Newman.
 Postman usa somente dados sintéticos; nenhum teste aplica migration em banco existente.
 
 Fora desta correção: falha de limpeza do CI pode impedir gravação do resumo,

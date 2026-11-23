@@ -15,7 +15,7 @@ test('demonstracao possui dois bancos e apps, portas loopback e nenhuma entrada 
     assert.equal(app.environment.DB_HOST, `db-${id}`);
     assert.equal(app.environment.SESSION_COOKIE_NAME, `edufast_${id}`);
     assert.equal(app.environment.DB_NAME, `edufast_${id}`);
-    assert.equal(db.environment.MYSQL_DATABASE, `edufast_${id}`);
+    assert.equal(db.environment.POSTGRES_DB, `edufast_${id}`);
     assert.equal(db.ports, undefined);
     assert.deepEqual(db.networks, [`back-${id}`]);
     assert.equal(compose.networks[`back-${id}`].internal, true);

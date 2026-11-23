@@ -9,9 +9,9 @@ on:
         options: [all, unit, api, integration, performance]
         default: all
       database:
-        description: Banco descartável (concorrência e performance exigem MySQL)
+        description: Banco descartável (concorrência e performance exigem PostgreSQL)
         type: choice
-        options: [both, sqlite, mysql]
+        options: [both, sqlite, postgresql]
         default: both
       smoke:
         description: Performance apenas smoke, sem homologar metas

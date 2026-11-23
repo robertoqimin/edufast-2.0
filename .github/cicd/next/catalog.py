@@ -172,9 +172,9 @@ api('API-076', 'Compatibilidade', 'Cadastro público não aceita papel privilegi
 api('API-077', 'Cache', 'Alternar escola não reaproveita painel privado anterior', 'dupla', 'GET', B+'/painel', 403,
     before=[{'method': 'GET', 'path': S+'/painel', 'status': 200}], error='forbidden')
 api('API-078', 'Matrículas', 'Duas requisições concorrentes criam apenas uma matrícula', 'secretaria_a', 'POST', S+'/matriculas', [201, 409],
-    json={'aluno_id': 3, 'turma_id': 3, 'periodo_id': 1}, concurrent=2, backends=['mysql'], conflict_error='duplicate_enrollment', db=[{'table': 'matriculas', 'where': {'aluno_id': 3, 'turma_id': 3}, 'count': 1}])
+    json={'aluno_id': 3, 'turma_id': 3, 'periodo_id': 1}, concurrent=2, backends=['postgresql'], conflict_error='duplicate_enrollment', db=[{'table': 'matriculas', 'where': {'aluno_id': 3, 'turma_id': 3}, 'count': 1}])
 api('API-079', 'Convites', 'Dois aceites concorrentes não duplicam participação', 'convidado', 'POST', '/api/v1/convites/aceitar', [200, 409],
-    json={'token': 'convite-ci-valido'}, concurrent=2, backends=['mysql'], conflict_error='invitation_used', db=[{'table': 'participacoes_escolas', 'where': {'usuario_id': 11, 'escola_id': 1}, 'count': 1}])
+    json={'token': 'convite-ci-valido'}, concurrent=2, backends=['postgresql'], conflict_error='invitation_used', db=[{'table': 'participacoes_escolas', 'where': {'usuario_id': 11, 'escola_id': 1}, 'count': 1}])
 api('API-080', 'Compatibilidade', 'Foto antiga não fica pública pelo nome', None, 'GET', '/arquivos/perfil/perfil_beta.png', 401, absent=['FOTO-BETA'])
 api('API-081', 'Compatibilidade', 'Download antigo autenticado não ignora escola', 'secretaria_a', 'GET', '/arquivos/download/documento-beta.pdf', 404, absent=['DOCUMENTO-BETA'])
 api('API-082', 'Compatibilidade', 'Foto antiga autenticada não ignora escola', 'secretaria_a', 'GET', '/arquivos/perfil/perfil_beta.png', 404, absent=['FOTO-BETA'])

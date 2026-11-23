@@ -53,7 +53,7 @@ ensino superior; essa diferença continua no plano de produto.
 
 ## Esquema e ativação
 
-[Proposta SQL 005](../../Códigos/migrations/005_espaco_disciplina.sql): duas tabelas,
+[Proposta SQL 005](../../Codigos/migrations/005_espaco_disciplina.sql): duas tabelas,
 `estudo_conteudos` e `estudo_auditoria`, compiladas offline dos modelos. Não altera
 contas, vínculos, documentos antigos ou aprovações existentes.
 
@@ -65,7 +65,7 @@ em produção. Não usar a implementação como autorização para executar o SQ
 Antes da ativação: revisão do usuário, identificação do destino, conferência de
 esquema e dependências, backup recuperável de banco/uploads/chave e ensaio no
 destino isolado. DDL MySQL pode deixar estado parcial e não deve ser repetido às
-cegas. Guia: [migrations](../../Códigos/migrations/README.md).
+cegas. Guia: [migrations](../../Codigos/migrations/README.md).
 
 ## Verificações
 
@@ -101,19 +101,19 @@ Protocolo estático estendido para os novos templates `estudo_*` e aprovado.
 Usar Python com dependências da aplicação/testes. Nesta máquina foi usado
 `.ci-results/diagnostico-2026-11-05/venv/Scripts/python.exe`. Configuração obrigatória
 de teste: `DB_URL=sqlite:///:memory:`, `APP_ENV=development`, chave sintética com
-32+ caracteres, `EDUFAST_TEST_DISPOSABLE=1` e `PYTHONPATH` com `Códigos` e
+32+ caracteres, `EDUFAST_TEST_DISPOSABLE=1` e `PYTHONPATH` com `Codigos` e
 `.github/cicd/tests`. A descoberta completa recria somente o banco descartável.
 
 ```powershell
 python -m unittest test_estudos -v
 python -m unittest discover -s .github/cicd/tests -v
-python Códigos/tests/verificar_protocolo_design.py
+python Codigos/tests/verificar_protocolo_design.py
 ```
 
 Para navegador: gerar chave Fernet sintética, definir `EDUFAST_FREQUENCIA_VISUAL=1`
 e iniciar `python .github/cicd/tests/frequencia_visual_fixture.py --local` com
 SQLite em memória. Em outro terminal, configurar `PLAYWRIGHT_MODULE` para o
-Playwright local e rodar `node Códigos/tests/verificar_estudos.cjs`. Repetir sempre
+Playwright local e rodar `node Codigos/tests/verificar_estudos.cjs`. Repetir sempre
 com servidor sintético novo, pois o cenário cria conteúdos.
 
 ### Ajustes encontrados na validação

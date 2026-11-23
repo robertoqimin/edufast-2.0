@@ -1,4 +1,4 @@
-// MySQL novo, sem portas públicas; nunca recebe URL de banco externo.
+// PostgreSQL novo, sem portas públicas; nunca recebe URL de banco externo.
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), crypto = require('node:crypto');
 const {spawnSync} = require('node:child_process');
 const root = path.resolve(__dirname,'../..');
@@ -9,15 +9,21 @@ if (process.argv.length !== 3 || !/^(?:edufast-platform:test|edufast-ci-[a-f0-9]
 const project = 'edufast-platform-test-' + crypto.randomBytes(5).toString('hex');
 const directory = fs.mkdtempSync(path.join(os.tmpdir(),project+'-'));
 const password = crypto.randomBytes(32).toString('hex');
+const POSTGRES_APP_ROLE = ['psql -v ON_ERROR_STOP=1 --username "$$POSTGRES_USER" --dbname "$$POSTGRES_DB" -v app_user="$$APP_DB_USER" -v app_password="$$APP_DB_PASSWORD" -v app_db="$$POSTGRES_DB" <<\'SQL\'',
+  'CREATE ROLE :"app_user" LOGIN PASSWORD :\'app_password\' NOSUPERUSER NOCREATEDB NOCREATEROLE;',
+  'ALTER DATABASE :"app_db" OWNER TO :"app_user";',
+  'REVOKE ALL ON DATABASE :"app_db" FROM PUBLIC;',
+  'GRANT CONNECT, TEMPORARY ON DATABASE :"app_db" TO :"app_user";', 'SQL', ''].join('\n');
 const compose = {services:{
-  'db-platform-test':{image:'mysql:8.4', environment:{MYSQL_DATABASE:'edufast_platform_disposable',MYSQL_USER:'disposable',
-    MYSQL_PASSWORD:password,MYSQL_ROOT_PASSWORD:crypto.randomBytes(32).toString('hex')},
-    networks:['isolated'],tmpfs:['/var/lib/mysql'],healthcheck:{test:['CMD-SHELL','MYSQL_PWD=$$MYSQL_PASSWORD mysql -h127.0.0.1 -u$$MYSQL_USER $$MYSQL_DATABASE -e "SELECT 1" >/dev/null'],interval:'2s',timeout:'3s',retries:60}},
+  'db-platform-test':{image:'postgres:17-alpine', environment:{POSTGRES_DB:'edufast_platform_disposable',POSTGRES_USER:'postgres',
+    POSTGRES_PASSWORD:crypto.randomBytes(32).toString('hex'),APP_DB_USER:'disposable',APP_DB_PASSWORD:password},
+    configs:[{source:'postgres-app-role',target:'/docker-entrypoint-initdb.d/10-app-role.sh'}],
+    networks:['isolated'],tmpfs:['/var/lib/postgresql/data'],healthcheck:{test:['CMD-SHELL','PGPASSWORD="$$APP_DB_PASSWORD" psql -h 127.0.0.1 -U "$$APP_DB_USER" -d "$$POSTGRES_DB" -tAc "SELECT 1" >/dev/null'],interval:'2s',timeout:'3s',retries:60}},
   tests:{image, working_dir:'/repo', entrypoint:['python'], command:['-m','unittest','discover','-s','/repo/.github/cicd/tests','-p','test_control_plane.py','-v'],
     networks:['isolated'], volumes:[{type:'bind',source:root,target:'/repo',read_only:true}],
-    environment:{EDUFAST_TEST_DISPOSABLE:'1',PYTHONPATH:'/repo/Códigos',DB_URL:'sqlite:///:memory:',SECRET_KEY:'synthetic-school-import-only-test-2026',
-      PLATFORM_TEST_DATABASE_URL:`mysql+pymysql://disposable:${password}@db-platform-test:3306/edufast_platform_disposable`}},
-},networks:{isolated:{internal:true}}};
+    environment:{EDUFAST_TEST_DISPOSABLE:'1',PYTHONPATH:'/repo/Codigos',DB_URL:'sqlite:///:memory:',SECRET_KEY:'synthetic-school-import-only-test-2026',
+      PLATFORM_TEST_DATABASE_URL:`postgresql+psycopg://disposable:${password}@db-platform-test:5432/edufast_platform_disposable`}},
+},networks:{isolated:{internal:true}},configs:{'postgres-app-role':{content:POSTGRES_APP_ROLE}}};
 const file = path.join(directory,'compose.json');
 fs.writeFileSync(file,JSON.stringify(compose),{mode:0o600,flag:'wx'});
 const base = ['compose','-p',project,'-f',file];

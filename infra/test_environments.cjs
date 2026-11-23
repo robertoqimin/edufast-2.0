@@ -15,8 +15,8 @@ test('painel central opcional tem segredo, banco e dominio separados sem acesso 
   const app = compose.services['app-plataforma-central'];
   assert.equal(app.command.at(-1), 'control_plane:create_app()');
   assert.deepEqual(app.networks, ['front-plataforma-central','back-plataforma-central']);
-  assert.equal(compose.services['db-plataforma-central'].environment.MYSQL_DATABASE, 'edufast_platform');
-  assert.ok(app.environment.PLATFORM_DATABASE_URL.includes('@db-plataforma-central:3306/edufast_platform'));
+  assert.equal(compose.services['db-plataforma-central'].environment.POSTGRES_DB, 'edufast_platform');
+  assert.ok(app.environment.PLATFORM_DATABASE_URL.includes('@db-plataforma-central:5432/edufast_platform'));
   assert.equal(app.environment.SECRET_KEY, undefined);
   assert.ok(env.includes('PLATAFORMA_CENTRAL_SECRET_KEY='));
   assert.ok(nginx.includes('server_name painel.example.test;'));
@@ -38,7 +38,7 @@ test('isolamento de redes, volumes e credenciais; somente gateway publica porta'
     assert.equal(compose.networks[`back-${id}`].internal, true);
     assert.equal(compose.networks[`front-${id}`].internal, true);
     assert.deepEqual(app.volumes, [`uploads-${id}:/app/uploads`]);
-    assert.deepEqual(db.volumes, [`mysql-${id}:/var/lib/mysql`]);
+    assert.deepEqual(db.volumes, [`postgres-${id}:/var/lib/postgresql/data`]);
     assert.ok(!app.command.join(' ').includes('migrat'));
     assert.equal(app.environment.DB_MAX_OVERFLOW, '0');
   }

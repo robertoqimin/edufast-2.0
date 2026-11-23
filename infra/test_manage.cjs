@@ -116,7 +116,7 @@ test('backup que falha retoma app e nao produz marcador de conclusao', t => {
   const f = fixture(t), calls = [];
   const runner = (exe, args, options) => {
     calls.push(args);
-    return {status: args.includes('mysqldump') || args.includes('exec') ? 1 : 0, stdout: options.encoding ? 'app-cliente-a\n' : ''};
+    return {status: args.includes('pg_dump') || args.includes('exec') ? 1 : 0, stdout: options.encoding ? 'app-cliente-a\n' : ''};
   };
   const destination = path.join(f.root, 'backup');
   assert.throws(() => backup(f.first, 'cliente-a', destination, runner));

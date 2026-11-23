@@ -37,9 +37,9 @@ async function main() {
     fs.writeFileSync(path.join(temp,'compose.json'),JSON.stringify(generated.compose));
     fs.writeFileSync(path.join(temp,'.env'),generated.env,{mode:0o600});
     compose=['compose','-p',project,'--env-file',path.join(temp,'.env'),'-f',path.join(temp,'compose.json')];
-    command('docker',[...compose,'up','-d','--wait','--wait-timeout','180','db-api'],{name:'mysql-start'});
-    command('docker',[...compose,'run','--rm','--no-deps','-T','app-api'],{name:'mysql'});
-    checks.results.push('API Flask + MySQL, incluindo concorrencia real');
+    command('docker',[...compose,'up','-d','--wait','--wait-timeout','180','db-api'],{name:'postgresql-start'});
+    command('docker',[...compose,'run','--rm','--no-deps','-T','app-api'],{name:'postgresql'});
+    checks.results.push('API Flask + PostgreSQL, incluindo concorrencia real');
     command('docker',['run','--rm','-d','--name',project+'-http','-p','127.0.0.1::8000','--mount',
       `type=bind,source=${path.join(__dirname,'tests')},target=/tests,readonly`,
       '-e','PYTHONPATH=/app','-e','EDUFAST_FREQUENCIA_VISUAL=1','-e','DB_URL=sqlite:////tmp/frequencia-visual.db',

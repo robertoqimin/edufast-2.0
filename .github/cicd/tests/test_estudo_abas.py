@@ -164,7 +164,7 @@ class SectionTests(TestCase):
         self.assertEqual(self.client(2).get('/estudos/disciplinas/1').status_code,503)
         self.assertEqual(self.section().status_code,503)
 
-    @skipUnless(engine.dialect.name=='mysql','Concorrência exige MySQL descartável')
+    @skipUnless(engine.dialect.name=='postgresql','Concorrência exige PostgreSQL descartável')
     def test_concurrent_rename_and_archive_have_one_effect(self):
         sid = self.section().json['id']
         barrier = threading.Barrier(2)

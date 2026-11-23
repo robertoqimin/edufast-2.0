@@ -26,7 +26,7 @@ A validação interna exige contraste mínimo de 4,5 entre textos e superfície.
 ## 4. Portões de entrega
 
 1. Antes da mudança: identificar os componentes de referência e os tokens necessários.
-2. Implementar no layout compartilhado e executar `python Códigos/tests/verificar_protocolo_design.py`.
+2. Implementar no layout compartilhado e executar `python Codigos/tests/verificar_protocolo_design.py`.
 3. Testar permissões e fluxo funcional relevante; o verificador estático não substitui testes de comportamento.
 4. Capturar e inspecionar visualmente a interface padrão e a personalização exercitada, em desktop e móvel. Registrar limitações reais.
 5. Registrar evidências com referência ao commit, revisar o diff e só então publicar.
@@ -47,7 +47,7 @@ distintos e não substituem as telas funcionais recuperadas.
   23 capturas, incluindo acesso negado, sem substituir a primeira referência.
 - `AGENTS.md` exige a leitura deste protocolo antes de alterar interfaces.
 - O workflow `.github/workflows/ci.yml` executa
-  `python Códigos/tests/verificar_protocolo_design.py`.
+  `python Codigos/tests/verificar_protocolo_design.py`.
 
 Uma mudança intencional de identidade precisa registrar o pedido do usuário,
 atualizar componentes/tokens compartilhados e criar novas capturas em outra pasta

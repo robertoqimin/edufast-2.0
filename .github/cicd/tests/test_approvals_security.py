@@ -309,7 +309,7 @@ class ApprovalSecurityTests(TestCase):
         self.assertEqual(self.client(2).get('/solicitacoes').status_code, 403)
         self.assertNotIn(b'99999999999', self.client(3).get('/professor/dashboard').data)
 
-    @skipUnless(engine.dialect.name == 'mysql', 'Concurrency requires disposable MySQL')
+    @skipUnless(engine.dialect.name == 'postgresql', 'Concurrency requires disposable PostgreSQL')
     def test_two_approvals_have_only_one_domain_effect(self):
         result = self.submit('criar_turma', {'nome': 'Unica', 'codigo': 'ONCE', 'ano_letivo': 2027})
         barrier = threading.Barrier(2)

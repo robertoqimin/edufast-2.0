@@ -429,7 +429,7 @@ class CourseApiTests(TestCase):
         self.assertIsNone(response.json['aula'])
         self.assertEqual(response.json['progresso'],0)
 
-    @skipUnless(engine.dialect.name=='mysql','Exige MySQL descartável')
+    @skipUnless(engine.dialect.name=='postgresql','Exige PostgreSQL descartável')
     def test_concurrent_course_edits_have_one_effect(self):
         cid = self.create()
         barrier = threading.Barrier(2)
@@ -441,7 +441,7 @@ class CourseApiTests(TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:
             self.assertEqual(sorted(pool.map(send,range(2))),[200,409])
 
-    @skipUnless(engine.dialect.name=='mysql','Exige MySQL descartável')
+    @skipUnless(engine.dialect.name=='postgresql','Exige PostgreSQL descartável')
     def test_concurrent_resume_first_insert_is_versioned(self):
         cid,module,chapter,lessons = self.tree()
         offer = self.publish(cid)
@@ -454,7 +454,7 @@ class CourseApiTests(TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:
             self.assertEqual(sorted(pool.map(send,lessons)),[200,409])
 
-    @skipUnless(engine.dialect.name=='mysql','Exige MySQL descartável')
+    @skipUnless(engine.dialect.name=='postgresql','Exige PostgreSQL descartável')
     def test_concurrent_completion_has_one_persisted_result(self):
         cid,module,chapter,lessons = self.tree(count=1)
         offer = self.publish(cid)
