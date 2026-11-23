@@ -11,6 +11,17 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 > **Atualização em 22/11/2026:** o banco foi trocado para **PostgreSQL 17** antes da A2,
 > a pedido do usuário. Ver [relatório da troca](../testes/MIGRACAO_POSTGRESQL_2026-11-22.md).
 
+### Andamento
+
+| Item | Situação | Evidência |
+| --- | --- | --- |
+| A1 | Concluído em 22/11 | [Inventário de esquema](../testes/INVENTARIO_ESQUEMA_2026-11-22.md) |
+| Troca para PostgreSQL | Concluída em 22/11 (fora do plano original, pedido do usuário) | [Relatório](../testes/MIGRACAO_POSTGRESQL_2026-11-22.md) |
+| A2 | Proposta 008 pronta para revisão em 22/11; não executada em banco persistente | [Registro de migrations](../testes/REGISTRO_MIGRACOES_2026-11-22.md) |
+
+Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única
+fonte de notas (B1); a demo única inclui escola e painel Supremo (C1).
+
 ## 1. Diagnóstico
 
 | # | Constatação | Evidência | Impacto |

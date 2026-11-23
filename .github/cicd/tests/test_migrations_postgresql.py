@@ -72,9 +72,11 @@ class PostgresMigrationTests(TestCase):
         legacy = [t for t in Base.metadata.sorted_tables if t.name not in created]
         Base.metadata.create_all(engine, tables=legacy)
         with engine.begin() as connection:
+            legacy_names = {table.name for table in legacy}
             for migration in self.migrations:
                 for table, column in migration['columns']:
-                    connection.execute(text(f'ALTER TABLE {table} DROP COLUMN {column}'))
+                    if table in legacy_names:  # colunas de tabelas criadas por propostas vem com elas
+                        connection.execute(text(f'ALTER TABLE {table} DROP COLUMN {column}'))
             connection.execute(text("INSERT INTO usuarios (email, senha, tipo) VALUES "
                                     "('docente@example.test', 'hash', 'professor'), ('aluno@example.test', 'hash', 'aluno')"))
 
@@ -119,6 +121,34 @@ class PostgresMigrationTests(TestCase):
         self.assertEqual((request.solicitante_id, request.tipo, request.estado, request.recurso_pendente),
                          (teacher.id, 'cadastro', 'pendente', f'cadastro:{teacher.id}'))
         self.assertEqual(json.loads(request.payload), {'usuario_id': teacher.id, 'papel_solicitado': 'professor'})
+
+    def registry(self):
+        with engine.connect() as connection:
+            return [tuple(row) for row in connection.execute(text(
+                'SELECT versao, origem, arquivo FROM educafast_migracoes ORDER BY versao'))]
+
+    def test_008_registers_every_complete_previous_migration(self):
+        self.apply()
+        expected = [(m['versao'], 'detectada', m['arquivo']) for m in self.migrations[:-1]]
+        expected.append((self.migrations[-1]['versao'], 'aplicada', self.migrations[-1]['arquivo']))
+        self.assertEqual(self.registry(), expected)
+        report = inventory(engine)
+        self.assertEqual(report['alertas'], [])
+        self.assertEqual(report['versoes_registradas'], [m['versao'] for m in self.migrations])
+
+    def test_008_skips_incomplete_structure_and_keeps_existing_rows(self):
+        self.apply(until=7)
+        with engine.begin() as connection:
+            connection.execute(text('DROP TABLE estudo_secao_auditoria'))
+            connection.execute(text('INSERT INTO educafast_migracoes (versao) VALUES (3)'))
+        run_sql((ESCOLA_DIR / '008_registro_migracoes.sql').read_text(encoding='utf-8'))
+        rows = {versao: (origem, arquivo) for versao, origem, arquivo in self.registry()}
+        self.assertNotIn(6, rows)
+        self.assertEqual(rows[3], ('aplicada', '003_restauracao_educafast.sql'))
+        self.assertEqual(rows[5], ('detectada', '005_espaco_disciplina.sql'))
+        self.assertEqual(rows[8], ('aplicada', '008_registro_migracoes.sql'))
+        alerts = inventory(engine)['alertas']
+        self.assertTrue(any('006_abas_disciplina.sql esta parcial' in a for a in alerts))
 
     def test_explicit_ids_advance_sequence_like_mysql_auto_increment(self):
         from app.database import get_session

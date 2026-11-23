@@ -88,7 +88,11 @@ def init_db():
         if table.name not in tables:
             raise RuntimeError(f"Esquema pendente de revisao/provisionamento: {table.name}")
         columns = {c["name"] for c in inspector.get_columns(table.name)}
-        if set(table.columns.keys()) - columns:
+        missing = set(table.columns.keys()) - columns
+        if table.name == "educafast_migracoes":
+            from app.models.curso_model import MIGRACAO_008_COLUNAS
+            missing -= MIGRACAO_008_COLUNAS  # 008 ainda nao revisada nesta instalacao
+        if missing:
             raise RuntimeError(f"Migracao revisada necessaria: {table.name}")
         unique = inspector.get_unique_constraints(table.name)
         unique += [i for i in inspector.get_indexes(table.name) if i.get("unique")]
@@ -97,3 +101,15 @@ def init_db():
                 set(item["column_names"]) == set(constraint.columns.keys()) for item in unique
             ):
                 raise RuntimeError(f"Constraint ausente; executar preflight: {table.name}")
+    verificar_registro_migracoes(engine)
+
+
+def verificar_registro_migracoes(bind):
+    """Recusa banco registrado com migration mais nova que o codigo ou checksum divergente."""
+    from schema_inventory import ESCOLA_DIR, load_migrations, problemas_registro, registry_rows, snapshot
+    if not ESCOLA_DIR.is_dir():
+        raise RuntimeError("Release sem a pasta migrations/: nao e possivel conferir o registro do esquema.")
+    rows = registry_rows(bind, snapshot(bind)["tables"])
+    problemas = problemas_registro(rows or [], load_migrations(ESCOLA_DIR), ESCOLA_DIR)
+    if problemas:
+        raise RuntimeError(" ".join(problemas))

@@ -54,6 +54,63 @@ DEPOIS = {
 
 # Estado original de colunas que uma proposta posterior altera.
 ORIGINAL = {3: {('curso_aulas', 'video_id'): ('video_id VARCHAR(11),', 'video_id VARCHAR(11) NOT NULL,')}}
+# Tabelas cuja forma original difere do modelo atual por colunas/constraints de propostas posteriores.
+ORIGINAL_DDL = {(3, 'educafast_migracoes'): 'CREATE TABLE educafast_migracoes (\n\tversao INTEGER NOT NULL,\n\tPRIMARY KEY (versao)\n);'}
+
+REGISTRO = '008_registro_migracoes.sql'
+REGISTRO_CABECALHO = [
+    '-- PROPOSTA 008: registro de versoes do esquema. REVISAR antes de executar.',
+    '-- Completa educafast_migracoes (criada pela 003) e registra como "detectada" cada proposta',
+    '-- anterior cuja estrutura completa ja existe. Nao altera outras tabelas nem dados escolares.',
+    '-- checksum fica vazio: um arquivo nao contem o proprio hash; o aplicador revisado o preenche.',
+    *CABECALHO,
+]
+REGISTRO_ALTER = [
+    'ALTER TABLE educafast_migracoes',
+    '    ADD COLUMN descricao VARCHAR(120),',
+    '    ADD COLUMN arquivo VARCHAR(120),',
+    '    ADD COLUMN checksum VARCHAR(64),',
+    '    ADD COLUMN aplicada_em TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,',
+    "    ADD COLUMN origem VARCHAR(12) DEFAULT 'aplicada' NOT NULL,",
+    "    ADD CONSTRAINT ck_migracao_origem CHECK (origem IN ('aplicada','detectada')),",
+    '    ADD CONSTRAINT ck_migracao_checksum CHECK (checksum IS NULL OR length(checksum) = 64);',
+]
+
+
+def _literal(valor):
+    return "'" + valor.replace("'", "''") + "'"
+
+
+def _condicoes(assinatura):
+    coluna = ('EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() '
+              'AND table_name = {t} AND column_name = {c}{extra})')
+    condicoes = [f'to_regclass({_literal(t)}) IS NOT NULL' for t in assinatura['tables']]
+    condicoes += [coluna.format(t=_literal(t), c=_literal(c), extra='') for t, c in assinatura['columns']]
+    condicoes += [f'EXISTS (SELECT 1 FROM pg_indexes WHERE schemaname = current_schema() '
+                  f'AND tablename = {_literal(t)} AND indexname = {_literal(i)})' for t, i in assinatura['indexes']]
+    condicoes += [coluna.format(t=_literal(t), c=_literal(c), extra=" AND is_nullable = 'YES'")
+                  for t, c in assinatura['nullable']]
+    return condicoes
+
+
+def gerar_registro():
+    """008: registro retroativo derivado das mesmas assinaturas usadas pelo inventario."""
+    corpo = [*REGISTRO_CABECALHO, '', 'BEGIN;', '', *REGISTRO_ALTER, '']
+    for caminho in sorted(HERE.glob('[0-9][0-9][0-9]_*.sql')):
+        versao = int(caminho.name[:3])
+        if caminho.name == REGISTRO or versao >= int(REGISTRO[:3]):
+            continue
+        descricao = caminho.stem[4:]
+        condicoes = _condicoes(parse_migration(caminho.read_text(encoding='utf-8')))
+        corpo += [f'-- {caminho.name}: registrada somente se toda a estrutura estiver presente.',
+                  'INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem)',
+                  f"SELECT {versao}, {_literal(descricao)}, {_literal(caminho.name)}, 'detectada'",
+                  'WHERE ' + '\n  AND '.join(condicoes),
+                  'ON CONFLICT (versao) DO UPDATE SET descricao = EXCLUDED.descricao, arquivo = EXCLUDED.arquivo;', '']
+    corpo += ['INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem)',
+              f"VALUES ({int(REGISTRO[:3])}, 'registro_migracoes', {_literal(REGISTRO)}, 'aplicada');", '',
+              'COMMIT;']
+    return '\n'.join(corpo) + '\n'
 
 
 def _comentarios(texto):
@@ -69,6 +126,8 @@ def _comentarios(texto):
 def _tabela(nome, versao):
     table = Base.metadata.tables[nome]
     dialect = postgresql.dialect()
+    if (versao, nome) in ORIGINAL_DDL:
+        return ORIGINAL_DDL[(versao, nome)]
     ddl = '\n'.join(l.rstrip() for l in str(CreateTable(table).compile(dialect=dialect)).strip().splitlines())
     for (alvo, _coluna), (atual, original) in ORIGINAL.get(versao, {}).items():
         if alvo == nome:
@@ -95,10 +154,18 @@ def gerar(caminho_legado):
     return '\n'.join(corpo) + '\n'
 
 
+def gerados():
+    """Conteudo esperado de cada proposta gerada; usado tambem pelo teste de sincronia."""
+    arquivos = {caminho.name: gerar(caminho) for caminho in sorted(LEGADO.glob('[0-9][0-9][0-9]_*.sql'))}
+    return arquivos
+
+
 def main():
-    for caminho in sorted(LEGADO.glob('[0-9][0-9][0-9]_*.sql')):
-        (HERE / caminho.name).write_text(gerar(caminho), encoding='utf-8', newline='\n')
-        print('gerado', caminho.name)
+    for nome, conteudo in gerados().items():
+        (HERE / nome).write_text(conteudo, encoding='utf-8', newline='\n')
+        print('gerado', nome)
+    (HERE / REGISTRO).write_text(gerar_registro(), encoding='utf-8', newline='\n')
+    print('gerado', REGISTRO)
 
 
 if __name__ == '__main__':

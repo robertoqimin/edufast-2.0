@@ -114,6 +114,33 @@ def classify(migrations, snapshot, registered=None):
     return report
 
 
+def checksum_arquivo(path):
+    """SHA-256 do conteudo do arquivo com quebras de linha normalizadas (Git pode usar CRLF)."""
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+
+
+def problemas_registro(linhas, migrations, directory=ESCOLA_DIR):
+    """Inconsistencias que impedem usar o banco com esta versao do codigo; funcao pura."""
+    problemas = []
+    conhecida = max((m['versao'] for m in migrations), default=0)
+    for linha in sorted(linhas, key=lambda item: item['versao']):
+        versao = linha['versao']
+        if versao > conhecida:
+            problemas.append(f'Banco registra a migration {versao}, mais nova que esta versao do codigo '
+                             f'(ultima conhecida: {conhecida}). Use a release correspondente ao banco.')
+            continue
+        checksum, arquivo = linha.get('checksum'), linha.get('arquivo')
+        if not checksum:
+            continue
+        caminho = Path(directory) / (arquivo or '')
+        if not arquivo or not caminho.is_file():
+            problemas.append(f'Migration {versao} registrada com checksum, mas o arquivo {arquivo!r} nao existe nesta release.')
+        elif checksum_arquivo(caminho) != checksum:
+            problemas.append(f'Migration {versao} ({arquivo}) foi aplicada com conteudo diferente do arquivo desta release.')
+    return problemas
+
+
 def snapshot(engine):
     """Retrato somente leitura de tabelas, colunas (nulabilidade) e indices."""
     from sqlalchemy import inspect
@@ -127,19 +154,32 @@ def snapshot(engine):
     return {'tables': tables}
 
 
-def registered_versions(engine, tables):
-    """Versoes gravadas em educafast_migracoes, ou None quando a tabela nao existe."""
+def registry_rows(engine, tables):
+    """Linhas de educafast_migracoes (com arquivo/checksum apos a 008), ou None sem a tabela."""
     if 'educafast_migracoes' not in tables:
         return None
     from sqlalchemy import text
+    columns = tables['educafast_migracoes']['columns']
+    selected = ['versao'] + [name for name in ('arquivo', 'checksum') if name in columns]
     with engine.connect() as connection:
-        return [int(row[0]) for row in connection.execute(text('SELECT versao FROM educafast_migracoes'))]
+        result = connection.execute(text(f"SELECT {', '.join(selected)} FROM educafast_migracoes"))
+        return [dict(zip(selected, row)) for row in result]
+
+
+def registered_versions(engine, tables):
+    """Versoes gravadas em educafast_migracoes, ou None quando a tabela nao existe."""
+    rows = registry_rows(engine, tables)
+    return None if rows is None else [int(row['versao']) for row in rows]
 
 
 def inventory(engine, directory=ESCOLA_DIR):
     current = snapshot(engine)
-    return classify(load_migrations(directory), current,
-                    registered_versions(engine, current['tables']))
+    migrations = load_migrations(directory)
+    rows = registry_rows(engine, current['tables'])
+    report = classify(migrations, current, None if rows is None else [int(r['versao']) for r in rows])
+    if rows:
+        report['alertas'] += problemas_registro(rows, migrations, directory)
+    return report
 
 
 def main(argv=None):

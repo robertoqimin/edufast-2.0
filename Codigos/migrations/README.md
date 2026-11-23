@@ -2,7 +2,7 @@
 
 ## PostgreSQL desde 22/11/2026
 
-As propostas 001–007 estão em SQL **PostgreSQL 17**, geradas a partir dos modelos por
+As propostas 001–008 estão em SQL **PostgreSQL 17**, geradas a partir dos modelos por
 `python migrations/gerar_postgresql.py`. Cada arquivo roda entre `BEGIN`/`COMMIT`: uma
 falha desfaz a proposta inteira, sem estado parcial. Aplicar com
 `psql -v ON_ERROR_STOP=1 -f <arquivo>`, somente após revisão. As versões MySQL ficam em
@@ -16,6 +16,22 @@ Para saber quais propostas já estão presentes num banco, sem alterá-lo:
 `EDUFAST_REVIEW_DB_URL=... python schema_inventory.py` em `Codigos/` (banco central:
 `--central`). Mostra cada migration como aplicada, parcial ou ausente e alerta sobre
 estado parcial ou registro divergente. Detalhes: `Documentos/testes/INVENTARIO_ESQUEMA_2026-11-22.md`.
+
+## Registro de versões — 008 pendente de revisão
+
+`008_registro_migracoes.sql` completa `educafast_migracoes` (criada pela 003) com
+`descricao`, `arquivo`, `checksum`, `aplicada_em` e `origem`. Em seguida registra como
+`detectada` cada proposta 001–007 cuja estrutura **completa** já existe (as condições são
+geradas a partir das mesmas assinaturas do inventário) e registra a si mesma como `aplicada`.
+Linhas já existentes são preservadas; só `descricao`/`arquivo` são completados.
+
+O `checksum` fica vazio: um arquivo não pode conter o próprio hash. Ele será preenchido por
+um aplicador revisado (etapa A4). Quando existir, é comparado com o arquivo da release.
+
+Na inicialização em produção, a aplicação **recusa** banco com migration registrada mais
+nova que o código ou com checksum diferente do arquivo, e **aceita** instalações que ainda
+não aplicaram a 008. Nada é executado automaticamente. Pré-requisito: 003 aplicada.
+Relatório: `Documentos/testes/REGISTRO_MIGRACOES_2026-11-22.md`.
 
 ## Cursos MS04 — 007 pendente de revisão
 

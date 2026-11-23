@@ -5,8 +5,26 @@ from app.database import Base
 
 
 class MigracaoSchemaModel(Base):
+    """Registro de migrations (003 cria a tabela; 008 acrescenta as colunas de controle).
+
+    origem 'aplicada': registrada ao aplicar; 'detectada': estrutura encontrada pela 008
+    em banco que recebeu a proposta antes do registro existir. checksum e o SHA-256 do
+    arquivo aplicado, quando conhecido; um arquivo nao consegue conter o proprio hash.
+    """
     __tablename__ = 'educafast_migracoes'
+    __table_args__ = (
+        CheckConstraint("origem IN ('aplicada','detectada')", name='ck_migracao_origem'),
+        CheckConstraint('checksum IS NULL OR length(checksum) = 64', name='ck_migracao_checksum'),
+    )
     versao: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    descricao: Mapped[str | None] = mapped_column(String(120))
+    arquivo: Mapped[str | None] = mapped_column(String(120))
+    checksum: Mapped[str | None] = mapped_column(String(64))
+    aplicada_em: Mapped[object] = mapped_column(DateTime, nullable=False, server_default=func.current_timestamp())
+    origem: Mapped[str] = mapped_column(String(12), nullable=False, default='aplicada', server_default='aplicada')
+
+# Colunas da 008: instalacoes que ainda nao a aplicaram continuam validas.
+MIGRACAO_008_COLUNAS = frozenset({'descricao', 'arquivo', 'checksum', 'aplicada_em', 'origem'})
 
 
 class CursoModel(Base):

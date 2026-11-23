@@ -6,6 +6,7 @@
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
 | [A1 — Inventário de esquema — 22/11](testes/INVENTARIO_ESQUEMA_2026-11-22.md) | Relatório somente leitura de quais migrations estão aplicadas, parciais ou ausentes em cada banco |
+| [A2 — Registro de migrations — 22/11](testes/REGISTRO_MIGRACOES_2026-11-22.md) | Proposta 008: registro de versões, detecção do passado e recusa de banco incompatível na inicialização |
 | [Troca para PostgreSQL — 22/11](testes/MIGRACAO_POSTGRESQL_2026-11-22.md) | MySQL → PostgreSQL 17 em toda a plataforma, caminhos de arquivos corrigidos, pasta `Codigos/` sem acento e regressão comparada |
 | [Backend e API MS04 — 20/11](testes/API_CURSOS_MS04_2026-11-20.md) | Rascunhos, publicação, retomada, texto/vídeo, recursos privados, SQL 007 e testes sem frontend |
 | [Esqueleto MS04 e caminhos de implementação](planejamento/ESQUELETO_MS04_2026-11-20.md) | Serviços isolados, catálogo de rotas/aceite, modelo conceitual e início pelo lote A |
