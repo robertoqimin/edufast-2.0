@@ -1,4 +1,15 @@
-# Migração de concorrência — revisão pendente
+# Migrations do EduFast
+
+## Revisão concluída em 23/11/2026 (A5)
+
+Base v8, propostas 001–008 e o banco central do painel foram **aprovados pelo usuário**; a 002
+mantém a quarentena geral de professores de bancos antigos. E-mails com maiúsculas serão
+tratados na importação, se houver. Aprovar não executou nada: aplicar em banco real continua
+exigindo backup (banco, uploads e chave) e o plano do `aplicar_migracoes.py`. Fichas e
+registro: `Documentos/planejamento/REVISAO_MIGRACOES_A5_2026-11-23.md`. Os cabeçalhos
+"PENDENTE DE REVISÃO" dentro dos arquivos permanecem porque eles estão congelados por checksum.
+As seções abaixo descrevem cada proposta como foi escrita; onde dizem "pendente de revisão",
+vale o registro acima.
 
 ## PostgreSQL desde 22/11/2026
 
@@ -6,7 +17,7 @@ As propostas 001–008 estão em SQL **PostgreSQL 17**, geradas a partir dos mod
 `python migrations/gerar_postgresql.py`. Cada arquivo roda entre `BEGIN`/`COMMIT`: uma
 falha desfaz a proposta inteira, sem estado parcial. Aplicar com
 `psql -v ON_ERROR_STOP=1 -f <arquivo>`, somente após revisão. As versões MySQL ficam em
-`legado-mysql/`, como histórico. O teste `test_migrations_postgresql.py` aplica 001–007
+`legado-mysql/`, como histórico. O teste `test_migrations_postgresql.py` aplica 001–008
 sobre o esquema legado e compara o resultado com os modelos. As menções a "DDL MySQL"
 abaixo descrevem a proposta original e deixaram de valer para estes arquivos.
 

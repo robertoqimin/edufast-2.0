@@ -32,7 +32,9 @@ def validate(root):
         raise ValueError('Estado do runtime diverge do catálogo.')
     local_file(catalog['roteiro'])
     proposal = json.loads(local_file(catalog['modelo_proposto']).read_text(encoding='utf-8'))
-    if proposal['sql_executavel'] is not False or proposal['revisao_usuario'] != 'pendente':
+    # Revisao A5 (23/11/2026) aprovou a proposta; aprovar nao executa nada.
+    revisao = proposal['revisao_usuario']
+    if proposal['sql_executavel'] is not False or not (revisao == 'pendente' or revisao.startswith('aprovada_em_')):
         raise ValueError('O modelo do esqueleto deve continuar como proposta sem execução.')
     if backend:
         local_file(proposal['arquivo_sql'])

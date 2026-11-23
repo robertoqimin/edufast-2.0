@@ -19,6 +19,8 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 | Troca para PostgreSQL | Concluída em 22/11 (fora do plano original, pedido do usuário) | [Relatório](../testes/MIGRACAO_POSTGRESQL_2026-11-22.md) |
 | A2 | Proposta 008 pronta para revisão em 22/11; não executada em banco persistente | [Registro de migrations](../testes/REGISTRO_MIGRACOES_2026-11-22.md) |
 | A3 | Esquema base v8 pronto para revisão em 22/11; iniciador e escolas de teste já o usam | [Esquema base](../testes/ESQUEMA_BASE_2026-11-22.md) |
+| Segurança | Revisão em 22/11 e correções S1–S7 em 23/11 (fora do plano original, pedido do usuário) | [Revisão](../testes/REGRESSAO_SEGURANCA_2026-11-22.md) · [Correções](../testes/SEGURANCA_CORRECOES_2026-11-23.md) |
+| A5 | Concluída em 23/11: base v8, 001–008 e banco central aprovados; 002 com quarentena geral; e-mails com maiúsculas tratados na importação. Nada executado | [Revisão das migrations](REVISAO_MIGRACOES_A5_2026-11-23.md) |
 | A4 | Redefinida com o usuário (bancos de teste já nascem na v8): aplicador revisado e ensaio de atualização do legado com backup e volta atrás, em 22/11 | [Aplicador e ensaio](../testes/APLICADOR_ENSAIO_2026-11-22.md) |
 
 Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única

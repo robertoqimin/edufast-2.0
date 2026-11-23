@@ -1,8 +1,8 @@
 {
   "etapa": "MS04",
-  "estado": "SQL_proposto_revisao_pendente",
+  "estado": "SQL_aprovado_em_23_11_2026",
   "sql_executavel": false,
-  "revisao_usuario": "pendente",
+  "revisao_usuario": "aprovada_em_23_11_2026",
   "numero_migration": 7,
   "preservar": [
     "IDs da hierarquia",
