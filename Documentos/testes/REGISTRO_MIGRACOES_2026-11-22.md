@@ -1,6 +1,6 @@
 # A2 — Registro de versões do esquema (proposta 008)
 
-Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir de `0572888`.
+Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir do commit «feat: troca o banco para PostgreSQL 17, corrige caminhos de arquivos e renomeia Codigos».
 Etapa A2 do [plano de melhoria](../planejamento/PLANO_MELHORIA_2026-11-22.md).
 **Estado: proposta para revisão. Nenhum SQL foi executado em banco persistente.**
 

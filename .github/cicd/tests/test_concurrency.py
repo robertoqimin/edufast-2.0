@@ -71,6 +71,10 @@ class MutationApiTests(TestCase):
         with get_session() as db:
             return db.query(model).count()
 
+    def id_by_code(self, model, code):
+        with get_session() as db:
+            return str(db.query(model.id).filter_by(codigo=code).one()[0])
+
     def files(self):
         return list(Path(self.folder.name).iterdir())
 
@@ -368,9 +372,14 @@ class MutationApiTests(TestCase):
             ("/cadastro/professores", lambda _: {"nome": "Novo", "email": "newteacher@example.test", "senha": "test-password-123", "cpf": "33333333333"}, UsuarioModel, 6),
             ("/admin/turmas", lambda _: {"nome": "Nova", "codigo": "T2", "ano_letivo": "2026"}, TurmaModel, 2),
             ("/admin/disciplinas", lambda _: {"nome": "Nova", "codigo": "D2", "carga_horaria": "40"}, DisciplinaModel, 2),
-            ("/admin/disciplinas", lambda _: {"action": "associate_teacher", "professor_id": "1", "disciplina_id": "2"}, ProfessorDisciplinaModel, 3),
-            ("/admin/turmas", lambda _: {"action": "associate_student", "aluno_id": "1", "turma_id": "2"}, AlunoTurmaModel, 2),
-            ("/admin/turmas", lambda _: {"action": "associate_teacher", "professor_id": "2", "turma_id": "2"}, ProfessorTurmaModel, 2),
+            # IDs reais pelo codigo: na criacao concorrente, o perdedor consome um valor da
+            # sequencia e o registro vencedor pode receber 2 ou 3.
+            ("/admin/disciplinas", lambda _: {"action": "associate_teacher", "professor_id": "1",
+                                              "disciplina_id": self.id_by_code(DisciplinaModel, "D2")}, ProfessorDisciplinaModel, 3),
+            ("/admin/turmas", lambda _: {"action": "associate_student", "aluno_id": "1",
+                                         "turma_id": self.id_by_code(TurmaModel, "T2")}, AlunoTurmaModel, 2),
+            ("/admin/turmas", lambda _: {"action": "associate_teacher", "professor_id": "2",
+                                         "turma_id": self.id_by_code(TurmaModel, "T2")}, ProfessorTurmaModel, 2),
         ]
         for path, factory, model, expected in cases:
             with self.subTest(path=path, model=model.__tablename__):

@@ -1,6 +1,6 @@
 # Troca do banco de dados: MySQL 8.4 → PostgreSQL 17
 
-Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir de `bf92b3a`.
+Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir do commit «feat: adiciona inventario somente leitura das migrations (A1)».
 Pedido do usuário: fazer a transição de forma segura, trocar todas as instâncias para
 PostgreSQL e validar com testes de API e regressão antes de seguir para a A2 do
 [plano de melhoria](../planejamento/PLANO_MELHORIA_2026-11-22.md).
@@ -23,7 +23,7 @@ Ambiente: Windows 11, Docker 29.4.0, imagem de teste com Python 3.12, SQLAlchemy
 psycopg 3.2.10 e PostgreSQL 17.12. Execuções em bancos descartáveis (tmpfs ou volumes
 removidos ao final), com o papel da aplicação sem superusuário.
 
-**Linha de base MySQL**, no commit de partida `bf92b3a`, numa cópia separada (worktree)
+**Linha de base MySQL**, no commit de partida «feat: adiciona inventario somente leitura das migrations (A1)», numa cópia separada (worktree)
 para não misturar com as alterações: `python .github/cicd/run_cursos_backend.py --suite regressao`.
 
 | Verificação | MySQL (linha de base) | PostgreSQL (versão final) |

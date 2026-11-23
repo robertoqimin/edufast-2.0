@@ -1,4 +1,4 @@
-"""Aplica as propostas PostgreSQL 001-007 sobre o esquema legado, em banco descartavel.
+"""Aplica as propostas PostgreSQL sobre o esquema legado e o esquema base, em banco descartavel.
 
 Nunca roda fora do executor descartavel: recria o banco de teste. Compara o
 resultado com os modelos e confirma que uma proposta com falha nao deixa estado
@@ -16,24 +16,13 @@ from schema_inventory import APLICADA, ESCOLA_DIR, inventory, load_migrations
 
 POSTGRES = engine.dialect.name == 'postgresql'
 MODELO = 'modelo_esperado'
+BASE = 'base_esperada'
 
 
-def run_sql(sql):
-    """Executa um arquivo inteiro como o psql faria; o proprio arquivo controla a transacao."""
-    raw = engine.raw_connection()
-    try:
-        raw.driver_connection.autocommit = True
-        with raw.driver_connection.cursor() as cursor:
-            try:
-                cursor.execute(sql)
-            except Exception:
-                cursor.execute('ROLLBACK')
-                raise
-    finally:
-        # A conexao volta ao pool: sem isto, testes seguintes herdariam autocommit
-        # e perderiam transacoes/SAVEPOINT.
-        raw.driver_connection.autocommit = False
-        raw.close()
+def run_sql(sql, schema=None):
+    """Mesmo executor usado pelo esquema base em producao (schema_base)."""
+    from schema_base import executar_arquivo_postgresql
+    executar_arquivo_postgresql(engine, sql, schema)
 
 
 def structure(schema):
@@ -66,7 +55,8 @@ class PostgresMigrationTests(TestCase):
     def setUp(self):
         Base.metadata.drop_all(engine)
         with engine.begin() as connection:
-            connection.execute(text(f'DROP SCHEMA IF EXISTS {MODELO} CASCADE'))
+            for schema in (MODELO, BASE):
+                connection.execute(text(f'DROP SCHEMA IF EXISTS {schema} CASCADE'))
         self.addCleanup(self.cleanup)
         created = {t for m in self.migrations for t in m['tables']}
         legacy = [t for t in Base.metadata.sorted_tables if t.name not in created]
@@ -82,7 +72,8 @@ class PostgresMigrationTests(TestCase):
 
     def cleanup(self):
         with engine.begin() as connection:
-            connection.execute(text(f'DROP SCHEMA IF EXISTS {MODELO} CASCADE'))
+            for schema in (MODELO, BASE):
+                connection.execute(text(f'DROP SCHEMA IF EXISTS {schema} CASCADE'))
         Base.metadata.drop_all(engine)
 
     def apply(self, until=None):
@@ -121,6 +112,42 @@ class PostgresMigrationTests(TestCase):
         self.assertEqual((request.solicitante_id, request.tipo, request.estado, request.recurso_pendente),
                          (teacher.id, 'cadastro', 'pendente', f'cadastro:{teacher.id}'))
         self.assertEqual(json.loads(request.payload), {'usuario_id': teacher.id, 'papel_solicitado': 'professor'})
+
+    def test_base_schema_equals_legacy_plus_every_migration(self):
+        from schema_base import arquivo_base, linhas_registro_base
+        self.apply()
+        with engine.begin() as connection:
+            connection.execute(text(f'CREATE SCHEMA {BASE}'))
+        run_sql((ESCOLA_DIR / arquivo_base()).read_text(encoding='utf-8'), schema=BASE)
+        sequential, base = structure('public'), structure(BASE)
+        self.assertEqual(sorted(sequential), sorted(base))
+        for table in sequential:
+            with self.subTest(tabela=table):
+                self.assertEqual(base[table], sequential[table])
+        with engine.connect() as connection:
+            rows = [tuple(r) for r in connection.execute(text(
+                f'SELECT versao, descricao, arquivo, origem FROM {BASE}.educafast_migracoes ORDER BY versao'))]
+        self.assertEqual(rows, [(r['versao'], r['descricao'], r['arquivo'], r['origem']) for r in linhas_registro_base()])
+
+    def test_base_creates_registered_database_accepted_in_production(self):
+        from unittest.mock import patch
+        from app import database
+        from schema_base import criar_esquema_base, versao_base
+        Base.metadata.drop_all(engine)
+        self.assertEqual(criar_esquema_base(engine), versao_base())
+        report = inventory(engine)
+        self.assertEqual([i for i in report['migrations'] if i['situacao'] != APLICADA], [])
+        self.assertEqual(report['alertas'], [])
+        with patch.object(database.Config, 'APP_ENV', 'production'):
+            database.init_db()
+        with self.assertRaisesRegex(RuntimeError, 'banco vazio'):
+            criar_esquema_base(engine)
+        # A sessao seguinte nao herda search_path nem autocommit do arquivo executado.
+        from app.database import get_session
+        from app.models import UsuarioModel
+        with get_session() as db:
+            db.add(UsuarioModel(email='base@example.test', senha='x', tipo='admin'))
+            db.commit()
 
     def registry(self):
         with engine.connect() as connection:

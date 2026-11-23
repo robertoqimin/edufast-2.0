@@ -16,7 +16,9 @@ class GeneratedProposalsTests(TestCase):
         spec = importlib.util.spec_from_file_location('gerar_postgresql', ESCOLA_DIR / 'gerar_postgresql.py')
         gerador = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(gerador)
-        expected = {**gerador.gerados(), gerador.REGISTRO: gerador.gerar_registro()}
+        expected = gerador.gerados()
+        self.assertIn('008_registro_migracoes.sql', expected)
+        self.assertTrue(any(name.startswith('base/esquema_v') for name in expected))
         for name, content in expected.items():
             with self.subTest(arquivo=name):
                 committed = (ESCOLA_DIR / name).read_bytes().replace(b'\r\n', b'\n').decode('utf-8')

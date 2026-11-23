@@ -91,14 +91,14 @@ try {
             $schemaCommand = @'
 import sys
 from sqlalchemy import inspect
-from app.database import Base, engine
-from app import models
+from app.database import engine
+from schema_base import arquivo_base, criar_esquema_base
 tables = set(inspect(engine).get_table_names())
 if sys.argv[1] == 'prepare' or not tables:
     if tables:
         raise SystemExit('Banco ja contem tabelas. Nada alterado; inicie sem -PrepararBancoNovo. Migrations exigem revisao separada.')
-    Base.metadata.create_all(engine)
-    print('Esquema novo criado no banco isolado de teste manual.')
+    versao = criar_esquema_base(engine)
+    print(f'Esquema base v{versao} criado no banco isolado de teste manual ({arquivo_base()}).')
 else:
     from config import Config
     from app.database import init_db

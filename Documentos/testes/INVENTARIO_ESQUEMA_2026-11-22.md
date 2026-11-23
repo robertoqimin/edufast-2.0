@@ -1,6 +1,6 @@
 # A1 — Inventário de esquema somente leitura
 
-Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir de `9b1edd1`.
+Data: 22/11/2026. Branch `feature/melhoria-dezembro`, a partir do commit «docs: atualiza README com estado atual do produto».
 Etapa A1 do [plano de melhoria](../planejamento/PLANO_MELHORIA_2026-11-22.md).
 
 ## Objetivo

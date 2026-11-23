@@ -16,7 +16,8 @@ Não é necessário copiar ou editar `Codigos/.env` para esse modo. O iniciador 
 segredos aleatórios em `.ci-results/manual-postgres/.env` e usa exclusivamente o
 projeto Docker `edufast-manual-postgres`, em **http://localhost:5050**, com banco
 e uploads próprios. O ambiente anterior não é alterado. Na primeira configuração,
-cria o esquema somente se o banco estiver vazio. Em banco existente, confere o
+cria o banco pelo esquema base revisável (`Codigos/migrations/base/`), somente se ele
+estiver vazio, já registrado na versão mais recente. Em banco existente, confere o
 esquema e recusa alterações automáticas. Não executa migrations.
 
 | Login local | Perfil |

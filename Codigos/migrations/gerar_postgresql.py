@@ -93,18 +93,27 @@ def _condicoes(assinatura):
     return condicoes
 
 
-def gerar_registro():
-    """008: registro retroativo derivado das mesmas assinaturas usadas pelo inventario."""
+def _conteudos_gravados():
+    return {caminho.name: caminho.read_text(encoding='utf-8') for caminho in sorted(HERE.glob('[0-9][0-9][0-9]_*.sql'))}
+
+
+def gerar_registro(conteudos=None):
+    """008: registro retroativo derivado das mesmas assinaturas usadas pelo inventario.
+
+    ``conteudos`` (nome -> SQL) permite gerar a partir do que acabou de ser gerado,
+    numa unica passada; sem ele, le os arquivos gravados.
+    """
+    conteudos = conteudos if conteudos is not None else _conteudos_gravados()
     corpo = [*REGISTRO_CABECALHO, '', 'BEGIN;', '', *REGISTRO_ALTER, '']
-    for caminho in sorted(HERE.glob('[0-9][0-9][0-9]_*.sql')):
-        versao = int(caminho.name[:3])
-        if caminho.name == REGISTRO or versao >= int(REGISTRO[:3]):
+    for nome in sorted(conteudos):
+        versao = int(nome[:3])
+        if nome == REGISTRO or versao >= int(REGISTRO[:3]):
             continue
-        descricao = caminho.stem[4:]
-        condicoes = _condicoes(parse_migration(caminho.read_text(encoding='utf-8')))
-        corpo += [f'-- {caminho.name}: registrada somente se toda a estrutura estiver presente.',
+        descricao = nome[4:-4]
+        condicoes = _condicoes(parse_migration(conteudos[nome]))
+        corpo += [f'-- {nome}: registrada somente se toda a estrutura estiver presente.',
                   'INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem)',
-                  f"SELECT {versao}, {_literal(descricao)}, {_literal(caminho.name)}, 'detectada'",
+                  f"SELECT {versao}, {_literal(descricao)}, {_literal(nome)}, 'detectada'",
                   'WHERE ' + '\n  AND '.join(condicoes),
                   'ON CONFLICT (versao) DO UPDATE SET descricao = EXCLUDED.descricao, arquivo = EXCLUDED.arquivo;', '']
     corpo += ['INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem)',
@@ -154,18 +163,44 @@ def gerar(caminho_legado):
     return '\n'.join(corpo) + '\n'
 
 
+def gerar_base(conteudos=None):
+    """Esquema completo para banco vazio, equivalente a legado + todas as propostas (A3).
+
+    Bases de versoes anteriores nunca sao apagadas: bancos criados por elas continuam
+    apontando para o arquivo no registro (e, com checksum, a release precisa conte-lo).
+    """
+    from schema_base import arquivo_base, linhas_registro_base, versao_base
+    conteudos = conteudos if conteudos is not None else _conteudos_gravados()
+    migrations = [{'versao': int(nome[:3]), 'arquivo': nome} for nome in sorted(conteudos)]
+    versao = versao_base(migrations)
+    corpo = [f'-- ESQUEMA BASE v{versao}: cria o banco COMPLETO de uma escola nova. REVISAR antes de executar.',
+             f'-- Equivale ao esquema legado com as propostas 001-{versao:03d} aplicadas em sequencia;',
+             '-- o CI compara os dois caminhos em PostgreSQL. Somente para banco VAZIO.',
+             '-- O registro marca cada versao como aplicada por este arquivo (checksum: ver A4).',
+             *CABECALHO, '', 'BEGIN;', '']
+    for table in Base.metadata.sorted_tables:
+        corpo += [_tabela(table.name, None), '']
+    linhas = linhas_registro_base(migrations)
+    valores = ',\n'.join(f"    ({l['versao']}, {_literal(l['descricao'])}, {_literal(l['arquivo'])}, {_literal(l['origem'])})"
+                         for l in linhas)
+    corpo += ['INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem) VALUES', valores + ';', '',
+              'COMMIT;']
+    return arquivo_base(migrations), '\n'.join(corpo) + '\n'
+
+
 def gerados():
-    """Conteudo esperado de cada proposta gerada; usado tambem pelo teste de sincronia."""
-    arquivos = {caminho.name: gerar(caminho) for caminho in sorted(LEGADO.glob('[0-9][0-9][0-9]_*.sql'))}
-    return arquivos
+    """Conteudo esperado de cada arquivo gerado (caminho relativo a migrations/), numa passada."""
+    propostas = {caminho.name: gerar(caminho) for caminho in sorted(LEGADO.glob('[0-9][0-9][0-9]_*.sql'))}
+    propostas[REGISTRO] = gerar_registro(propostas)
+    nome_base, base = gerar_base(propostas)
+    return {**propostas, nome_base: base}
 
 
 def main():
     for nome, conteudo in gerados().items():
+        (HERE / nome).parent.mkdir(exist_ok=True)
         (HERE / nome).write_text(conteudo, encoding='utf-8', newline='\n')
         print('gerado', nome)
-    (HERE / REGISTRO).write_text(gerar_registro(), encoding='utf-8', newline='\n')
-    print('gerado', REGISTRO)
 
 
 if __name__ == '__main__':

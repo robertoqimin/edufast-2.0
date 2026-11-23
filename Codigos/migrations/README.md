@@ -17,6 +17,24 @@ Para saber quais propostas já estão presentes num banco, sem alterá-lo:
 `--central`). Mostra cada migration como aplicada, parcial ou ausente e alerta sobre
 estado parcial ou registro divergente. Detalhes: `Documentos/testes/INVENTARIO_ESQUEMA_2026-11-22.md`.
 
+## Banco novo — esquema base pendente de revisão
+
+Para uma escola **nova**, não aplicar 001–008 em sequência: usar `base/esquema_vN.sql`
+(hoje `esquema_v8.sql`), que cria o banco completo de uma vez e registra as versões 1–N
+em `educafast_migracoes` com origem `aplicada` e `arquivo = base/esquema_vN.sql`. Só aceita
+banco **vazio**. Gerado por `gerar_postgresql.py` a partir dos modelos, junto com 001–008.
+
+O CI aplica, em PostgreSQL descartável, os dois caminhos (esquema legado + 001…N e o
+esquema base) e exige estrutura idêntica: tabelas, colunas, tipos, nulidade, chaves,
+índices, FKs e CHECKs. Em código, `schema_base.criar_esquema_base(engine)` executa a base
+(PostgreSQL) e recusa banco com qualquer tabela. O iniciador local e as escolas Teste 01/02
+já criam o banco por esse caminho.
+
+**Não apague bases antigas.** Quando surgir a 009, o gerador cria `esquema_v9.sql` e
+mantém `esquema_v8.sql`: bancos criados pela v8 continuam apontando para ela no registro.
+Instalações existentes seguem pelas propostas sequenciais. Relatório:
+`Documentos/testes/ESQUEMA_BASE_2026-11-22.md`.
+
 ## Registro de versões — 008 pendente de revisão
 
 `008_registro_migracoes.sql` completa `educafast_migracoes` (criada pela 003) com

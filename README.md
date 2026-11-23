@@ -155,7 +155,7 @@ Nunca as use em produção.
 | Painel Supremo | `node infra/platform-demo.cjs start` | http://127.0.0.1:5093/login | `dono@plataforma.local` · `Plataforma-teste-2026!` |
 
 - `iniciar-educafast.ps1` aceita `-Porta`, `-SemNavegador`, `-Acao Status|Logs|Parar|CriarAdmin`
-  e `-PrepararBancoNovo`. Ele cria o esquema apenas em banco novo e vazio, e nunca
+  e `-PrepararBancoNovo`. Ele cria o banco pelo esquema base (`migrations/base/`) apenas quando está vazio, e nunca
   aplica migrations em banco existente.
 - As demos ENEM e Supremo usam bancos temporários: **parar descarta os dados**.
 - Roteiros: [duas escolas](Documentos/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md),

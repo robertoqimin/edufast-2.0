@@ -1,6 +1,6 @@
 # Plano de melhoria — dezembro de 2026
 
-Data: 22/11/2026. Base inspecionada: `9b1edd1` (branch `feature/instancias-clientes-nuvem`).
+Data: 22/11/2026. Base inspecionada: commit «docs: atualiza README com estado atual do produto» (branch `feature/instancias-clientes-nuvem`).
 Horizonte: 4 semanas, de 23/11 a 18/12/2026.
 Frentes escolhidas pelo usuário: **ativação do banco**, **produto** e **pronto para vender**.
 Manutenção (consolidação de documentos, migração de controllers antigos) fica fora deste ciclo.
@@ -18,6 +18,7 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 | A1 | Concluído em 22/11 | [Inventário de esquema](../testes/INVENTARIO_ESQUEMA_2026-11-22.md) |
 | Troca para PostgreSQL | Concluída em 22/11 (fora do plano original, pedido do usuário) | [Relatório](../testes/MIGRACAO_POSTGRESQL_2026-11-22.md) |
 | A2 | Proposta 008 pronta para revisão em 22/11; não executada em banco persistente | [Registro de migrations](../testes/REGISTRO_MIGRACOES_2026-11-22.md) |
+| A3 | Esquema base v8 pronto para revisão em 22/11; iniciador e escolas de teste já o usam | [Esquema base](../testes/ESQUEMA_BASE_2026-11-22.md) |
 
 Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única
 fonte de notas (B1); a demo única inclui escola e painel Supremo (C1).
