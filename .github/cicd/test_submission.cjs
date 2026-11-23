@@ -66,14 +66,3 @@ test("disabling the approval button preserves its decision in the payload", () =
     assert.equal(form.hidden.value, "aprovar");
     assert.equal(form.hidden.type, "hidden");
 });
-
-test("changing a grade subject selects the corresponding server version", () => {
-    const { HTMLFormElement, listeners } = browser();
-    const form = new HTMLFormElement();
-    const version = { value: "0" };
-    const select = { name: "disciplina_id", selectedOptions: [{ dataset: { versao: "7" } }], form };
-    form.elements.namedItem = (name) => name === "versao" ? version : select;
-    form.classList = { contains: () => true };
-    listeners.change({ target: select });
-    assert.equal(version.value, "7");
-});

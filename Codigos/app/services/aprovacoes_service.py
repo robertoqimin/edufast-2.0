@@ -2,7 +2,6 @@
 import json
 import os
 from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from flask import current_app
@@ -12,7 +11,7 @@ from werkzeug.utils import secure_filename
 from app.concurrency import MutationConflict, begin_submission, check_version, finish_submission
 from app.database import get_session
 from app.models import (AlunoModel, AlunoTurmaModel, AtividadeModel, DisciplinaModel,
-                        DocumentoModel, NotaModel, ProfessorDisciplinaModel, ProfessorModel,
+                        DocumentoModel, ProfessorDisciplinaModel, ProfessorModel,
                         ProfessorTurmaModel, SolicitacaoAlteracaoModel, SolicitacaoDocumentoModel,
                         TurmaDisciplinaModel, TurmaModel, UsuarioModel)
 from app.services.identidade_service import current_identity
@@ -26,10 +25,12 @@ FIELDS = {
     "criar_disciplina": {"nome", "codigo", "carga_horaria"},
     "editar_aluno": {"aluno_id", "nome", "curso_serie", "versao"},
     "lancar_atividade": {"turma_id", "disciplina_id", "titulo", "descricao", "data_entrega"},
-    "salvar_nota": {"aluno_id", "turma_id", "disciplina_id", "nota", "observacao", "versao"},
     "enviar_documento": {"aluno_id", "disciplina_id", "titulo"},
     "responder_documento": {"solicitacao_id"},
 }
+# B1: notas são lançadas só no diário da avaliação (academico_notas). Propostas antigas
+# pendentes continuam listadas e podem ser rejeitadas, mas nunca gravam em `notas`.
+LEGADOS = {"salvar_nota": "Notas agora sao lancadas no diario da avaliacao (/academico)."}
 
 
 def _text(data, name, maximum, required=False):
@@ -97,7 +98,7 @@ def validate_proposal(db, user_id, kind, raw):
     for key in ("aluno_id", "turma_id", "disciplina_id", "solicitacao_id"):
         if key in FIELDS[kind]:
             data[key] = _integer(data, key)
-    if kind in {"lancar_atividade", "salvar_nota"}:
+    if kind == "lancar_atividade":
         _scope(db, professor, data["turma_id"], data["disciplina_id"], data.get("aluno_id"))
     if kind == "editar_aluno":
         row = _student(db, professor, data["aluno_id"])
@@ -122,19 +123,6 @@ def validate_proposal(db, user_id, kind, raw):
             data["data_entrega"] = date.fromisoformat(value).isoformat() if value else None
         except ValueError:
             raise MutationConflict("Data de entrega invalida", 400)
-    if kind == "salvar_nota":
-        try:
-            number = Decimal(str(data.get("nota", "")).replace(",", "."))
-            if not number.is_finite() or not 0 <= number <= 10 or number.as_tuple().exponent < -2:
-                raise InvalidOperation()
-        except (InvalidOperation, ValueError):
-            raise MutationConflict("Nota invalida: use 0 a 10, com ate duas casas", 400)
-        data["nota"] = str(number)
-        data["observacao"] = _text(data, "observacao", 255)
-        data["versao"] = _integer(data, "versao", 0)
-        note = db.query(NotaModel).filter_by(aluno_id=data["aluno_id"], disciplina_id=data["disciplina_id"]).first()
-        if data["versao"] != (note.versao if note else 0):
-            raise MutationConflict("Nota alterada; recarregue antes de solicitar")
     if kind == "enviar_documento":
         _student(db, professor, data["aluno_id"])
         turma = (db.query(AlunoTurmaModel.turma_id)
@@ -159,6 +147,8 @@ def submit_proposal(kind, data, files=None):
     identity = current_identity()
     if identity.papel != "professor":
         raise MutationConflict("Somente professores podem enviar propostas", 403)
+    if isinstance(kind, str) and kind in LEGADOS:
+        raise MutationConflict(LEGADOS[kind], 410)
     if not isinstance(kind, str) or kind not in FIELDS:
         raise MutationConflict("Operacao ou campos nao permitidos", 400)
     db = get_session()
@@ -194,9 +184,7 @@ def submit_proposal(kind, data, files=None):
             resource = f"curso:{normalized['curso_id']}:{normalized['versao']}"
         if kind == 'publicar_material':
             resource = f"estudo:{normalized['conteudo_id']}:{normalized['versao']}"
-        if kind == "salvar_nota":
-            resource = f"nota:{normalized['aluno_id']}:{normalized['disciplina_id']}:{normalized['versao']}"
-        elif kind == "responder_documento":
+        if kind == "responder_documento":
             resource = f"documento:{normalized['solicitacao_id']}"
         proposal = SolicitacaoAlteracaoModel(solicitante_id=identity.id, tipo=kind,
             payload=json.dumps(normalized, ensure_ascii=False), estado="pendente", arquivo=filename, recurso_pendente=resource)
@@ -234,6 +222,8 @@ def can_review(db, identity, proposal):
 
 
 def _apply(db, proposal):
+    if proposal.tipo in LEGADOS:
+        raise MutationConflict("Proposta de nota do painel antigo: rejeite e peca o lancamento no diario da avaliacao")
     data = json.loads(proposal.payload)
     if proposal.tipo == 'publicar_curso':
         from app.services.cursos_ms04.publicacao import preparar_publicacao
@@ -270,14 +260,6 @@ def _apply(db, proposal):
         aluno = _student(db, professor, data["aluno_id"])
         check_version(aluno, data)
         aluno.nome, aluno.curso_serie = data["nome"], data["curso_serie"] or None
-    elif proposal.tipo == "salvar_nota":
-        note = db.query(NotaModel).filter_by(aluno_id=data["aluno_id"], disciplina_id=data["disciplina_id"]).first()
-        check_version(note, data)
-        if note:
-            note.nota, note.observacao, note.professor_id = Decimal(data["nota"]), data["observacao"] or None, professor.id
-        else:
-            db.add(NotaModel(aluno_id=data["aluno_id"], disciplina_id=data["disciplina_id"],
-                            professor_id=professor.id, nota=Decimal(data["nota"]), observacao=data["observacao"] or None))
     elif proposal.tipo == "lancar_atividade":
         db.add(AtividadeModel(professor_id=professor.id, caminho_arquivo=proposal.arquivo, **data))
     elif proposal.tipo == "enviar_documento":

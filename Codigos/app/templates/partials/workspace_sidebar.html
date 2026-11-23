@@ -38,11 +38,11 @@
             <span class="nav-section">MINHA ESCOLA</span>
             {% if request.endpoint == 'professor.dashboard' %}
             <button type="button" data-professor-tab="turmas" class="active" aria-pressed="true">{{ icon('grid') }} Minhas turmas</button>
-            <button type="button" data-professor-tab="notas" aria-pressed="false">{{ icon('cap') }} Lançar notas</button>
+            <button type="button" data-professor-tab="notas" aria-pressed="false">{{ icon('cap') }} Notas e avaliações</button>
             <button type="button" data-professor-tab="documentos" aria-pressed="false">{{ icon('users') }} Documentos</button>
             {% else %}
             {{ nav_link('professor.dashboard', 'Minhas turmas', 'grid') }}
-            <a href="{{ url_for('professor.dashboard') }}#notas">{{ icon('cap') }} Lançar notas</a>
+            <a href="{{ url_for('professor.dashboard') }}#notas">{{ icon('cap') }} Notas e avaliações</a>
             <a href="{{ url_for('professor.dashboard') }}#documentos">{{ icon('users') }} Documentos</a>
             {% endif %}
         {% endif %}

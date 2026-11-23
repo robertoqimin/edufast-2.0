@@ -23,6 +23,8 @@ from app.models import (AlunoModel, ProfessorModel, UsuarioModel, TurmaModel,
 
 
 REAL_DB = engine.dialect.name == "postgresql"
+DIARY = "/academico/avaliacoes/1/alunos/1"
+DIARY_CSRF = "diary-csrf"
 
 
 class MutationApiTests(TestCase):
@@ -81,10 +83,10 @@ class MutationApiTests(TestCase):
     def upload(self, **data):
         return {**data, "arquivo": (io.BytesIO(b"synthetic-document"), "doc.txt")}
 
-    def pair(self, path, factory, user=1, hook=None):
+    def pair(self, path, factory, user=1, hook=None, client_factory=None):
         barrier = threading.Barrier(2)
         def send(index):
-            client = self.client(user)
+            client = (client_factory or self.client)(user)
             data = factory(index)
             barrier.wait(timeout=15)
             return client.post(path, data=data)
@@ -115,6 +117,44 @@ class MutationApiTests(TestCase):
 
     def grade(self, **extra):
         return {"aluno_id": "1", "turma_id": "1", "disciplina_id": "1", "nota": "8", "versao": "0", "idempotency_key": "grade-v" + str(extra.get("versao", "0")), **extra}
+
+    def diary_setup(self, existing=None):
+        # B1: notas vivem no diario academico; cada acao do professor e uma solicitacao.
+        from app.models import (AtribuicaoDocenteModel, AvaliacaoModel, EstadoTurmaModel,
+                                LancamentoNotaModel, PeriodoLetivoModel)
+        with get_session() as db:
+            db.add_all([AtribuicaoDocenteModel(professor_id=1, turma_disciplina_id=1, ativo=True),
+                        EstadoTurmaModel(turma_id=1, arquivada=False),
+                        PeriodoLetivoModel(id=1, turma_id=1, nome="Periodo", ordem=1)])
+            db.flush()
+            db.add(AvaliacaoModel(id=1, turma_disciplina_id=1, periodo_id=1, titulo="Prova", peso=1))
+            if existing is not None:
+                db.flush()
+                db.add(LancamentoNotaModel(avaliacao_id=1, aluno_id=1, professor_id=1, valor=existing, observacao="", versao=1))
+            db.commit()
+
+    def diary_client(self, user=3):
+        client = self.client(user)
+        with client.session_transaction() as session:
+            session["csrf_token"] = DIARY_CSRF
+        return client
+
+    def diary_grade(self, **extra):
+        return {"valor": "8", "versao": "0", "csrf_token": DIARY_CSRF,
+                "idempotency_key": "diary-v" + str(extra.get("versao", "0")), **extra}
+
+    def pending_ids(self):
+        with get_session() as db:
+            return [row.id for row in db.query(SolicitacaoAlteracaoModel).filter_by(estado="pendente").order_by(SolicitacaoAlteracaoModel.id)]
+
+    def decide_together(self, ids):
+        barrier = threading.Barrier(len(ids))
+        def decide(request_id):
+            client = self.client()
+            barrier.wait(timeout=15)
+            return client.post(f"/solicitacoes/alteracoes/{request_id}/decidir", json={"decisao": "aprovar"})
+        with ThreadPoolExecutor(max_workers=len(ids)) as pool:
+            return list(pool.map(decide, ids))
 
     def approve_all(self):
         # Changed contract: professor writes are proposals; only an admin applies them.
@@ -188,16 +228,20 @@ class MutationApiTests(TestCase):
                 self.assertEqual(client.post(path, data=data).status_code, 428)
 
     def test_grade_version_is_required_and_stale_grade_rejected(self):
-        path = "/professor/notas/salvar"
-        client = self.client(3)
-        self.assertEqual(client.post(path, data=self.grade()).status_code, 302)
-        self.assertEqual(client.post(path, data=self.grade(nota="4")).status_code, 409)
-        self.assertEqual(self.count(NotaModel), 0)
+        from app.models import LancamentoNotaModel
+        self.diary_setup()
+        client = self.diary_client()
+        self.assertEqual(client.post(DIARY, data=self.diary_grade()).status_code, 302)
+        self.assertEqual(self.count(LancamentoNotaModel), 0)
         self.approve_all()
-        self.assertEqual(client.post(path, data=self.grade(nota="9", versao="1")).status_code, 302)
+        self.assertEqual(client.post(DIARY, data=self.diary_grade(valor="4", idempotency_key="stale")).status_code, 409)
+        missing = {k: v for k, v in self.diary_grade(idempotency_key="no-version").items() if k != "versao"}
+        self.assertEqual(client.post(DIARY, data=missing).status_code, 400)
+        self.assertEqual(client.post(DIARY, data=self.diary_grade(valor="9", versao="1")).status_code, 302)
         self.approve_all()
         with get_session() as db:
-            self.assertEqual(float(db.query(NotaModel).one().nota), 9)
+            self.assertEqual(float(db.query(LancamentoNotaModel).one().valor), 9)
+        self.assertEqual(self.count(NotaModel), 0)
 
     def test_idempotency_replays_and_rejects_changed_content(self):
         data = {"titulo": "Aviso", "mensagem": "Mensagem", "idempotency_key": "same-send"}
@@ -247,14 +291,17 @@ class MutationApiTests(TestCase):
         self.assertEqual(len(self.files()), 1)
 
     def test_forms_include_key_and_versions(self):
+        # B1: a versao da nota fica no formulario do diario, nao mais no painel do professor.
+        self.diary_setup()
         for user, path in [(1, "/admin/comunicados"), (1, "/admin/alunos/1"),
-                           (1, "/admin/professores/1"), (3, "/professor/dashboard")]:
+                           (1, "/admin/professores/1"), (3, "/professor/dashboard"),
+                           (3, "/academico/avaliacoes/1")]:
             with self.subTest(path=path):
                 response = self.client(user).get(path)
                 self.assertEqual(response.status_code, 200)
                 self.assertIn(b'name="idempotency_key"', response.data)
                 self.assertIn(b'submission.js', response.data)
-                if "comunicados" not in path:
+                if path not in {"/admin/comunicados", "/professor/dashboard"}:
                     self.assertIn(b'name="versao"', response.data)
 
     def test_legacy_seed_cannot_delete_users(self):
@@ -305,22 +352,27 @@ class MutationApiTests(TestCase):
 
     @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_existing_grade(self):
+        from app.models import LancamentoNotaModel
+        self.diary_setup(existing=5)
+        self.statuses(self.pair(DIARY, lambda i: self.diary_grade(valor=str(7 + i), versao="1", idempotency_key=f"existing-grade-{i}"),
+                                user=3, client_factory=self.diary_client), [302, 302])
+        self.statuses(self.decide_together(self.pending_ids()), [200, 409])
         with get_session() as db:
-            db.add(NotaModel(aluno_id=1, disciplina_id=1, professor_id=1, nota=5))
-            db.commit()
-        self.statuses(self.pair("/professor/notas/salvar", lambda i: self.grade(versao="1", idempotency_key=f"existing-grade-{i}"), user=3), [302, 409])
-        self.approve_all()
-        with get_session() as db:
-            note = db.query(NotaModel).one()
+            note = db.query(LancamentoNotaModel).one()
             self.assertEqual(note.versao, 2)
-            self.assertEqual(float(note.nota), 8)
+            self.assertIn(float(note.valor), {7, 8})
+        self.assertEqual(self.count(NotaModel), 0)
 
     @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_new_grade(self):
-        self.statuses(self.pair("/professor/notas/salvar", lambda i: self.grade(idempotency_key=f"new-grade-{i}"), user=3), [302, 409])
+        from app.models import LancamentoNotaModel
+        self.diary_setup()
+        self.statuses(self.pair(DIARY, lambda i: self.diary_grade(idempotency_key=f"new-grade-{i}"),
+                                user=3, client_factory=self.diary_client), [302, 302])
+        self.assertEqual(self.count(LancamentoNotaModel), 0)
+        self.statuses(self.decide_together(self.pending_ids()), [200, 409])
+        self.assertEqual(self.count(LancamentoNotaModel), 1)
         self.assertEqual(self.count(NotaModel), 0)
-        self.approve_all()
-        self.assertEqual(self.count(NotaModel), 1)
 
     @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_repeated_creations(self):

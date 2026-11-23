@@ -214,25 +214,21 @@ class ApprovalSecurityTests(TestCase):
         self.assertEqual(self.approve(result.json['id']).status_code, 403)
         self.assertEqual(self.count(AtividadeModel), 0)
 
-    def test_grade_write_is_a_proposal_with_no_immediate_effect(self):
+    def test_retired_grade_form_has_no_effect(self):
+        # B1: notas sao lancadas no diario academico, com aprovacao (test_notas_unificadas).
         data = self.fixture.grade()
         data['idempotency_key'] = 'grade-proposal'
         result = self.client(3).post('/professor/notas/salvar', data=data)
-        self.assertEqual(result.status_code, 302)
+        self.assertEqual(result.status_code, 410)
         self.assertEqual(self.count(NotaModel), 0)
-        with get_session() as db:
-            request_id = db.query(SolicitacaoAlteracaoModel).one().id
-        self.assertEqual(self.approve(request_id).status_code, 200)
-        with get_session() as db:
-            self.assertEqual(float(db.query(NotaModel).one().nota), 8)
+        self.assertEqual(self.count(SolicitacaoAlteracaoModel), 0)
 
     def test_material_reviewer_is_limited_and_cannot_approve_self(self):
         result = self.client().post('/admin/usuarios/4/permissoes', json={'revisor_materiais': True})
         self.assertEqual(result.status_code, 200)
         activity = self.submit('lancar_atividade', self.activity())
         self.assertEqual(self.approve(activity.json['id'], user=4).status_code, 200)
-        grade = self.submit('salvar_nota', dict(self.fixture.grade()))
-        self.assertEqual(self.approve(grade.json['id'], user=4).status_code, 403)
+        self.assertEqual(self.submit('salvar_nota', dict(self.fixture.grade())).status_code, 410)
         self.assertEqual(self.client(4).get('/admin/dashboard').status_code, 403)
         self.assertEqual(self.client(4).get('/alunos/busca?cpf=99999999999').status_code, 403)
         self.assertEqual(self.client(4).post('/admin/usuarios/3/permissoes', json={'revisor_materiais': True}).status_code, 403)

@@ -28,7 +28,7 @@ feita quando houver cliente. Nenhuma instalação de produção foi homologada.
 | Supremo (proprietário da plataforma) | Cadastra escolas, consulta o diretório de pessoas e o financeiro da plataforma, em painel e banco próprios |
 | Superadmin da escola | Identidade visual, usuários, papéis, calendário e políticas da própria escola |
 | Admin / secretaria | Cadastros, turmas, disciplinas, vínculos, documentos e aprovação de propostas |
-| Professor | Turmas e disciplinas atribuídas: chamada, materiais, abas, cursos, atividades e notas (via proposta) |
+| Professor | Turmas e disciplinas atribuídas: chamada, materiais, abas, cursos, atividades e notas no diário da avaliação (cada lançamento aprovado pela secretaria) |
 | Professor revisor | Além do acima, aprova materiais de outros professores nas disciplinas que lhe foram atribuídas |
 | Aluno | Disciplinas, materiais, cursos com retomada, presença, documentos e solicitações próprias |
 

@@ -1,0 +1,57 @@
+{
+  "base_commit": "docs: registra revisao das migrations (A5)",
+  "relatorio": "Documentos/testes/NOTAS_UNIFICADAS_B1_2026-11-23.md",
+  "data": "2026-11-23",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Fixture sintetica em SQLite temporario; nenhuma conta real",
+  "capturas": [
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "admin-professor-celular.png",
+      "sha256": "25d721450125054d813061a645c61c53d39ded3e8295b523938209bd33cd8e56",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "admin-professor-desktop.png",
+      "sha256": "f82b3e8b03e2c282924346b78095039e21e1752477c0dbaeb025d00bd76d9cd2",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "aluno-notas-celular.png",
+      "sha256": "64d54a633a767a9802c29739190e8d3b3693b6702c7cb74dcc351fd36001220b",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "aluno-notas-desktop.png",
+      "sha256": "c20c8d185e10c3e068a9e34f21f57742a0c2ce42aa80b7af6f19b228c385b9c4",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "professor-notas-celular.png",
+      "sha256": "c15d894d211ef10ad0ff28ad8843fbf62c83196744e656df4a439f100d892c5b",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "professor-notas-desktop.png",
+      "sha256": "6d9701f2ae8cc80cd0a53ba613c079cc005e394566dabaacc36b6b5420824c8e",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "professor-turmas-celular.png",
+      "sha256": "22c31bf41bb5411c77050ec44ecf2f8d5b260e4b714388d182d2a5822f87f791",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-23-b1",
+      "arquivo": "professor-turmas-desktop.png",
+      "sha256": "14d711d602667a315dee408d9d9d2953e8da754bcd361143750cf5a1195804df",
+      "viewport": "1440x1000"
+    }
+  ]
+}

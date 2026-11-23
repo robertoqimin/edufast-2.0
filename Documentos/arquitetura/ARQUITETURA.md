@@ -52,7 +52,7 @@ A interface usa sessão nas páginas web. Há endpoints com autenticação por J
 | Identidade | `UsuarioModel`, `AlunoModel`, `ProfessorModel` |
 | Organização | `TurmaModel`, `DisciplinaModel` |
 | Vínculos | `AlunoTurmaModel`, `AlunoDisciplinaModel`, `ProfessorTurmaModel`, `ProfessorDisciplinaModel`, `TurmaDisciplinaModel` |
-| Pedagógico | `AtividadeModel`, `NotaModel` |
+| Pedagógico | `AtividadeModel`; notas em `PeriodoLetivoModel`, `AvaliacaoModel`, `LancamentoNotaModel` (`academico_notas`); `NotaModel` (`notas`) só leitura |
 | Comunicação | `ComunicadoModel` |
 | Documentação | `DocumentoModel`, `SolicitacaoDocumentoModel` |
 
@@ -78,7 +78,7 @@ erDiagram
     DISCIPLINA ||--o{ ATIVIDADE : organiza
 ```
 
-Notas têm unicidade por aluno e disciplina, sem dimensão de período no contrato atual. Os vínculos separados professor–turma e professor–disciplina não equivalem a uma atribuição explícita professor–turma–disciplina. Essas limitações precisam ser resolvidas antes de ampliar o histórico acadêmico.
+O diagrama mostra a tabela antiga `notas` (uma nota por aluno e disciplina, sem período). Desde a B1 (23/11/2026) ela é **somente leitura**: nenhuma tela grava nela, e os registros são preservados para reconciliação em "Histórico de notas". A **única fonte de notas** é o módulo acadêmico: período letivo → avaliação (por turma e disciplina, com peso) → lançamento por aluno (`academico_notas`), exigindo atribuição explícita professor–turma–disciplina (`atribuicoes_docentes`). Cada ação do professor no diário é uma solicitação aprovada pela secretaria; o aluno só vê avaliações publicadas. Os vínculos separados professor–turma e professor–disciplina continuam existindo para os demais módulos.
 
 ## Persistência e arquivos
 

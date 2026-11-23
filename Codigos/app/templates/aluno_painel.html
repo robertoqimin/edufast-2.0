@@ -65,9 +65,12 @@
         </section>
 
         <section id="notas" data-aluno-panel="notas" class="glass-card aluno-card rounded-[32px] p-8 mb-10 aluno-panel-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">Notas</h2>
-                <span class="text-sm text-gray-400">Lançamentos disponíveis</span>
+            <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold">Notas</h2>
+                    <p class="mt-1 text-sm text-gray-400">Avaliações publicadas pelos professores, por período.</p>
+                </div>
+                <a class="text-sm font-bold text-cyan-400" href="{{ url_for('academico.meu_boletim') }}">Ver boletim completo</a>
             </div>
 
             <div class="aluno-table-wrapper">
@@ -75,27 +78,32 @@
                     <thead>
                         <tr class="text-gray-500 text-xs uppercase tracking-wider">
                             <th class="pb-4 font-medium">Disciplina</th>
-                            <th class="pb-4 font-medium">Nota</th>
-                            <th class="pb-4 font-medium">Observação</th>
-                            <th class="pb-4 font-medium">Data</th>
+                            <th class="pb-4 font-medium">Período</th>
+                            <th class="pb-4 font-medium">Notas publicadas</th>
+                            <th class="pb-4 font-medium">Média</th>
+                            <th class="pb-4 font-medium">Situação</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm">
-                        {% for nota in notas %}
+                        {% for item in boletim.periodos %}
                         <tr class="border-t border-white/5">
-                            <td class="py-4 font-medium text-white">{{ nota.disciplina }}</td>
-                            <td class="py-4 text-cyan-400 font-bold">{{ nota.nota }}</td>
-                            <td class="py-4 text-gray-400">{{ nota.observacao }}</td>
-                            <td class="py-4 text-gray-400">{{ nota.data }}</td>
+                            <td class="py-4 font-medium text-white">{{ item.disciplina }}</td>
+                            <td class="py-4 text-gray-400">{{ item.periodo }} · {{ item.turma }} {{ item.ano }}</td>
+                            <td class="py-4 text-gray-400">{% for nota in item.notas %}{{ nota.titulo }}: <strong class="text-cyan-400">{{ nota.nota }}</strong>{% if not loop.last %} · {% endif %}{% else %}Aguardando lançamento{% endfor %}</td>
+                            <td class="py-4 text-cyan-400 font-bold">{{ item.media if item.media is not none else 'Pendente' }}</td>
+                            <td class="py-4 text-gray-400">{{ item.situacao }}</td>
                         </tr>
                         {% else %}
                         <tr class="border-t border-white/5">
-                            <td class="py-6 text-gray-400" colspan="4">Nenhuma nota lançada até o momento.</td>
+                            <td class="py-6 text-gray-400" colspan="5">Nenhuma avaliação publicada até o momento.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% if boletim.anteriores %}
+            <p class="mt-4 text-sm text-gray-400">Há registros anteriores de notas, de antes dos períodos letivos (total: {{ boletim.anteriores }}). Eles estão preservados no <a class="text-cyan-400" href="{{ url_for('academico.meu_boletim') }}">boletim completo</a> e não entram na média dos períodos.</p>
+            {% endif %}
         </section>
 
         <section id="documentos" data-aluno-panel="documentos" class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px] aluno-panel-hidden">

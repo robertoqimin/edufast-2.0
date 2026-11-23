@@ -2,13 +2,13 @@ from datetime import datetime
 
 from app.controllers.admin_controller import format_created_at
 from app.database import get_session
+from app.services.notas_painel import resumo_aluno
 from app.models import (
     AlunoModel,
     AlunoTurmaModel,
     AtividadeModel,
     DisciplinaModel,
     DocumentoModel,
-    NotaModel,
     ProfessorDisciplinaModel,
     ProfessorModel,
     ProfessorTurmaModel,
@@ -57,13 +57,6 @@ def get_aluno_area_data(user_id):
             return None
 
         aluno, email = row
-        notas = (
-            db.query(NotaModel, DisciplinaModel.nome)
-            .join(DisciplinaModel, DisciplinaModel.id == NotaModel.disciplina_id)
-            .filter(NotaModel.aluno_id == aluno.id)
-            .order_by(DisciplinaModel.nome.asc())
-            .all()
-        )
         documentos = (
             db.query(DocumentoModel)
             .filter(DocumentoModel.aluno_id == aluno.id)
@@ -164,15 +157,7 @@ def get_aluno_area_data(user_id):
                 "foto_perfil": aluno.foto_perfil,
             },
             "disciplinas": list(disciplinas_map.values()),
-            "notas": [
-                {
-                    "disciplina": disciplina_nome,
-                    "nota": nota.nota,
-                    "observacao": nota.observacao or "-",
-                    "data": format_created_at(nota.data_lancamento),
-                }
-                for nota, disciplina_nome in notas
-            ],
+            "boletim": resumo_aluno(db, aluno.id),
             "documentos": [
                 {
                     "titulo": documento.titulo,

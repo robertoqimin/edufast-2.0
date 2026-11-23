@@ -38,7 +38,8 @@ def load_get_professor_detail(db, professor_id):
     professor, email = professor_row
     disciplinas = db.query(ProfessorDisciplinaModel, DisciplinaModel).join(DisciplinaModel, DisciplinaModel.id == ProfessorDisciplinaModel.disciplina_id).filter(ProfessorDisciplinaModel.professor_id == professor.id).order_by(ProfessorDisciplinaModel.id.desc()).limit(10).all()
     documentos = db.query(DocumentoModel, AlunoModel, DisciplinaModel).join(AlunoModel, AlunoModel.id == DocumentoModel.aluno_id).join(DisciplinaModel, DisciplinaModel.id == DocumentoModel.disciplina_id).filter(DocumentoModel.professor_id == professor.id).order_by(DocumentoModel.id.desc()).limit(10).all()
-    notas = db.query(NotaModel, AlunoModel, DisciplinaModel).join(AlunoModel, AlunoModel.id == NotaModel.aluno_id).join(DisciplinaModel, DisciplinaModel.id == NotaModel.disciplina_id).filter(NotaModel.professor_id == professor.id).order_by(NotaModel.id.desc()).limit(10).all()
+    from app.services.notas_painel import ultimas_do_professor
+    notas = ultimas_do_professor(db, professor.id)
     arquivos_professor = db.query(DocumentoModel, DisciplinaModel).join(DisciplinaModel, DisciplinaModel.id == DocumentoModel.disciplina_id).filter(DocumentoModel.professor_id == professor.id, DocumentoModel.aluno_id.is_(None)).order_by(DocumentoModel.id.desc()).limit(10).all()
     solicitacoes = db.query(SolicitacaoDocumentoModel).filter(SolicitacaoDocumentoModel.professor_id == professor.id).order_by(SolicitacaoDocumentoModel.id.desc()).limit(10).all()
     return {'professor': professor, 'email': email, 'disciplinas': disciplinas, 'documentos': documentos, 'notas': notas, 'arquivos_professor': arquivos_professor, 'solicitacoes': solicitacoes}

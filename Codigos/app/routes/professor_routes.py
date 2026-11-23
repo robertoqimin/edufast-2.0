@@ -3,7 +3,6 @@ from flask import Blueprint, abort, jsonify, redirect, render_template, request,
 from app.controllers.professor_controller import (
     get_teacher_area_data,
     launch_activity,
-    save_student_grade,
     upload_requested_document,
 )
 from app.routes.guards import teacher_required
@@ -24,12 +23,10 @@ def dashboard():
 
 @professor_bp.route("/professor/notas/salvar", methods=["POST"])
 def salvar_nota():
-    identity = teacher_required()
-    response, status = save_student_grade(identity.id, request.form)
-    if 200 <= status < 300:
-        return redirect(url_for("professor.dashboard"))
-
-    return jsonify(response), status
+    """Aposentada na B1: notas são lançadas no diário da avaliação, com aprovação."""
+    teacher_required()
+    return jsonify({"erro": "Notas agora sao lancadas no diario da avaliacao.",
+                    "destino": url_for("academico.painel")}), 410
 
 
 @professor_bp.route("/professor/atividades/lancar", methods=["POST"])

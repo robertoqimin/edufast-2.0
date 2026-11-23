@@ -7,8 +7,8 @@ Desabilitar redirecionamentos automáticos para conferir os HTTP 302.
 
 O fluxo altera cadastros e notas, cria comunicados, solicitações, atividades e arquivos.
 Selecionar este repositório como diretório de trabalho e permitir leitura do arquivo
-`Documentos/testes/postman/arquivo.txt`. Os IDs de solicitação precisam estar pendentes
-e a nota precisa estar ausente ao iniciar. Para repetir a coleção inteira, recriar
+`Documentos/testes/postman/arquivo.txt`. Os IDs de solicitação precisam estar pendentes;
+a avaliação 1 (período, atribuição e turma revisada) precisa existir sem notas ao iniciar. Para repetir a coleção inteira, recriar
 somente o banco descartável; não limpar um banco existente.
 
 Executar tudo de forma isolada, sem preparar banco manualmente:
@@ -36,8 +36,14 @@ Para regenerar os JSONs: `python .github/cicd/build_postman.py`.
 Os envios docentes agora criam propostas: a coleção entra como admin para
 autorizar notas, atividade e resposta documental antes de conferir seus efeitos.
 Repetir a mesma chave após aprovação não cria outro documento; outra chave para
-a solicitação documental já concluída recebe conflito. O executor confere quatro
-propostas aprovadas e a nota final, além das contagens anteriores.
+a solicitação documental já concluída recebe conflito.
+
+Notas (B1, 23/11/2026): o formulário antigo `/professor/notas/salvar` responde 410.
+O professor lança no diário da avaliação com token (`Authorization: Bearer`) e
+`Idempotency-Key`; cada lançamento, a correção e a publicação viram solicitações
+aprovadas pelo admin, e uma versão antiga recebe 409. Ao final, o aluno lê o boletim
+com a nota publicada. O executor confere cinco propostas aprovadas, nenhuma linha na
+tabela antiga `notas`, a nota 9 em `academico_notas` e a avaliação publicada.
 
 A coleção também verifica o superperfil restaurado: admin comum recebe 403,
 o superperfil lê o formulário protegido por CSRF, cria um administrador sem duplicar

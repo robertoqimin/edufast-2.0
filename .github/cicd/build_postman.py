@@ -35,7 +35,16 @@ def request(name, method, path, status, *, form=None, raw=None, file=False, scri
 def login(role, reset=False):
     return request("Login " + role, "POST", "/login", 200,
                    raw={"email": "{{" + role + "_email}}", "senha": "{{password}}"},
+                   script=["const body = pm.response.json();",
+                           f"if (body.token) pm.collectionVariables.set('{role}_token', body.token);"],
                    pre=["pm.collectionVariables.set('run_key', pm.variables.replaceIn('{{$guid}}')); "] if reset else None)
+
+
+def diary(name, path, status, body, key, script=None):
+    # Diario academico (B1): o professor envia JSON com token; cada acao vira solicitacao.
+    return request(name, "POST", path, status, raw=body, script=script, extra_headers=[
+        {"key": "Authorization", "value": "Bearer {{professor_token}}"},
+        {"key": "Idempotency-Key", "value": "{{run_key}}-" + key}])
 
 
 def approve(kind):
@@ -76,11 +85,20 @@ def build():
                              form={"solicitacao_id": "{{aluno_request_id}}"}, file=True))
     items.append(login("professor"))
     grade = {"aluno_id": "{{aluno_id}}", "turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "nota": "8", "versao": "0", "idempotency_key": "{{run_key}}-nota0"}
-    items += [request("Criar nota", "POST", "/professor/notas/salvar", 302, form=grade),
-              request("Repetir proposta de nota", "POST", "/professor/notas/salvar", 302, form=grade)]
-    items += approve("salvar_nota") + [login("professor"),
-              request("Propor edicao nota versao 1", "POST", "/professor/notas/salvar", 302, form={**grade, "nota": "9", "versao": "1", "idempotency_key": "{{run_key}}-nota1"})]
-    items += approve("salvar_nota") + [login("professor")]
+    launch = "/academico/avaliacoes/{{avaliacao_id}}/alunos/{{aluno_id}}"
+    items += [request("Formulario antigo de nota aposentado", "POST", "/professor/notas/salvar", 410, form=grade),
+              diary("Propor nota no diario", launch, 202, {"valor": "8", "versao": 0}, "diario0"),
+              diary("Repetir proposta no diario", launch, 202, {"valor": "8", "versao": 0}, "diario0")]
+    items += approve("operacao_restaurada") + [login("professor"),
+              diary("Versao antiga no diario rejeitada", launch, 409, {"valor": "4", "versao": 0}, "diario-antiga"),
+              diary("Propor correcao versao 1", launch, 202, {"valor": "9", "versao": 1}, "diario1")]
+    items += approve("operacao_restaurada") + [login("professor"),
+              diary("Propor publicacao da avaliacao", "/academico/avaliacoes/{{avaliacao_id}}/publicar", 202, {}, "publicar")]
+    items += approve("operacao_restaurada") + [login("aluno"),
+              request("Boletim do aluno mostra nota publicada", "GET", "/boletim?formato=json", 200, script=[
+                  "const notas = pm.response.json().periodos.flatMap(p => p.avaliacoes.map(a => a.nota));",
+                  "pm.test('Nota aprovada e publicada', () => pm.expect(notas).to.eql(['9.00']));"]),
+              login("professor")]
     activity = {"turma_id": "{{turma_id}}", "disciplina_id": "{{disciplina_id}}", "titulo": "Atividade sintetica", "idempotency_key": "{{run_key}}-atividade"}
     for label in ["Criar atividade", "Repetir atividade"]:
         items.append(request(label, "POST", "/professor/atividades/lancar", 302, form=activity, file=True))
@@ -128,7 +146,7 @@ def build():
                   "variable": [{"key": "run_key", "value": ""}], "item": items}
     values = {"base_url": "http://127.0.0.1:5000", "admin_email": "u1@example.test",
               "aluno_email": "u2@example.test", "professor_email": "u3@example.test", "superadmin_email": "u5@example.test", "password": "",
-              "aluno_id": "1", "professor_id": "1", "turma_id": "1", "disciplina_id": "1",
+              "aluno_id": "1", "professor_id": "1", "turma_id": "1", "disciplina_id": "1", "avaliacao_id": "1",
               "aluno_request_id": "1", "professor_request_id": "2"}
     environment = {"name": "EduFast - somente dados sinteticos", "values": [
         {"key": key, "value": value, "enabled": True, "type": "secret" if key == "password" else "default"}

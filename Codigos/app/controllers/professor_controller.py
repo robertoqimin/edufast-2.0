@@ -1,5 +1,4 @@
 import os
-from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +7,7 @@ from werkzeug.utils import secure_filename
 from app.controllers.admin_controller import format_created_at
 from app.controllers.document_controller import get_upload_folder
 from app.database import get_session
+from app.services.notas_painel import diario_professor
 from app.concurrency import check_version, begin_submission, finish_submission
 from app.models import (
     AlunoModel,
@@ -15,7 +15,6 @@ from app.models import (
     AtividadeModel,
     DisciplinaModel,
     DocumentoModel,
-    NotaModel,
     ProfessorDisciplinaModel,
     ProfessorModel,
     ProfessorTurmaModel,
@@ -49,13 +48,6 @@ def get_professor_by_user_id(user_id):
         }
     finally:
         db.close()
-
-
-def _format_nota(value):
-    if value is None:
-        return ""
-
-    return str(value).replace(".", ",")
 
 
 def get_teacher_area_data(user_id):
@@ -146,19 +138,6 @@ def get_teacher_area_data(user_id):
                     }
                 )
 
-        notas_rows = (
-            db.query(NotaModel, AlunoModel, DisciplinaModel, TurmaModel)
-            .join(AlunoModel, AlunoModel.id == NotaModel.aluno_id)
-            .join(DisciplinaModel, DisciplinaModel.id == NotaModel.disciplina_id)
-            .join(AlunoTurmaModel, AlunoTurmaModel.aluno_id == AlunoModel.id)
-            .join(TurmaModel, TurmaModel.id == AlunoTurmaModel.turma_id)
-            .join(ProfessorTurmaModel, ProfessorTurmaModel.turma_id == TurmaModel.id)
-            .filter(NotaModel.professor_id == professor.id)
-            .filter(ProfessorTurmaModel.professor_id == professor.id)
-            .order_by(NotaModel.id.desc())
-            .limit(30)
-            .all()
-        )
         documentos_rows = (
             db.query(DocumentoModel, DisciplinaModel)
             .join(DisciplinaModel, DisciplinaModel.id == DocumentoModel.disciplina_id)
@@ -178,14 +157,7 @@ def get_teacher_area_data(user_id):
             .all()
         )
 
-        grade_versions = {
-            f"{n.aluno_id}:{n.disciplina_id}": n.versao
-            for n in db.query(NotaModel).filter(
-                NotaModel.aluno_id.in_([a["id"] for values in alunos_por_turma.values() for a in values])
-            ).all()
-        }
         return {
-            "grade_versions": grade_versions,
             "professor": {
                 "id": professor.id,
                 "nome": professor.nome,
@@ -207,18 +179,7 @@ def get_teacher_area_data(user_id):
                 }
                 for turma in turma_rows
             ],
-            "notas": [
-                {
-                    "aluno": aluno.nome,
-                    "matricula": aluno.matricula,
-                    "disciplina": disciplina.nome,
-                    "turma": turma.nome,
-                    "nota": _format_nota(nota.nota),
-                    "observacao": nota.observacao or "-",
-                    "data": format_created_at(nota.data_lancamento),
-                }
-                for nota, aluno, disciplina, turma in notas_rows
-            ],
+            "diario": diario_professor(db, professor, user_id),
             "documentos": [
                 {
                     "titulo": documento.titulo,
@@ -260,12 +221,3 @@ def upload_requested_document(user_id, form, files):
     if current_identity().id != user_id:
         raise MutationConflict("Identidade divergente", 403)
     return submit_proposal("responder_documento", form, files)
-
-
-def save_student_grade(user_id, data):
-    from app.services.aprovacoes_service import submit_proposal
-    from app.services.identidade_service import current_identity
-    from app.concurrency import MutationConflict
-    if current_identity().id != user_id:
-        raise MutationConflict("Identidade divergente", 403)
-    return submit_proposal("salvar_nota", data)

@@ -11,6 +11,7 @@
 | Aprovações e permissões | `test_approvals_security.py` | Autorização, propostas, revogação e propriedade de documentos |
 | Espaço da disciplina e abas | `test_estudos.py`, `test_estudo_abas.py` | Rascunhos, aprovação, vínculos, arquivo cifrado, arquivamento, versões e concorrência PostgreSQL |
 | Backend de cursos MS04 | `test_cursos_ms04.py` | 32 casos: autoria versionada, publicação, retomada, texto/vídeo, materiais, legado e concorrência real PostgreSQL; sem frontend |
+| Notas unificadas (B1) | `test_notas_unificadas.py` | 13 casos: formulário antigo aposentado (410), propostas antigas só rejeitáveis, nenhuma gravação em `notas`, painéis lendo o diário, aluno só vê publicadas, reconciliação preservada |
 | Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige PostgreSQL |
 | Restauração funcional | `test_restauracao.py` | Superperfil, identidade, calendário, regras escolares, privacidade e aprovações |
 | Massa de teste manual | `test_manual_fixtures.py` | Repetição, preservação de contas e bloqueio de preparação fora do ambiente autorizado |

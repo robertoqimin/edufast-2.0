@@ -22,9 +22,12 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 | Segurança | Revisão em 22/11 e correções S1–S7 em 23/11 (fora do plano original, pedido do usuário) | [Revisão](../testes/REGRESSAO_SEGURANCA_2026-11-22.md) · [Correções](../testes/SEGURANCA_CORRECOES_2026-11-23.md) |
 | A5 | Concluída em 23/11: base v8, 001–008 e banco central aprovados; 002 com quarentena geral; e-mails com maiúsculas tratados na importação. Nada executado | [Revisão das migrations](REVISAO_MIGRACOES_A5_2026-11-23.md) |
 | A4 | Redefinida com o usuário (bancos de teste já nascem na v8): aplicador revisado e ensaio de atualização do legado com backup e volta atrás, em 22/11 | [Aplicador e ensaio](../testes/APLICADOR_ENSAIO_2026-11-22.md) |
+| B1 | Concluída em 23/11: painéis de professor e aluno leem o diário acadêmico; formulário antigo aposentado (410); nenhuma gravação em `notas`; aprovação por ação mantida | [Notas unificadas](../testes/NOTAS_UNIFICADAS_B1_2026-11-23.md) |
 
 Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única
 fonte de notas (B1); a demo única inclui escola e painel Supremo (C1).
+Em 23/11 (B1): manter a **aprovação por ação** no diário, ou seja, cada lançamento, correção e
+publicação do professor continua sendo uma solicitação aprovada pela secretaria.
 
 ## 1. Diagnóstico
 

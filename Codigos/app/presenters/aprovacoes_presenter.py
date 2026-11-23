@@ -6,6 +6,9 @@ OPERATIONS = {'cursos.criar': 'Criar curso', 'cursos.editar_estrutura': 'Editar 
 
 
 def present(kind, payload):
+    if kind == 'salvar_nota':
+        return ('Nota do painel antigo: rejeite e peça o lançamento no diário da avaliação',
+                {'aluno': payload.get('aluno_id'), 'disciplina': payload.get('disciplina_id'), 'nota': payload.get('nota')})
     if kind == 'publicar_material':
         return 'Publicar aviso ou material de estudo', {'conteudo':payload.get('conteudo_id'),'versao':payload.get('versao')}
     if kind != 'operacao_restaurada':

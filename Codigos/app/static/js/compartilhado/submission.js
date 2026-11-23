@@ -16,17 +16,6 @@
         const input = form.elements.namedItem("idempotency_key");
         if (input) { input.value = crypto.randomUUID(); input.defaultValue = input.value; }
     }
-    function syncGrade(form) {
-        const select = form.elements.namedItem("disciplina_id");
-        form.elements.namedItem("versao").value = select.selectedOptions[0]?.dataset.versao || "0";
-    }
-    document.addEventListener("react-shell:mounted", function (event) {
-        event.detail.root.querySelectorAll(".professor-grade-form").forEach(syncGrade);
-    });
-    document.addEventListener("change", function (event) {
-        const form = event.target.form;
-        if (form?.classList.contains("professor-grade-form") && event.target.name === "disciplina_id") syncGrade(form);
-    });
     // Bubble after AJAX handlers; they own their busy state and recovery.
     document.addEventListener("submit", function (event) {
         const form = event.target;
