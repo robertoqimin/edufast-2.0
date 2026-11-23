@@ -18,8 +18,10 @@ def register_commands(app):
     @click.option("--super-admin", is_flag=True, help="Provisiona um superadmin novo; nunca promove conta existente.")
     def create_admin(email, password, super_admin=False):
         """Cria um administrador novo; recusa substituir uma conta existente."""
-        if "@" not in email or len(password) < 12:
-            raise click.ClickException("Informe email válido e senha com pelo menos 12 caracteres.")
+        from .services.senha_service import MINIMO_ADMIN, problema_senha
+        erro_senha = problema_senha(password, MINIMO_ADMIN)
+        if "@" not in email or erro_senha:
+            raise click.ClickException(erro_senha or "Informe email válido.")
         db = get_session()
         try:
             if db.query(UsuarioModel).filter_by(email=normalizar_email(email)).first():

@@ -65,6 +65,13 @@ test('proxy controla rajadas, tamanho, buffering e headers sem cache privado', (
     'proxy_request_buffering on', 'proxy_max_temp_file_size 0',
     'proxy_next_upstream off', 'proxy_set_header X-Forwarded-For $remote_addr',
     'resolver 127.0.0.11', 'proxy_pass $backend', 'return 444']) assert.ok(nginx.includes(setting));
+  // S7: mesmos cabecalhos basicos tambem nas respostas geradas pelo proprio Nginx, sem duplicar os da app.
+  for (const header of ['X-Frame-Options "DENY"', 'X-Content-Type-Options "nosniff"',
+    'Referrer-Policy "strict-origin-when-cross-origin"']) {
+    assert.ok(nginx.includes(`add_header ${header} always;`), header);
+    assert.ok(nginx.includes(`proxy_hide_header ${header.split(' ')[0]};`), header);
+  }
+  assert.ok(nginx.includes('server_tokens off;'));
   assert.ok(!nginx.includes('proxy_cache'));
   assert.ok(!nginx.includes('$request_uri'));
 });

@@ -41,6 +41,22 @@ Provisionamento inicial usa `flask create-admin --super-admin` para conta nova.
 
 ## Proteções comuns
 
+**Login (desde 23/11/2026):** 5 falhas seguidas bloqueiam a conta por 15 minutos (até a
+senha correta é recusada, com 429 e `Retry-After`); um IP é bloqueado após 30 falhas em
+qualquer conta. E-mail inexistente e senha errada têm a mesma resposta (401, "E-mail ou
+senha inválidos") e o mesmo custo, então o login não revela quais contas existem. A tabela
+`limites_login` guarda apenas HMAC do e-mail e do IP. Limites ajustáveis por
+`LOGIN_MAX_TENTATIVAS`, `LOGIN_MAX_TENTATIVAS_IP` e `LOGIN_BLOQUEIO_MINUTOS`.
+
+**Senhas:** aluno e professor, pelo menos 6 caracteres com um caractere especial; contas
+administrativas, 12 caracteres com especial; no máximo 128.
+
+**Cabeçalhos:** toda resposta da escola e do painel central leva CSP com nonce (scripts só
+do próprio servidor), proteção contra enquadramento, `nosniff`, `Referrer-Policy` e
+`Permissions-Policy`; páginas de usuário logado não são armazenadas em cache
+(`Vary: Cookie`, `Cache-Control: private, no-store`). Relatório:
+`Documentos/testes/SEGURANCA_CORRECOES_2026-11-23.md`.
+
 CPF e data de nascimento não integram a busca de professores. Busca por CPF fica
 restrita a admin/super admin. Download aplica a mesma autorização de objeto a
 cookie e JWT, inclusive foto de perfil. Respostas de arquivo são privadas,

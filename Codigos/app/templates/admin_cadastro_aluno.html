@@ -132,7 +132,7 @@
             </div>
     </main></div>
 </template>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         window.__REACT_PAGE__ = {
             routes: {
                 cadastroAluno: {{ url_for('auth.cadastro_aluno')|tojson }}

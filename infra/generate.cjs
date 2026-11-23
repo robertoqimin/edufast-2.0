@@ -167,6 +167,13 @@ http {
   ssl_certificate_key /etc/nginx/tls/privkey.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
   add_header Strict-Transport-Security "max-age=31536000" always;
+  proxy_hide_header X-Frame-Options;
+  proxy_hide_header X-Content-Type-Options;
+  proxy_hide_header Referrer-Policy;
+  add_header X-Frame-Options "DENY" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  server_tokens off;
   server { listen 443 ssl default_server; server_name _; return 444; }
 ${servers.join('\n')}
 }

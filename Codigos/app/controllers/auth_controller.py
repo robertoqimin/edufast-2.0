@@ -14,9 +14,14 @@ from app.auth import generate_token, normalize_role
 from app.database import get_session
 from app.models import AlunoModel, ProfessorModel, UsuarioModel, SolicitacaoAlteracaoModel
 from app.models.usuario_model import normalizar_email
+from app.services import limite_login_service as limite
+from app.services.senha_service import problema_senha
 
 
 PROFILE_PHOTO_EXTENSIONS = {"jpg", "jpeg", "png"}
+# Hash ficticio: e-mail inexistente passa pela mesma verificacao (mesmo tempo de resposta).
+_HASH_FICTICIO = generate_password_hash("conta-inexistente-nunca-usada")
+CREDENCIAIS_INVALIDAS = {"erro": "E-mail ou senha invalidos"}
 MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024
 
 
@@ -27,35 +32,42 @@ def login_usuario(data):
     email = data.get("email")
     senha = data.get("senha")
 
-    if not email or not senha:
+    if not email or not senha or not isinstance(email, str) or not isinstance(senha, str):
         return {"erro": "E-mail e senha sao obrigatorios"}, 400
+    email = normalizar_email(email)
 
     session = get_session()
     try:
-        user = session.query(UsuarioModel).filter(UsuarioModel.email == normalizar_email(email)).first()
+        minutos = limite.minutos_bloqueado(session, email)
+        if minutos:
+            return {"erro": "Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.",
+                    "retry_after": minutos * 60}, 429
+        user = session.query(UsuarioModel).filter(UsuarioModel.email == email).first()
+        # Mesma resposta e mesmo custo para conta inexistente e senha errada (S6).
+        senha_ok = check_password_hash(user.senha if user else _HASH_FICTICIO, senha)
+        if not user or not senha_ok:
+            limite.registrar_falha(session, email)
+            session.commit()
+            return CREDENCIAIS_INVALIDAS, 401
+        # Senha correta: so entao o estado da conta e revelado (pendente/inativa).
+        if user.estado != "ativo":
+            resposta = ({"erro": "Cadastro pendente de aprovacao ou acesso inativo"}, 403)
+        else:
+            role = normalize_role(user.tipo)
+            resposta = ({
+                "id": user.id,
+                "email": user.email,
+                "tipo": role.upper(),
+                "role": role,
+                "auth_version": user.auth_version,
+                # O JWT tambem inclui a role para o front enviar nas proximas chamadas protegidas.
+                "token": generate_token(user),
+            }, 200)
+        limite.limpar_conta(session, email)
+        session.commit()
+        return resposta
     finally:
         session.close()
-
-    if not user:
-        return {"erro": "Usuario nao encontrado"}, 404
-
-    if not check_password_hash(user.senha, senha):
-        return {"erro": "Senha invalida"}, 401
-
-    if user.estado != "ativo":
-        return {"erro": "Cadastro pendente de aprovacao ou acesso inativo"}, 403
-
-    role = normalize_role(user.tipo)
-
-    return {
-        "id": user.id,
-        "email": user.email,
-        "tipo": role.upper(),
-        "role": role,
-        "auth_version": user.auth_version,
-        # O JWT tambem inclui a role para o front enviar nas proximas chamadas protegidas.
-        "token": generate_token(user),
-    }, 200
 
 
 def _parse_date(value):
@@ -83,6 +95,10 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
 
     if not email or not senha or not nome:
         return {"erro": "E-mail, senha e nome sao obrigatorios"}, 400
+
+    erro_senha = problema_senha(senha)
+    if erro_senha:
+        return {"erro": erro_senha}, 400
 
     if aprovado:
         from app.services.identidade_service import ADMIN_ROLES, require_role

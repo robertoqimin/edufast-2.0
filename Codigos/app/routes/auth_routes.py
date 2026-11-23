@@ -22,6 +22,9 @@ def _get_request_data():
 def login():
     data = request.json
     response, status = login_usuario(data)
+    if status == 429:
+        retry = response.pop("retry_after", 900)
+        return jsonify(response), status, {"Retry-After": str(retry)}
     if status == 200:
         session["user_id"] = response["id"]
         session["user_email"] = response["email"]

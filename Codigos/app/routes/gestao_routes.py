@@ -37,8 +37,10 @@ def usuarios():
         body, status = cadastrar_usuario(request.form, request.files, aprovado=True)
     elif role == 'admin':
         email, password = request.form.get('email', '').strip(), request.form.get('senha', '')
-        if '@' not in email or len(email) > 120 or len(password) < 12:
-            return _render(error='Informe e-mail valido e senha com pelo menos 12 caracteres.', status=400)
+        from app.services.senha_service import MINIMO_ADMIN, problema_senha
+        erro_senha = problema_senha(password, MINIMO_ADMIN)
+        if '@' not in email or len(email) > 120 or erro_senha:
+            return _render(error=erro_senha or 'Informe e-mail valido.', status=400)
         with get_session() as db:
             entry, replay = begin_submission(db, 'super:criar_admin', actor=identity.id)
             if replay:

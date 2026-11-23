@@ -121,7 +121,7 @@ class Ensaio:
         resultados['login_professor_em_quarentena'], _ = login('professor@legado.test')
         resultados['login_email_com_maiusculas_legado'], _ = login('Misto@Legado.test')
         esperado = {'healthz': 200, 'login_admin': 200, 'login_aluna': 200, 'download_aluna_identico': True,
-                    'login_professor_em_quarentena': 403, 'login_email_com_maiusculas_legado': 404}
+                    'login_professor_em_quarentena': 403, 'login_email_com_maiusculas_legado': 401}
         if resultados != esperado:
             raise RuntimeError(f'HTTP diferente do esperado: {resultados}')
         return resultados

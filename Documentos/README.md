@@ -6,6 +6,7 @@
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
 | [A1 — Inventário de esquema — 22/11](testes/INVENTARIO_ESQUEMA_2026-11-22.md) | Relatório somente leitura de quais migrations estão aplicadas, parciais ou ausentes em cada banco |
+| [Correções de segurança S1–S7 — 23/11](testes/SEGURANCA_CORRECOES_2026-11-23.md) | Limite de 5 tentativas no login, resposta única, regra de senha, CSP e proteção contra clickjacking, bibliotecas atualizadas |
 | [Regressão, Postman e segurança — 22/11](testes/REGRESSAO_SEGURANCA_2026-11-22.md) | Regressão 291 testes, Postman nos dois bancos e revisão de segurança com 13 achados priorizados |
 | [A4 — Aplicador e ensaio de atualização — 22/11](testes/APLICADOR_ENSAIO_2026-11-22.md) | Ferramenta revisada de aplicação com checksum, arquivos congelados e ensaio legado → v8 com backup e volta atrás |
 | [A3 — Esquema base — 22/11](testes/ESQUEMA_BASE_2026-11-22.md) | Banco novo criado por um único SQL revisável, idêntico ao caminho legado + 001–008 |

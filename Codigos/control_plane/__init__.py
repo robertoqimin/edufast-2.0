@@ -80,6 +80,8 @@ def create_app(config=None):
         def sqlite_foreign_keys(connection, _):
             connection.execute('PRAGMA foreign_keys=ON')
     app.extensions['platform_engine'] = engine
+    from seguranca_http import instalar as instalar_seguranca_http
+    instalar_seguranca_http(app, chave_usuario='platform_owner')
     app.extensions['platform_session'] = sessionmaker(bind=engine, expire_on_commit=False)
     # Validação somente: DDL nunca é executado ao iniciar o painel.
     if not app.config.get('TESTING'):

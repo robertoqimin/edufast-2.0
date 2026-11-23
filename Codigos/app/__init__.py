@@ -77,6 +77,8 @@ def create_app():
         if request.headers.get("Sec-Fetch-Site") == "cross-site":
             return jsonify(erro="Origem nao autorizada"), 403
 
+    from seguranca_http import instalar as instalar_seguranca_http
+    instalar_seguranca_http(app)
     register_routes(app)
     from .restauracao import install
     install(app)
