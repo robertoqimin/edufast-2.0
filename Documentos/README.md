@@ -6,6 +6,7 @@
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
 | [A1 — Inventário de esquema — 22/11](testes/INVENTARIO_ESQUEMA_2026-11-22.md) | Relatório somente leitura de quais migrations estão aplicadas, parciais ou ausentes em cada banco |
+| [A4 — Aplicador e ensaio de atualização — 22/11](testes/APLICADOR_ENSAIO_2026-11-22.md) | Ferramenta revisada de aplicação com checksum, arquivos congelados e ensaio legado → v8 com backup e volta atrás |
 | [A3 — Esquema base — 22/11](testes/ESQUEMA_BASE_2026-11-22.md) | Banco novo criado por um único SQL revisável, idêntico ao caminho legado + 001–008 |
 | [A2 — Registro de migrations — 22/11](testes/REGISTRO_MIGRACOES_2026-11-22.md) | Proposta 008: registro de versões, detecção do passado e recusa de banco incompatível na inicialização |
 | [Troca para PostgreSQL — 22/11](testes/MIGRACAO_POSTGRESQL_2026-11-22.md) | MySQL → PostgreSQL 17 em toda a plataforma, caminhos de arquivos corrigidos, pasta `Codigos/` sem acento e regressão comparada |

@@ -17,6 +17,47 @@ Para saber quais propostas já estão presentes num banco, sem alterá-lo:
 `--central`). Mostra cada migration como aplicada, parcial ou ausente e alerta sobre
 estado parcial ou registro divergente. Detalhes: `Documentos/testes/INVENTARIO_ESQUEMA_2026-11-22.md`.
 
+## Como aplicar, depois da revisão — `aplicar_migracoes.py`
+
+Ferramenta única para banco novo e para atualização. **Por padrão só mostra o plano.**
+Nunca usa o `.env`: o banco é informado explicitamente.
+
+```bash
+cd Codigos
+EDUFAST_APPLY_DB_URL='postgresql+psycopg://usuario:senha@host/banco' python aplicar_migracoes.py
+EDUFAST_APPLY_DB_URL='...' python aplicar_migracoes.py --aplicar --confirmar banco
+EDUFAST_APPLY_DB_URL='...' python aplicar_migracoes.py --aplicar --confirmar banco --ate 4   # em etapas
+```
+
+- Banco vazio: cria pelo esquema base. Banco existente: aplica, em ordem, as propostas que faltam.
+- **Recusa** proposta parcial, ordem quebrada, registro incompatível com a release, banco que
+  não seja PostgreSQL, outra aplicação simultânea (trava no próprio banco) e plano
+  desatualizado (o plano é refeito sob a trava e precisa ser igual ao mostrado).
+- Cada proposta roda numa transação **junto com o registro da versão e o checksum** do
+  arquivo. Uma falha desfaz só aquela proposta; as anteriores ficam aplicadas e registradas.
+- Avisos, sem bloquear: e-mails legados com maiúsculas (o login compara em minúsculas) e
+  professores que a 002 coloca em quarentena.
+- Propostas aplicadas antes de existir a 008 aparecem como `detectada`; as aplicadas pela
+  ferramenta, como `aplicada`, com checksum.
+
+**Procedimento validado no ensaio** (`.github/cicd/run_ensaio_atualizacao.py`):
+1. Parar gravações e fazer backup: `pg_dump --clean --if-exists --no-owner --no-privileges`,
+   pasta de uploads e `DATA_ENCRYPTION_KEY` (guardada à parte).
+2. Plano → revisão → `--aplicar --confirmar <banco>`.
+3. Conferir com `schema_inventory.py` e iniciar a aplicação (a inicialização de produção
+   recusa registro incompatível).
+4. **Volta atrás**: recriar o banco vazio (`DROP DATABASE … WITH (FORCE)` e
+   `CREATE DATABASE … OWNER <papel da aplicação>`, como superusuário), restaurar o dump com
+   `psql -v ON_ERROR_STOP=1 --single-transaction` e restaurar os uploads. Não restaurar o dump
+   por cima do banco atualizado: as tabelas criadas pelas propostas não estão no dump e ficariam.
+
+## Arquivos congelados
+
+Propostas e bases registradas com checksum **não podem ser editadas**: a inicialização
+recusaria todo banco que as aplicou. `checksums.json` lista o SHA-256 de cada uma e um teste
+falha se algum arquivo mudar. O gerador só cria arquivos novos. Mudou um modelo? Criar a
+proposta seguinte (009…) e a nova base (`esquema_v9.sql`), nunca alterar as anteriores.
+
 ## Banco novo — esquema base pendente de revisão
 
 Para uma escola **nova**, não aplicar 001–008 em sequência: usar `base/esquema_vN.sql`

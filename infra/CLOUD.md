@@ -41,7 +41,9 @@ node infra/manage.cjs run /srv/edufast/r1 database cliente-a
 Isso inicia somente o PostgreSQL de A. **Não cria tabelas da aplicação.** Revisar o
 provisionamento de banco novo ou as migrations aplicáveis em
 `Codigos/migrations/README.md` antes de executar SQL. O aplicativo em produção
-recusa esquema pendente. Não há comando de migration neste gerenciador.
+recusa esquema pendente. Não há comando de migration neste gerenciador: depois da
+revisão, usar `aplicar_migracoes.py` no serviço do cliente (plano por padrão; aplica
+somente com `--aplicar --confirmar <banco>`), conforme o guia de migrations.
 
 Após esquema revisado e preparado, iniciar A:
 

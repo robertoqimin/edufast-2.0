@@ -34,5 +34,7 @@ jobs:
         run: node infra/smoke_cloud.cjs
       - name: Testar API de frequencia em bancos descartaveis e HTTP real
         run: node .github/cicd/run_frequencia_api.cjs --image "$(cat .ci-results/image.txt)"
+      - name: Ensaiar atualizacao do legado com backup e volta atras
+        run: python .github/cicd/run_ensaio_atualizacao.py --image "$(cat .ci-results/image.txt)"
       - name: Testar painel central e concorrencia em PostgreSQL descartavel
         run: node .github/cicd/run_platform_api.cjs "$(cat .ci-results/image.txt)"

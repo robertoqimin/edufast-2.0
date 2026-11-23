@@ -11,18 +11,26 @@ from schema_inventory import ESCOLA_DIR, checksum_arquivo, inventory, load_migra
 
 
 class GeneratedProposalsTests(TestCase):
-    def test_committed_proposals_match_the_generator(self):
+    def test_frozen_files_match_the_checksum_manifest(self):
+        """Propostas e bases aplicadas nao podem mudar: o checksum gravado nos bancos as recusaria."""
+        import json
+        manifest = json.loads((ESCOLA_DIR / 'checksums.json').read_text(encoding='utf-8'))
+        files = sorted([p.name for p in ESCOLA_DIR.glob('[0-9][0-9][0-9]_*.sql')] +
+                       ['base/' + p.name for p in (ESCOLA_DIR / 'base').glob('esquema_v*.sql')])
+        self.assertEqual(sorted(manifest), files, 'Todo arquivo novo entra no manifesto pelo gerador')
+        for name, digest in manifest.items():
+            with self.subTest(arquivo=name):
+                self.assertEqual(checksum_arquivo(ESCOLA_DIR / name), digest, 'Arquivo congelado foi alterado')
+
+    def test_latest_base_matches_current_models(self):
+        """Modelo alterado sem nova proposta/base aparece aqui antes de chegar a um banco."""
         import importlib.util
         spec = importlib.util.spec_from_file_location('gerar_postgresql', ESCOLA_DIR / 'gerar_postgresql.py')
         gerador = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(gerador)
-        expected = gerador.gerados()
-        self.assertIn('008_registro_migracoes.sql', expected)
-        self.assertTrue(any(name.startswith('base/esquema_v') for name in expected))
-        for name, content in expected.items():
-            with self.subTest(arquivo=name):
-                committed = (ESCOLA_DIR / name).read_bytes().replace(b'\r\n', b'\n').decode('utf-8')
-                self.assertEqual(committed, content, 'Regenere com migrations/gerar_postgresql.py')
+        name, content = gerador.gerar_base()
+        committed = (ESCOLA_DIR / name).read_bytes().replace(b'\r\n', b'\n').decode('utf-8')
+        self.assertEqual(committed, content, 'Modelos mudaram: crie nova proposta e nova base, sem editar as antigas')
 
     def test_008_is_the_latest_proposal_and_registers_every_previous_one(self):
         migrations = load_migrations()

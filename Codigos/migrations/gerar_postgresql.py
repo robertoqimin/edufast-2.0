@@ -196,11 +196,33 @@ def gerados():
     return {**propostas, nome_base: base}
 
 
+MANIFESTO = HERE / 'checksums.json'
+
+
+def ler_manifesto():
+    import json
+    return json.loads(MANIFESTO.read_text(encoding='utf-8')) if MANIFESTO.is_file() else {}
+
+
 def main():
+    """Cria somente arquivos que ainda nao existem; nunca reescreve uma proposta ou base.
+
+    Arquivos aplicados ficam registrados com checksum: alterar um deles faria bancos
+    validos serem recusados na inicializacao. Cada arquivo novo entra no manifesto.
+    """
+    import json
+    from schema_inventory import checksum_arquivo
+    manifesto = ler_manifesto()
     for nome, conteudo in gerados().items():
-        (HERE / nome).parent.mkdir(exist_ok=True)
-        (HERE / nome).write_text(conteudo, encoding='utf-8', newline='\n')
+        caminho = HERE / nome
+        if caminho.exists():
+            print('congelado (mantido)', nome)
+            continue
+        caminho.parent.mkdir(exist_ok=True)
+        caminho.write_text(conteudo, encoding='utf-8', newline='\n')
+        manifesto[nome] = checksum_arquivo(caminho)
         print('gerado', nome)
+    MANIFESTO.write_text(json.dumps(dict(sorted(manifesto.items())), indent=2) + '\n', encoding='utf-8', newline='\n')
 
 
 if __name__ == '__main__':
