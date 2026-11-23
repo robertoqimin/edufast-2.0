@@ -5,6 +5,7 @@
 | Documento | Conteúdo |
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
+| [B2 — Interface única de cursos — 23/11](testes/CURSOS_INTERFACE_UNICA_B2_2026-11-23.md) | Com MS04 habilitado, `/aprendizagem` é o único caminho: páginas antigas redirecionam, gravações antigas respondem 410, progresso preservado |
 | [B1 — Notas unificadas — 23/11](testes/NOTAS_UNIFICADAS_B1_2026-11-23.md) · [capturas](design/referencias/2026-11-23-notas-unificadas/COMPARACAO.md) | Professor lança só no diário (com aprovação), aluno vê só o boletim publicado, tabela antiga `notas` somente leitura e preservada |
 | [A1 — Inventário de esquema — 22/11](testes/INVENTARIO_ESQUEMA_2026-11-22.md) | Relatório somente leitura de quais migrations estão aplicadas, parciais ou ausentes em cada banco |
 | [A5 — Revisão das migrations — 23/11](planejamento/REVISAO_MIGRACOES_A5_2026-11-23.md) · [registro](testes/REVISAO_A5_2026-11-23.md) | Fichas de cada migration e decisões do usuário: tudo aprovado, quarentena geral na 002, nada executado |

@@ -57,14 +57,20 @@ def install(app):
             session.clear()
             principal = None
         values = {**IDENTIDADE_PADRAO, 'versao': 0, 'texto_botao': '#071923'}
+        cursos_ms04 = False
         if inspect(engine).has_table('escola_identidade'):
             with get_session() as db:
                 values = identidade_atual(db)
+                # B2: com o MS04 habilitado, menus e links de cursos apontam só para /aprendizagem.
+                from app.services.cursos_ms04.comum import habilitado
+                cursos_ms04 = habilitado(db, required=False)
         g.escola = values
+        g.cursos_ms04 = cursos_ms04
         g.workspace_role = principal.papel if principal else None
 
     @app.context_processor
     def workspace():
         values = getattr(g, 'escola', {**IDENTIDADE_PADRAO, 'versao': 0, 'texto_botao': '#071923'})
         return {'escola': values, 'tema': {'cor_fundo': values['fundo'], 'cor_destaque': values['destaque']},
-                'workspace_role': getattr(g, 'workspace_role', None)}
+                'workspace_role': getattr(g, 'workspace_role', None),
+                'cursos_ms04': getattr(g, 'cursos_ms04', False)}

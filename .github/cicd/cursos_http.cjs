@@ -80,7 +80,7 @@ async function run(base){
   assert.equal(response.headers.get('cache-control'),'no-store');assert.equal(response.headers.get('x-content-type-options'),'nosniff');
   assert.ok(response.headers.get('content-disposition').includes('attachment'));assert.ok(response.body.startsWith('%PDF'));
   await req('publicado imutavel',path+'/estrutura',409,{token:teacher,method:'POST',key:randomUUID(),body:{acao:'curso',titulo:'X',versao:version}});
-  await req('legacy nao ignora versao','/cursos/'+created.curso_id+'/estrutura',409,{token:admin,method:'POST',body:{acao:'curso',titulo:'Atalho'}});
+  await req('interface antiga somente leitura (B2)','/cursos/'+created.curso_id+'/estrutura',410,{token:admin,method:'POST',body:{acao:'curso',titulo:'Atalho'}});
   const duplicated=(await req('duplicar edicao',path+'/duplicar',201,{token:teacher,method:'POST',key:randomUUID(),body:{versao:version}})).body;
   assert.notEqual(duplicated.curso_id,created.curso_id);
   await req('arquivar curso',path+'/estado',200,{token:admin,method:'POST',key:randomUUID(),body:{estado:'arquivado',versao:version}});

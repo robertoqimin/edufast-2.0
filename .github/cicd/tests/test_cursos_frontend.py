@@ -25,7 +25,9 @@ class CourseFrontendTests(TestCase):
 
     def test_library_editor_and_text_are_html_escaped(self):
         cid,m,c,lessons = self.tree()
-        for path in ('/cursos','/aprendizagem',f'/cursos/{cid}',f'/aprendizagem/cursos/{cid}',
+        for antigo,novo in (('/cursos','/aprendizagem'),(f'/cursos/{cid}',f'/aprendizagem/cursos/{cid}')):
+            self.assertEqual(self.client().get(antigo).location,novo)  # B2: páginas antigas redirecionam
+        for path in ('/aprendizagem',f'/aprendizagem/cursos/{cid}',
                 f'/aprendizagem/cursos/{cid}/aulas/{lessons[0]}',f'/aprendizagem/cursos/{cid}/capitulos/{c}/aulas/nova'):
             r = self.client().get(path)
             self.assertEqual(r.status_code,200,r.text)

@@ -49,7 +49,11 @@
         {% if workspace_role in ['admin','super_admin','professor'] %}{{ nav_link('aprovacoes.painel', 'Solicitações e aprovações', 'shield') }}{% endif %}
         <span class="nav-section">APRENDIZAGEM</span>
         {{ nav_link('estudos.disciplinas', 'Espaço da disciplina', 'book', ['estudos.disciplina','estudos.conteudo','estudos.novo','estudos.editar']) }}
+        {% if cursos_ms04 %}
+        {{ nav_link('cursos_web.biblioteca', 'Meus cursos' if role == 'aluno' else 'Biblioteca de cursos', 'book', ['cursos_web.editor','cursos_web.aula','cursos_web.aprender','cursos_web.disciplina']) }}
+        {% else %}
         {{ nav_link('cursos.biblioteca', 'Meus cursos' if role == 'aluno' else 'Biblioteca de cursos', 'book', ['cursos.editor','cursos.aprender']) }}
+        {% endif %}
         {% if role in ['admin','super_admin'] %}{{ nav_link('cursos.gestao_turmas', 'Gestão acadêmica', 'grid') }}{% endif %}
         <span class="nav-section">VIDA ACADÊMICA</span>
         {{ nav_link('frequencia.painel', 'Frequência e atestados', 'book', ['frequencia.formulario','frequencia.chamada','frequencia.relatorio']) }}

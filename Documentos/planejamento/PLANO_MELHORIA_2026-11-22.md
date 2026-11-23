@@ -23,6 +23,7 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 | A5 | Concluída em 23/11: base v8, 001–008 e banco central aprovados; 002 com quarentena geral; e-mails com maiúsculas tratados na importação. Nada executado | [Revisão das migrations](REVISAO_MIGRACOES_A5_2026-11-23.md) |
 | A4 | Redefinida com o usuário (bancos de teste já nascem na v8): aplicador revisado e ensaio de atualização do legado com backup e volta atrás, em 22/11 | [Aplicador e ensaio](../testes/APLICADOR_ENSAIO_2026-11-22.md) |
 | B1 | Concluída em 23/11: painéis de professor e aluno leem o diário acadêmico; formulário antigo aposentado (410); nenhuma gravação em `notas`; aprovação por ação mantida | [Notas unificadas](../testes/NOTAS_UNIFICADAS_B1_2026-11-23.md) |
+| B2 | Concluída em 23/11: com MS04 habilitado, menu aponta para `/aprendizagem`, páginas antigas redirecionam e as 7 gravações antigas respondem 410 (sem proposta); progresso preservado | [Interface única de cursos](../testes/CURSOS_INTERFACE_UNICA_B2_2026-11-23.md) |
 
 Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única
 fonte de notas (B1); a demo única inclui escola e painel Supremo (C1).

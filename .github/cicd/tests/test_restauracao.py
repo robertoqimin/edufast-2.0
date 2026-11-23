@@ -43,7 +43,7 @@ class RestoredTests(TestCase):
         return self.client(user).post(path,json=body,headers={'X-CSRF-Token':'restoration-csrf','Idempotency-Key':key or uuid4().hex})
 
     def test_original_screens_render_and_super_navigation_exists(self):
-        for path in ['/super/usuarios','/super/layout','/super/escola','/admin/dashboard','/cursos','/academico','/calendario-escolar','/mensagens','/minha-privacidade','/solicitacoes']:
+        for path in ['/super/usuarios','/super/layout','/super/escola','/admin/dashboard','/aprendizagem','/academico','/calendario-escolar','/mensagens','/minha-privacidade','/solicitacoes']:
             with self.subTest(path=path):
                 response=self.client().get(path)
                 self.assertEqual(response.status_code,200,response.get_data(as_text=True)[:300])
@@ -97,7 +97,8 @@ class RestoredTests(TestCase):
         self.assertEqual(self.fixture.count(CalendarioEscolaModel),1)
         self.assertEqual(self.post('/super/escola/calendarios',{'ano':2026,'nome':'Duplicado','inicio':'2026-01-01','fim':'2026-12-31','dias_semana':[0],'meta_letivos':20}).status_code,409)
 
-    def test_teacher_course_submission_waits_for_one_approval(self):
+    @patch('app.services.cursos_ms04.comum.habilitado', return_value=False)  # B2: instalação sem MS04
+    def test_teacher_course_submission_waits_for_one_approval(self, _sem_ms04):
         data={'disciplina_id':1,'titulo':'Curso recuperado','descricao':'Descricao com acentos: ' + 'á' * 9000}
         key=uuid4().hex
         response=self.post('/cursos',data,user=3,key=key)
@@ -116,7 +117,8 @@ class RestoredTests(TestCase):
             self.assertEqual(result.status_code,400)
         self.assertEqual(self.fixture.count(SolicitacaoAlteracaoModel),0)
 
-    def test_pending_course_edit_does_not_overwrite_a_later_admin_edit(self):
+    @patch('app.services.cursos_ms04.comum.habilitado', return_value=False)  # B2: instalação sem MS04
+    def test_pending_course_edit_does_not_overwrite_a_later_admin_edit(self, _sem_ms04):
         created=self.post('/cursos',{'disciplina_id':1,'professor_id':1,'titulo':'Inicial','descricao':''},user=1)
         self.assertEqual(created.status_code,201)
         course=created.json['curso_id']
@@ -129,7 +131,8 @@ class RestoredTests(TestCase):
             self.assertEqual(db.get(CursoModel,course).titulo,'Alterado pelo admin')
             self.assertEqual(db.get(SolicitacaoAlteracaoModel,proposed.json['id']).estado,'pendente')
 
-    def test_material_reviewer_can_approve_course_but_not_grade(self):
+    @patch('app.services.cursos_ms04.comum.habilitado', return_value=False)  # B2: instalação sem MS04
+    def test_material_reviewer_can_approve_course_but_not_grade(self, _sem_ms04):
         from app.models import (AtribuicaoDocenteModel, EstadoTurmaModel, PeriodoLetivoModel,
                                 AvaliacaoModel, LancamentoNotaModel)
         with get_session() as db:

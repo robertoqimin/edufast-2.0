@@ -1,4 +1,10 @@
-"""Biblioteca de cursos e gestão de ofertas por turma/ano."""
+"""Biblioteca de cursos e gestão de ofertas por turma/ano.
+
+B2: quando o MS04 está habilitado, esta interface antiga é somente leitura. As páginas
+redirecionam para /aprendizagem e as gravações respondem 410; o MS04 (API e telas em
+/aprendizagem) é o único caminho de edição. Sem MS04, tudo continua como antes.
+"""
+from functools import wraps
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, session, url_for
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import HTTPException
@@ -10,6 +16,28 @@ from app.models.curso_model import (CursoModel, CapituloModel, TemaModel, AulaMo
 from app.services import cursos as service
 
 cursos_bp = Blueprint('cursos', __name__)
+AVISO_MS04 = ('A edição de cursos agora é feita em Aprendizagem (/aprendizagem). '
+              'Esta interface antiga é somente leitura.')
+
+
+def ms04_ativo():
+    from app.services.cursos_ms04.comum import habilitado
+    with get_session() as db:
+        return habilitado(db, required=False)
+
+
+def interface_ms04(destino=None):
+    """Envolve a própria view: vale também quando a proposta do professor a executa."""
+    def decorar(view):
+        @wraps(view)
+        def envolvida(*args, **kwargs):
+            if ms04_ativo():
+                if destino is None:
+                    abort(410, AVISO_MS04)
+                return redirect(destino(**kwargs))
+            return view(*args, **kwargs)
+        return envolvida
+    return decorar
 
 
 def identidade(admin=False):
@@ -61,16 +89,10 @@ def conflito(exc):
 
 
 @cursos_bp.get('/cursos')
+@interface_ms04(lambda: url_for('cursos_web.biblioteca'))
 def biblioteca():
     user_id, role = identidade()
-    from app.services.restauracao_context import get_identity
-    principal = get_identity()
     with get_session() as db:
-        from app.services.cursos_ms04.comum import habilitado
-        if habilitado(db,required=False):
-            from app.routes.cursos_web_routes import render_biblioteca
-            from app.services.restauracao_context import get_identity
-            return render_biblioteca(db,principal)
         if role == 'aluno':
             cards = []
             for oferta in db.query(OfertaCursoModel).filter_by(ativa=True):
@@ -99,6 +121,7 @@ def biblioteca():
 
 
 @cursos_bp.post('/cursos')
+@interface_ms04()
 def criar():
     user_id, role = identidade()
     if role == 'aluno':
@@ -121,16 +144,10 @@ def criar():
 
 
 @cursos_bp.get('/cursos/<int:curso_id>')
+@interface_ms04(lambda curso_id: url_for('cursos_web.editor', curso_id=curso_id))
 def editor(curso_id):
     user_id, role = identidade()
-    from app.services.restauracao_context import get_identity
-    principal = get_identity()
     with get_session() as db:
-        from app.services.cursos_ms04.comum import habilitado
-        if habilitado(db,required=False):
-            from app.routes.cursos_web_routes import render_editor
-            from app.services.restauracao_context import get_identity
-            return render_editor(db,principal,curso_id)
         curso = service.autoria(db, curso_id, user_id, role)
         if any(a.video_id is None for a in service.aulas_curso(db,curso_id)):
             abort(409,'Este curso contém novos formatos disponíveis pela API; a interface será atualizada posteriormente.')
@@ -142,6 +159,7 @@ def editor(curso_id):
 
 
 @cursos_bp.post('/cursos/<int:curso_id>/estrutura')
+@interface_ms04()
 def editar_estrutura(curso_id):
     user_id, role = identidade()
     data = dados()
@@ -217,6 +235,7 @@ def editar_estrutura(curso_id):
 
 
 @cursos_bp.post('/cursos/<int:curso_id>/duplicar')
+@interface_ms04()
 def duplicar(curso_id):
     user_id, role = identidade()
     with get_session() as db:
@@ -227,6 +246,7 @@ def duplicar(curso_id):
 
 
 @cursos_bp.post('/cursos/<int:curso_id>/estado')
+@interface_ms04()
 def estado(curso_id):
     user_id, role = identidade(admin=True)
     data = dados()
@@ -248,6 +268,7 @@ def estado(curso_id):
 
 
 @cursos_bp.post('/cursos/<int:curso_id>/ofertas')
+@interface_ms04()
 def ofertar(curso_id):
     user_id, role = identidade(admin=True)
     data = dados()
@@ -272,6 +293,7 @@ def ofertar(curso_id):
 
 
 @cursos_bp.post('/cursos/ofertas/<int:oferta_id>/revogar')
+@interface_ms04()
 def revogar_oferta(oferta_id):
     user_id, _ = identidade(admin=True)
     with get_session() as db:
@@ -284,16 +306,11 @@ def revogar_oferta(oferta_id):
 
 
 @cursos_bp.get('/aprender/<int:oferta_id>')
+@interface_ms04(lambda oferta_id: url_for('cursos_web.aprender', oferta_id=oferta_id,
+                                          aula=request.args.get('aula', type=int)))
 def aprender(oferta_id):
     user_id, role = identidade()
-    from app.services.restauracao_context import get_identity
-    principal = get_identity()
     with get_session() as db:
-        from app.services.cursos_ms04.comum import habilitado
-        if habilitado(db,required=False):
-            from app.routes.cursos_web_routes import render_aprender
-            from app.services.restauracao_context import get_identity
-            return render_aprender(db,principal,oferta_id)
         oferta, curso, aluno = service.acesso_oferta(db, oferta_id, user_id, role)
         aulas = service.aulas_curso(db, curso.id)
         if any(a.video_id is None for a in aulas):
@@ -311,6 +328,7 @@ def aprender(oferta_id):
 
 
 @cursos_bp.post('/aprender/<int:oferta_id>/aulas/<int:aula_id>/concluir')
+@interface_ms04()
 def concluir(oferta_id, aula_id):
     user_id, role = identidade()
     with get_session() as db:

@@ -71,11 +71,13 @@ class CourseApiTests(TestCase):
         self.assertEqual(self.client(2).get(f'/api/cursos/{cid}').status_code,403)
         self.assertEqual(self.client(4).get(f'/api/cursos/{cid}').status_code,403)
         self.assertEqual(self.client(2).get('/api/cursos').json['ofertas'],[])
+        # B2: com MS04 habilitado, a interface antiga não cria proposta nem altera cursos.
         response = self.post('/cursos',{'disciplina_id':1,'titulo':'Legado','descricao':''})
-        self.assertEqual(response.status_code,202,response.text)
+        self.assertEqual(response.status_code,410,response.text)
         with get_session() as db:
             self.assertEqual(db.query(CursoModel).count(),1)
-        self.assertEqual(self.post(f'/cursos/{cid}/estrutura',{'acao':'curso','titulo':'Atalho'},uid=1).status_code,409)
+            self.assertEqual(db.query(SolicitacaoAlteracaoModel).count(),0)
+        self.assertEqual(self.post(f'/cursos/{cid}/estrutura',{'acao':'curso','titulo':'Atalho'},uid=1).status_code,410)
 
     def test_full_tree_text_publication_offer_navigation_and_resume(self):
         cid,module,chapter,lessons = self.tree()
@@ -94,12 +96,12 @@ class CourseApiTests(TestCase):
         self.assertEqual(resumed['progresso'],0)
         self.assertEqual(resumed['anterior_id'],lessons[0])
         self.assertIsNone(resumed['proxima_id'])
-        self.assertEqual(self.client(2).get(f'/aprender/{offer}').status_code,200)
+        self.assertEqual(self.client(2).get(f'/aprendizagem/ofertas/{offer}').status_code,200)
 
     def test_legacy_youtube_remains_valid(self):
         cid,module,chapter,lessons = self.tree(text=False,count=1)
         offer = self.publish(cid)
-        self.assertEqual(self.client(2).get(f'/aprender/{offer}').status_code,200)
+        self.assertEqual(self.client(2).get(f'/aprendizagem/ofertas/{offer}').status_code,200)
         self.assertEqual(self.client(2).get(f'/api/aprender/{offer}').json['aula']['video_id'],'abcdefghijk')
 
     def test_version_conflict_and_idempotent_edit(self):
@@ -214,7 +216,7 @@ class CourseApiTests(TestCase):
             db.query(AlunoDisciplinaModel).filter_by(aluno_id=1,disciplina_id=1).delete()
             db.commit()
         self.assertEqual(self.client(2).get(f'/api/aprender/{offer}').status_code,404)
-        self.assertEqual(self.client(2).get(f'/aprender/{offer}').status_code,404)
+        self.assertEqual(self.client(2).get(f'/aprendizagem/ofertas/{offer}').status_code,404)
         self.assertEqual(self.client(2).get('/api/cursos').json['ofertas'],[])
 
     def test_resume_is_separate_from_conclusion_and_idempotent(self):
@@ -337,13 +339,17 @@ class CourseApiTests(TestCase):
         self.assertEqual(self.client(2).get('/api/cursos').json['ofertas'],[])
 
     def test_legacy_pending_proposal_cannot_bypass_api_version_adoption(self):
-        created = self.post('/cursos',{'disciplina_id':1,'professor_id':1,'titulo':'Legado','descricao':''},uid=1)
-        self.assertEqual(created.status_code,201,created.text)
-        cid = created.json['curso_id']
-        proposal = self.post(f'/cursos/{cid}/estrutura',{'acao':'curso','titulo':'Título proposto','descricao':''})
-        self.assertEqual(proposal.status_code,202,proposal.text)
+        # Proposta criada pela interface antiga antes do MS04; depois dele, só pode ser rejeitada (B2).
+        with patch('app.services.cursos_ms04.comum.habilitado', return_value=False):
+            created = self.post('/cursos',{'disciplina_id':1,'professor_id':1,'titulo':'Legado','descricao':''},uid=1)
+            self.assertEqual(created.status_code,201,created.text)
+            cid = created.json['curso_id']
+            proposal = self.post(f'/cursos/{cid}/estrutura',{'acao':'curso','titulo':'Título proposto','descricao':''})
+            self.assertEqual(proposal.status_code,202,proposal.text)
         self.edit(cid,acao='curso',titulo='Legado',descricao='')
-        self.assertEqual(self.decide(proposal.json['id']).status_code,409)
+        self.assertEqual(self.decide(proposal.json['id']).status_code,410)
+        with get_session() as db:
+            self.assertEqual(db.get(CursoModel,cid).titulo,'Legado')
 
     def test_link_https_and_archive_resource_invalidates_snapshot(self):
         cid,module,chapter,lessons = self.tree(count=1)
@@ -405,7 +411,7 @@ class CourseApiTests(TestCase):
         self.assertEqual(response.status_code,200,response.text)
         self.assertEqual(response.json['ofertas'][0]['id'],offer)
         self.assertEqual(self.client(5).get('/api/estudos/disciplinas/1/cursos').status_code,404)
-        self.assertEqual(self.post(f'/cursos/ofertas/{offer}/revogar',{},uid=1).status_code,409)
+        self.assertEqual(self.post(f'/cursos/ofertas/{offer}/revogar',{},uid=1).status_code,410)
         self.assertEqual(self.client(2).get(f'/api/aprender/{offer}').status_code,200)
 
     def test_all_completed_and_empty_legacy_course_are_safe(self):
