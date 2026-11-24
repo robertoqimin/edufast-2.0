@@ -116,3 +116,36 @@ Não foi rodada a bateria completa (`ci.py`, piloto, ensaio de atualização, Po
 entrega não altera imagem, infraestrutura de nuvem, migrations nem os fluxos cobertos por
 esses executores. As mudanças são a matrícula nas disciplinas e o novo modo do iniciador
 local.
+
+## Atualização — demonstração automática e regra de senha (24/11/2026, noite)
+
+**Pedido:** uma demonstração automática em câmera lenta, com 15 minutos ou mais, para gravar a
+tela. Foram criados:
+- **`scripts/demo_video.cjs`:** digita campo a campo, destaca cada controle, mostra legendas e
+  cartões por perfil, e aceita `ritmo` (1 = padrão).
+- **`scripts/gravar-demo.ps1`:** pede confirmação, zera **somente** a escola de gravação,
+  reinicia o Supremo de demonstração, faz uma contagem regressiva e roda a demonstração.
+
+O Playwright fica em `.ci-results/demo-video/`, que não é versionado.
+
+**Defeito encontrado pela digitação real:** a tela "Novo usuário" exigia 12 caracteres para
+qualquer perfil, enquanto o servidor aceitava 6 para aluno e professor. O ensaio anterior
+preenchia os campos por código e não pegou o problema.
+
+**Decisão do usuário (24/11/2026):** senha com **no mínimo 12 caracteres e um caractere
+especial para todos os perfis**. Aplicada:
+- no servidor: `senha_service.MINIMO = 12`;
+- nos formulários: `minlength="12"` em usuários e nos cadastros de alunos e professores;
+- nos testes: `test_seguranca_login_cabecalhos`, `test_approvals_security` e
+  `test_application`, 58 testes aprovados;
+- na demonstração e no guia.
+
+**Pendente para a próxima sessão:**
+- **A validação longa da demonstração no Edge não foi concluída.** Duas execuções chegaram a
+  rodar ao mesmo tempo sobre a mesma escola, porque interromper a tarefa não encerrou o
+  processo. Elas foram encerradas e a sessão foi pausada a pedido do usuário. Falta rodar
+  uma única vez até o fim, medir a duração (alvo: 15 minutos ou mais) e ajustar o ritmo.
+- **A suíte completa não foi repetida** depois da mudança de senha. Só os 58 testes afetados
+  foram rodados.
+- **A escola de gravação pode estar com dados parciais** das execuções interrompidas.
+  `.\scripts\gravar-demo.ps1` zera a escola antes de começar.

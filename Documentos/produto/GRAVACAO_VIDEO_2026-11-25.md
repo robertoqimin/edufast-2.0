@@ -30,9 +30,8 @@ ambiente manual (5050) e dos seus outros bancos; nada do que você criar mexe ne
 - **Vídeos:** são **links do YouTube**. Não há envio de arquivo de vídeo.
 - **Textos:** viram um "aviso" no Espaço da disciplina ou uma "aula de texto" no curso.
 
-**Senhas:**
-- professor e aluno: pelo menos 6 caracteres, com **um caractere especial** (ex.: `Prof-2026!`);
-- admin e super admin: pelo menos **12** caracteres, com um especial (ex.: `Secretaria-2026!`).
+**Senhas:** para **todos** os perfis, pelo menos **12 caracteres** e **um caractere especial**
+(ex.: `Professora-Ana-2026!`, `Secretaria-2026!`). A tela não deixa enviar uma senha mais curta.
 
 ## Roteiro
 
@@ -123,7 +122,7 @@ publica passa pela secretaria.
 | O painel Supremo não abre | `node infra/platform-demo.cjs start`. Ele recomeça com as duas escolas fictícias, sem o seu cadastro |
 | O aluno não vê o material ou o curso | Confira o passo 6: aprovar em **Solicitações e aprovações** e **Liberar** o curso para a turma |
 | "Arquivo inválido" | Use PDF, PNG ou JPEG de até 5 MB |
-| Senha recusada | Inclua um caractere especial; admin e super admin precisam de 12 caracteres |
+| Senha recusada | Use 12 caracteres ou mais, com um caractere especial |
 | Quer recomeçar a escola do zero | Peça para eu zerar o ambiente de gravação; isso apaga só essa escola |
 
 Detalhes técnicos e evidências do ensaio: [relatório](../testes/ENSAIO_GRAVACAO_2026-11-24.md).

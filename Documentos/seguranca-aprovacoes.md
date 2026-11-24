@@ -48,8 +48,10 @@ senha inválidos") e o mesmo custo, então o login não revela quais contas exis
 `limites_login` guarda apenas HMAC do e-mail e do IP. Limites ajustáveis por
 `LOGIN_MAX_TENTATIVAS`, `LOGIN_MAX_TENTATIVAS_IP` e `LOGIN_BLOQUEIO_MINUTOS`.
 
-**Senhas:** aluno e professor, pelo menos 6 caracteres com um caractere especial; contas
-administrativas, 12 caracteres com especial; no máximo 128.
+**Senhas:** todos os perfis, pelo menos 12 caracteres com um caractere especial; no máximo 128
+(decisão do usuário em 24/11/2026; antes, 6 caracteres para aluno e professor). A regra vale no
+servidor e nos formulários (`minlength`). Contas existentes não são alteradas: a regra vale
+para novas senhas.
 
 **Cabeçalhos:** toda resposta da escola e do painel central leva CSP com nonce (scripts só
 do próprio servidor), proteção contra enquadramento, `nosniff`, `Referrer-Policy` e

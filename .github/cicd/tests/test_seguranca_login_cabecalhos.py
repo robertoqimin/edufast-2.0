@@ -91,15 +91,15 @@ class SegurancaTests(TestCase):
             self.login('ninguem@example.test', 'errada')
         self.assertEqual(self.login('ninguem@example.test', 'errada').status_code, 429)  # bloqueio igual
 
-    # S4 — senha minima de 6 com caractere especial
+    # S4 — senha minima de 12 com caractere especial para todos (decisao de 24/11/2026)
     def test_public_registration_password_rule(self):
         base = {'nome': 'Candidato', 'tipo': 'aluno', 'matricula': 'NOVA-1'}
-        for senha in ['ab!12', 'abcdef', 'abc 123', 'a' * 129 + '!']:
+        for senha in ['ab!12', 'abc!12', 'curta-11!ab', 'semespecial1234', 'abc 1234567890', 'a' * 129 + '!']:
             with self.subTest(senha=senha):
                 resposta = self.app.test_client().post('/cadastro', json={**base, 'email': 'novo@example.test', 'senha': senha})
                 self.assertEqual(resposta.status_code, 400)
                 self.assertIn('senha', resposta.json['erro'].lower())
-        aceito = self.app.test_client().post('/cadastro', json={**base, 'email': 'novo@example.test', 'senha': 'abc!12'})
+        aceito = self.app.test_client().post('/cadastro', json={**base, 'email': 'novo@example.test', 'senha': 'aluno-novo-2026!'})
         self.assertEqual(aceito.status_code, 202, aceito.get_data(as_text=True))
 
     def test_admin_accounts_keep_twelve_characters_and_require_special(self):

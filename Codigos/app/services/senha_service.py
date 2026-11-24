@@ -1,11 +1,11 @@
 """Regra de senha (S4), num lugar so.
 
-Contas de aluno e professor: pelo menos 6 caracteres e um caractere especial (decisao do
-usuario em 23/11/2026). Contas administrativas mantem 12 caracteres, tambem com especial.
+Todas as contas: pelo menos 12 caracteres e um caractere especial (decisao do usuario em
+24/11/2026, substituindo o minimo de 6 para aluno/professor definido em 23/11/2026).
 Limite maximo evita que uma senha enorme consuma CPU no calculo do hash.
 """
-MINIMO = 6
-MINIMO_ADMIN = 12
+MINIMO = 12
+MINIMO_ADMIN = MINIMO  # mesma regra para todos os perfis
 MAXIMO = 128
 
 
