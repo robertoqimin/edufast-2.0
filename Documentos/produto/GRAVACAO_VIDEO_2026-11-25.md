@@ -3,7 +3,24 @@
 Preparado em 24/11/2026 e ensaiado de ponta a ponta no Edge, pela interface, com o código
 atual (37 passos aprovados). Use somente dados fictícios na gravação.
 
-## Antes de gravar
+## Opção automática (recomendada para o vídeo)
+
+Com o Docker Desktop aberto, no PowerShell, na pasta do projeto:
+
+```powershell
+.\scripts\gravar-demo.ps1
+```
+
+1. Confirme com `s`. O comando apaga e recria **somente** a escola de gravação e reinicia o painel
+   Supremo.
+2. Quando aparecer **"COMECE A GRAVAR A TELA AGORA"**, inicie a gravação. Há 10 segundos de
+   contagem antes de o Edge abrir.
+3. O roteiro abaixo roda sozinho em cerca de **16 minutos**, com legendas e digitação visível.
+   Para ficar mais lento: `.\scripts\gravar-demo.ps1 -Ritmo 1.3`.
+
+Validado em 24/11/2026: roteiro completo, sem falhas, em 16,4 minutos.
+
+## Opção manual — antes de gravar
 
 1. Abra o **Docker Desktop** e espere ficar pronto.
 2. No PowerShell, na pasta do projeto:

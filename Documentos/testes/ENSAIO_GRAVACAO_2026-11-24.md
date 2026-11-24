@@ -149,3 +149,16 @@ especial para todos os perfis**. Aplicada:
   foram rodados.
 - **A escola de gravação pode estar com dados parciais** das execuções interrompidas.
   `.\scripts\gravar-demo.ps1` zera a escola antes de começar.
+
+## Validação da demonstração concluída (retomada)
+
+Com o Docker Desktop reiniciado e uma **única** execução por vez:
+
+| Execução | Resultado |
+| --- | --- |
+| Rodada rápida invisível (`DEMO_HEADLESS=1`, ritmo 0,3) | Roteiro completo, sem falhas, em 6,3 min |
+| **Rodada visível no Edge, pelo atalho `scripts/gravar-demo.ps1`, ritmo 1** | **Roteiro completo, sem falhas, em 16,4 min**, acima do alvo de 15 min |
+| Suíte completa local, com a senha mínima de 12 para todos | 333 testes aprovados (43 pulados, os mesmos de antes); `test_submission.cjs` 3/3; protocolo de design aprovado |
+
+Ao final, a escola de gravação foi zerada (0 contas) e o painel Supremo de demonstração foi
+reiniciado limpo. As pendências anteriores estão encerradas.
