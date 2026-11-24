@@ -48,19 +48,33 @@ def painel():
                 AtribuicaoDocenteModel.turma_disciplina_id == TurmaDisciplinaModel.id).filter(
                 AtribuicaoDocenteModel.professor_id == prof.id, AtribuicaoDocenteModel.ativo.is_(True))
         offers = vinculos.order_by(TurmaModel.ano_letivo.desc(), TurmaModel.nome, DisciplinaModel.nome).all()
-        ids = [v.id for v, _, _ in offers]
         turmas_ids = {t.id for _, t, _ in offers}
-        avaliacoes = db.query(AvaliacaoModel).filter(AvaliacaoModel.turma_disciplina_id.in_(ids)).order_by(AvaliacaoModel.id).all()
-        periodos = db.query(PeriodoLetivoModel).order_by(PeriodoLetivoModel.ordem).all()
-        turmas = db.query(TurmaModel).order_by(TurmaModel.ano_letivo.desc()).all() if role != 'professor' else [t for t in db.query(TurmaModel) if t.id in turmas_ids]
         if request.args.get('formato') == 'json':
+            periodos = db.query(PeriodoLetivoModel).order_by(PeriodoLetivoModel.ordem).all()
             return jsonify(vinculos=[{'id': v.id, 'turma_id': t.id, 'ano': t.ano_letivo,
                 'disciplina_id': d.id, 'disciplina': d.nome} for v, t, d in offers],
                 periodos=[{'id': p.id, 'turma_id': p.turma_id, 'nome': p.nome, 'fechado': p.fechado}
                           for p in periodos if role != 'professor' or p.turma_id in turmas_ids])
-        return render_template('academico_painel.html', vinculos=offers, avaliacoes=avaliacoes,
-            periodos=periodos, turmas=turmas, periodo_map={p.id: p for p in periodos},
-            estados={e.turma_id: e for e in db.query(EstadoTurmaModel)})
+        # B3: a página não cresce com a escola. A secretaria vê uma turma por vez (a primeira por
+        # padrão); o professor vê todas as suas, com filtro opcional. Agrupamento feito aqui, não no template.
+        opcoes = list({t.id: t for _, t, _ in offers}.values())
+        escolhida = request.args.get('turma', type=int)
+        if escolhida not in turmas_ids:
+            escolhida = opcoes[0].id if opcoes and role != 'professor' else None
+        visiveis = [o for o in offers if escolhida is None or o[1].id == escolhida]
+        visiveis_turmas = {t.id for _, t, _ in visiveis}
+        avaliacoes = db.query(AvaliacaoModel).filter(AvaliacaoModel.turma_disciplina_id.in_(
+            [v.id for v, _, _ in visiveis])).order_by(AvaliacaoModel.id).all() if visiveis else []
+        periodos = db.query(PeriodoLetivoModel).filter(PeriodoLetivoModel.turma_id.in_(visiveis_turmas)).order_by(
+            PeriodoLetivoModel.ordem).all() if visiveis_turmas else []
+        periodos_por_turma, avaliacoes_por_grupo = {}, {}
+        for p in periodos:
+            periodos_por_turma.setdefault(p.turma_id, []).append(p)
+        for a in avaliacoes:
+            avaliacoes_por_grupo.setdefault((a.turma_disciplina_id, a.periodo_id), []).append(a)
+        turmas = db.query(TurmaModel).order_by(TurmaModel.ano_letivo.desc()).all() if role != 'professor' else opcoes
+        return render_template('academico_painel.html', vinculos=visiveis, turmas=turmas, opcoes_turma=opcoes,
+            turma_escolhida=escolhida, periodos_por_turma=periodos_por_turma, avaliacoes_por_grupo=avaliacoes_por_grupo)
 
 
 @academico_bp.post('/academico/periodos')

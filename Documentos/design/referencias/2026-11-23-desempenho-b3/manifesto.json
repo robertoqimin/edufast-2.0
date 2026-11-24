@@ -1,0 +1,29 @@
+{
+  "base_commit": "feat: aposenta interface antiga de cursos com MS04 (B2)",
+  "relatorio": "Documentos/testes/DESEMPENHO_B3_2026-11-23.md",
+  "data": "2026-11-23",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Escola de teste descartável; somente dados fictícios",
+  "capturas": [
+    {
+      "arquivo": "aluno-painel-sem-react-celular.png",
+      "sha256": "6327838e60abb8d0be2a3769f83e3799cf2b7cdfad06b93beeabf36f03c13263",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "professor-painel-sem-react-desktop.png",
+      "sha256": "43bf0a3cedccd89651654942c6ec75413f54611e371c6f8c4ae5aee638997d3c",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-academico-celular.png",
+      "sha256": "e9cbe8bb33ef67a167fd326c654e9810518094ebef622bc7cb36efd18d8e656b",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-academico-desktop.png",
+      "sha256": "0de865a7f2b37f098bb2de4bebb730c7360493aea07312642b0d2250907fa377",
+      "viewport": "1440x1000"
+    }
+  ]
+}

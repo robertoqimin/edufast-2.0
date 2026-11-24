@@ -64,12 +64,12 @@ passando pelo fluxo de aprovação.
 
 ## Arquitetura
 
-Monólito **Flask** em camadas, com frontend **Jinja + CSS + React 18 local** servido
+Monólito **Flask** em camadas, com frontend **Jinja + CSS + JavaScript simples** servido
 pela própria aplicação e persistência **SQLAlchemy/PostgreSQL 17**.
 
 ```mermaid
 flowchart LR
-    U[Admin · Professor · Aluno] --> UI[Jinja · CSS · React 18]
+    U[Admin · Professor · Aluno] --> UI[Jinja · CSS · JavaScript]
     UI --> R[Rotas e guards]
     R --> S[Controllers e services]
     S --> Rep[Repositories]
@@ -198,7 +198,7 @@ em banco persistente.**
 
 | Camada | Tecnologias |
 | --- | --- |
-| Interface | HTML, Jinja, CSS com tokens, JavaScript, React 18 local, fonte DM Sans local |
+| Interface | HTML, Jinja, CSS com tokens, JavaScript simples (sem framework; React removido na B3), fonte DM Sans local |
 | Aplicação | Python 3.12, Flask 3.1, Gunicorn |
 | Dados | SQLAlchemy 2.0, psycopg 3, PostgreSQL 17; `cryptography` para arquivos e textos cifrados |
 | Infraestrutura | Docker Compose, Nginx (instâncias) e Caddy (instalação única), scripts Node |

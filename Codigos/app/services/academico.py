@@ -163,14 +163,26 @@ def boletim(db, aluno_id):
         TurmaModel.id.in_(matriculas), AvaliacaoModel.publicada.is_(True)).all():
         grupos[(turma.id, periodo.id, disciplina.id)] = (turma, periodo, disciplina, avaliacao.turma_disciplina_id)
     resultado = []
-    for turma, periodo, disciplina, vinculo_id in sorted(grupos.values(), key=lambda g: (g[0].ano_letivo, g[0].nome, g[1].ordem, g[2].nome)):
-        avals = db.query(AvaliacaoModel).filter_by(periodo_id=periodo.id, turma_disciplina_id=vinculo_id).order_by(AvaliacaoModel.id).all()
+    # B3: avaliações, notas e regras de todos os grupos em consultas fixas (antes: 3+ por grupo).
+    from app.services.escola import regras_periodos, arredondar
+    ordenados = sorted(grupos.values(), key=lambda g: (g[0].ano_letivo, g[0].nome, g[1].ordem, g[2].nome))
+    chaves = {(p.id, v) for _, p, _, v in ordenados}
+    todas = db.query(AvaliacaoModel).filter(
+        AvaliacaoModel.periodo_id.in_({p for p, _ in chaves}),
+        AvaliacaoModel.turma_disciplina_id.in_({v for _, v in chaves})).order_by(AvaliacaoModel.id).all() if chaves else []
+    por_grupo = {}
+    for a in todas:
+        por_grupo.setdefault((a.periodo_id, a.turma_disciplina_id), []).append(a)
+    ids_publicadas = [a.id for a in todas if a.publicada]
+    todas_notas = {n.avaliacao_id: n for n in db.query(LancamentoNotaModel).filter(
+        LancamentoNotaModel.aluno_id == aluno_id, LancamentoNotaModel.avaliacao_id.in_(ids_publicadas))} if ids_publicadas else {}
+    regras = regras_periodos(db, {p for p, _ in chaves})
+    for turma, periodo, disciplina, vinculo_id in ordenados:
+        avals = por_grupo.get((periodo.id, vinculo_id), [])
         publicadas = [a for a in avals if a.publicada]
-        notas = {n.avaliacao_id: n for n in db.query(LancamentoNotaModel).filter(
-            LancamentoNotaModel.aluno_id == aluno_id, LancamentoNotaModel.avaliacao_id.in_([a.id for a in publicadas]))}
+        notas = {a.id: todas_notas[a.id] for a in publicadas if a.id in todas_notas}
         completa = bool(avals) and all(a.publicada and a.id in notas for a in avals)
-        from app.services.escola import regra_periodo, arredondar
-        regra = regra_periodo(db, periodo)
+        regra = regras.get(periodo.id)
         media = arredondar(sum(notas[a.id].valor * a.peso for a in avals) / sum(a.peso for a in avals), regra) if completa else None
         resultado.append({'turma': turma.nome, 'turma_id': turma.id, 'ano': turma.ano_letivo,
             'periodo': periodo.nome, 'disciplina': disciplina.nome, 'disciplina_id': disciplina.id, 'fechado': periodo.fechado,

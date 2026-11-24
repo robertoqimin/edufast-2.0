@@ -1,5 +1,7 @@
+// B3: o shell das páginas antigas não usa mais React; ele só copia o <template> da página
+// para a tela e liga as abas, e JavaScript simples faz o mesmo sem baixar e interpretar 138 KiB.
+// Nomes (react-shell, data-react-*, evento react-shell:mounted) mantidos por compatibilidade.
 (function (window) {
-    const h = window.React.createElement;
 
     const gruposAbas = [
         {
@@ -32,13 +34,6 @@
         }
     ];
 
-    function PaginaShell({ html }) {
-        return h("div", {
-            className: "react-shell flex w-full",
-            dangerouslySetInnerHTML: { __html: html }
-        });
-    }
-
     function montar(root) {
         const template = document.getElementById(root.dataset.reactTemplate);
 
@@ -47,7 +42,11 @@
         }
 
         root.dataset.reactMounted = "true";
-        window.ReactDOM.createRoot(root).render(h(PaginaShell, { html: template.innerHTML }));
+        const shell = document.createElement("div");
+        shell.className = "react-shell flex w-full";
+        shell.innerHTML = template.innerHTML;
+        root.replaceChildren(shell);
+        // Como antes: comportamentos e evento depois dos scripts da página já registrados.
         window.setTimeout(function () {
             inicializarComportamentosPagina(root);
             dispararEventoMontado(root);

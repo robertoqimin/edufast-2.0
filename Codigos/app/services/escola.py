@@ -209,6 +209,21 @@ def regra_periodo(db, periodo):
     return {**spec, 'item': spec['periodos'][row.ordem - 1], 'politica_id': politica.id}
 
 
+def regras_periodos(db, periodo_ids):
+    """regra_periodo() para vários períodos em duas consultas (B3). Sem regra -> None."""
+    ids = list(periodo_ids)
+    if not ids:
+        return {}
+    linhas = db.query(RegraPeriodoEscolaModel).filter(RegraPeriodoEscolaModel.periodo_id.in_(ids)).all()
+    politicas = {p.id: p for p in db.query(PoliticaEscolaModel).filter(
+        PoliticaEscolaModel.id.in_({r.politica_id for r in linhas}))} if linhas else {}
+    resultado = dict.fromkeys(ids)
+    for row in linhas:
+        spec = json.loads(politicas[row.politica_id].configuracao)
+        resultado[row.periodo_id] = {**spec, 'item': spec['periodos'][row.ordem - 1], 'politica_id': row.politica_id}
+    return resultado
+
+
 def arredondar(valor, spec=None):
     spec = spec or {'casas': 2, 'arredondamento': 'comercial'}
     return valor.quantize(Decimal('0.1') if spec['casas'] == 1 else Decimal('0.01'),
@@ -220,11 +235,16 @@ def resumo_anual(db, periodos):
     for item in periodos:
         groups.setdefault((item['turma_id'], item['disciplina_id']), []).append(item)
     result = []
+    # B3: regras e políticas de todas as turmas em duas consultas, em vez de uma por grupo.
+    regras = {r.turma_id: r for r in db.query(RegraTurmaEscolaModel).filter(
+        RegraTurmaEscolaModel.turma_id.in_({t for t, _ in groups}))} if groups else {}
+    politicas = {p.id: p for p in db.query(PoliticaEscolaModel).filter(
+        PoliticaEscolaModel.id.in_({r.politica_id for r in regras.values()}))} if regras else {}
     for (turma_id, disciplina_id), items in groups.items():
-        regra = db.get(RegraTurmaEscolaModel, turma_id)
+        regra = regras.get(turma_id)
         if not regra:
             continue
-        politica = cursos.obter(db, PoliticaEscolaModel, regra.politica_id)
+        politica = politicas[regra.politica_id]
         spec = json.loads(politica.configuracao)
         ordered = {i['ordem']: i for i in items}
         complete = all(i in ordered and ordered[i]['media'] is not None and ordered[i]['fechado'] for i in range(1, len(spec['periodos']) + 1))

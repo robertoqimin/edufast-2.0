@@ -49,6 +49,32 @@ def scope(db, identity, pair_id):
     return pair
 
 
+def pares_permitidos(db, identity, pairs):
+    """Mesma regra de scope() para vários pares, em consultas fixas (B3: evita N+1 no painel)."""
+    if identity.admin:
+        return {pair.id for pair in pairs}
+    if identity.papel != 'professor':
+        return set()
+    teacher = db.query(ProfessorModel).filter_by(usuario_id=identity.id).first()
+    if not teacher or not pairs:
+        return set()
+    ids = [pair.id for pair in pairs]
+    assignments = {}
+    for row in db.query(AtribuicaoDocenteModel).filter(AtribuicaoDocenteModel.turma_disciplina_id.in_(ids)):
+        assignments.setdefault(row.turma_disciplina_id, []).append(row)
+    turmas = {t for t, in db.query(ProfessorTurmaModel.turma_id).filter_by(professor_id=teacher.id)}
+    disciplinas = {d for d, in db.query(ProfessorDisciplinaModel.disciplina_id).filter_by(professor_id=teacher.id)}
+    allowed = set()
+    for pair in pairs:
+        rows = assignments.get(pair.id)
+        if rows:
+            if any(a.professor_id == teacher.id and a.ativo for a in rows):
+                allowed.add(pair.id)
+        elif pair.turma_id in turmas and pair.disciplina_id in disciplinas:
+            allowed.add(pair.id)
+    return allowed
+
+
 def students(db, pair):
     return db.query(AlunoModel).join(AlunoTurmaModel, AlunoTurmaModel.aluno_id == AlunoModel.id).filter(
         AlunoTurmaModel.turma_id == pair.turma_id).order_by(AlunoModel.nome, AlunoModel.id).all()

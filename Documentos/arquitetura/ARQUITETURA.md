@@ -6,7 +6,7 @@ Este documento descreve o código presente em `Codigos/`. Propostas futuras são
 
 ## Organização atual
 
-O sistema é um monólito Flask em camadas. A aplicação atende páginas HTML/Jinja e endpoints que retornam JSON. React 18 é carregado por CDN para componentes da interface; não há um projeto SPA separado com build Node neste diretório.
+O sistema é um monólito Flask em camadas. A aplicação atende páginas HTML/Jinja e endpoints que retornam JSON. A interface usa JavaScript simples, sem framework: o shell das páginas antigas (`shell_react.js`) copia o `<template>` da página e liga as abas; o React foi removido na B3 (23/11/2026) depois de medido. Não há projeto SPA separado nem build Node.
 
 | Componente | Responsabilidade | Local |
 | --- | --- | --- |

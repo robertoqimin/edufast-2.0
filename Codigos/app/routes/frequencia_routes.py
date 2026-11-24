@@ -61,15 +61,11 @@ def painel():
     with get_session() as db:
         pairs = []
         if identity.papel != 'aluno':
-            for pair, turma, subject in db.query(TurmaDisciplinaModel, TurmaModel, DisciplinaModel).join(
-                    TurmaModel, TurmaModel.id == TurmaDisciplinaModel.turma_id).join(
-                    DisciplinaModel, DisciplinaModel.id == TurmaDisciplinaModel.disciplina_id).order_by(TurmaModel.nome, DisciplinaModel.nome):
-                try:
-                    service.scope(db, identity, pair.id)
-                    pairs.append({'id': pair.id, 'nome': f'{turma.nome} · {subject.nome}'})
-                except MutationConflict as exc:
-                    if exc.status != 403:
-                        raise
+            rows = db.query(TurmaDisciplinaModel, TurmaModel, DisciplinaModel).join(
+                TurmaModel, TurmaModel.id == TurmaDisciplinaModel.turma_id).join(
+                DisciplinaModel, DisciplinaModel.id == TurmaDisciplinaModel.disciplina_id).order_by(TurmaModel.nome, DisciplinaModel.nome).all()
+            allowed = service.pares_permitidos(db, identity, [pair for pair, _, _ in rows])
+            pairs = [{'id': pair.id, 'nome': f'{turma.nome} · {subject.nome}'} for pair, turma, subject in rows if pair.id in allowed]
         calls = db.query(ChamadaModel).order_by(ChamadaModel.criada_em.desc(), ChamadaModel.id.desc())
         if not identity.admin:
             calls = calls.filter(ChamadaModel.autor_id == identity.id)

@@ -7,6 +7,7 @@ escuro/ciano. A paleta clara/verde usa a personalização do mesmo sistema de to
 Leia o [protocolo obrigatório](../PROTOCOLO_DESIGN.md) antes de alterar interfaces.
 
 MS04, 20/11: [cursos e Matemática para o ENEM — comparação e capturas](referencias/2026-11-20-cursos-enem/COMPARACAO.md).
+B3, 23/11: [seletor de turma e painéis sem React — comparação e capturas](referencias/2026-11-23-desempenho-b3/COMPARACAO.md).
 B1, 23/11: [notas unificadas nos painéis de professor e aluno — comparação e capturas](referencias/2026-11-23-notas-unificadas/COMPARACAO.md).
 As imagens abaixo usam somente contas e dados fictícios do ambiente manual.
 

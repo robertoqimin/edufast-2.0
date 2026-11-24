@@ -84,7 +84,7 @@ Até a implementação do modelo de várias escolas, medir uma instalação úni
 | 5 | Priorizar consultas, paginação e JavaScript conforme as medições | Antes/depois no mesmo ambiente e testes funcionais preservados |
 | 6 | Adicionar verificações de tamanho e regressão de desempenho ao CI | Limites estáveis e relatórios; testes de carga em ambiente controlado |
 
-Encontrado no código atual: templates usam `cdn.tailwindcss.com`, e o runtime compartilhado carrega React/ReactDOM via CDN. São candidatos a avaliação, não uma demonstração de que sejam o maior gargalo. O Tailwind informa que seu Play CDN é destinado a desenvolvimento, e orienta gerar CSS estático para produção.
+**Atualização B3 (23/11/2026):** linha de base medida e piores casos corrigidos; o React foi removido do shell (−250 a 300 ms até o conteúdo com CPU 4× mais lenta). Ver [relatório da B3](../testes/DESEMPENHO_B3_2026-11-23.md). Texto original: templates usam `cdn.tailwindcss.com`, e o runtime compartilhado carrega React/ReactDOM via CDN. São candidatos a avaliação, não uma demonstração de que sejam o maior gargalo. O Tailwind informa que seu Play CDN é destinado a desenvolvimento, e orienta gerar CSS estático para produção.
 
 ## Relação com o CI e a liberação
 
