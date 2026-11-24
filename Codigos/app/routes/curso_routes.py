@@ -396,6 +396,9 @@ def gestao_turmas():
                     if not db.get(EstadoTurmaModel, turma_id):
                         db.add(EstadoTurmaModel(turma_id=turma_id))
                     service.atribuir(db, service.inteiro(data, 'professor_id'), turma_id, service.inteiro(data, 'disciplina_id'))
+                    db.flush()
+                    from app.services.matriculas import sincronizar_turma
+                    sincronizar_turma(db, turma_id)
                 elif acao == 'revogar':
                     row = service.obter(db, AtribuicaoDocenteModel, service.inteiro(data, 'atribuicao_id'))
                     if service.obter(db, TurmaDisciplinaModel, row.turma_disciplina_id).turma_id != turma_id:
@@ -405,9 +408,13 @@ def gestao_turmas():
                     aluno_id = service.inteiro(data, 'aluno_id')
                     service.obter(db, AlunoModel, aluno_id)
                     row = db.query(AlunoTurmaModel).filter_by(aluno_id=aluno_id, turma_id=turma_id).first()
+                    from app.services.matriculas import remover_da_turma, sincronizar_turma
                     if acao == 'matricular' and not row:
                         db.add(AlunoTurmaModel(aluno_id=aluno_id, turma_id=turma_id))
+                        db.flush()
+                        sincronizar_turma(db, turma_id)
                     elif acao == 'desmatricular' and row:
+                        remover_da_turma(db, aluno_id, turma_id)
                         db.delete(row)
                 else:
                     abort(400)

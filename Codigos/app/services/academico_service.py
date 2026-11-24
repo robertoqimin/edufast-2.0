@@ -172,6 +172,9 @@ def associar_aluno_turma(data, *, session_factory=get_session):
             return {"erro": "Turma nao encontrada"}, 404
 
         db.add(AlunoTurmaModel(aluno_id=aluno_id, turma_id=turma_id))
+        db.flush()
+        from app.services.matriculas import sincronizar_turma
+        sincronizar_turma(db, turma_id)
         db.commit()
         return {"mensagem": "Aluno associado a turma"}, 201
     except IntegrityError:
@@ -208,6 +211,8 @@ def associar_professor_turma(data, *, session_factory=get_session):
         for vinculo in disciplinas_professor:
             insert_if_missing(db, TurmaDisciplinaModel,
                               turma_id=turma_id, disciplina_id=vinculo.disciplina_id)
+        from app.services.matriculas import sincronizar_turma
+        sincronizar_turma(db, turma_id)
 
         db.commit()
         return {"mensagem": "Professor associado a turma"}, 201

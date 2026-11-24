@@ -8,7 +8,7 @@ services:
       FLASK_DEBUG: "0"
       PYTHON_DOTENV_DISABLED: "1"
       DB_URL: ""
-      DB_NAME: edufast_manual
+      DB_NAME: ${DB_NAME:-edufast_manual}
       EDUFAST_MANUAL_TEST: "1"
       DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
   db:

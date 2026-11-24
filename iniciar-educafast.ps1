@@ -5,7 +5,7 @@ param(
     [switch]$SemNavegador,
     [switch]$PrepararBancoNovo,
     [switch]$SuperAdmin,
-    [ValidateSet('Atual', 'Restaurado')]
+    [ValidateSet('Atual', 'Restaurado', 'Gravacao')]
     [string]$Ambiente = 'Restaurado',
     [ValidateRange(1024, 65535)]
     [int]$Porta = 5050
@@ -19,6 +19,15 @@ if ($Ambiente -eq 'Atual') {
 # Ambiente PostgreSQL proprio: os ambientes MySQL anteriores (manual e manual-restaurado) nao sao tocados.
 $manualName = 'manual-postgres'
 $manualProject = 'edufast-manual-postgres'
+$dbName = 'edufast_manual'
+# Gravacao: escola vazia para demonstracao/video (sem contas de teste), projeto, banco e porta proprios.
+$gravacao = $Ambiente -eq 'Gravacao'
+if ($gravacao) {
+    $manualName = 'gravacao'
+    $manualProject = 'edufast-gravacao'
+    $dbName = 'edufast_gravacao'
+    if (-not $PSBoundParameters.ContainsKey('Porta')) { $Porta = 5070 }  # 5060/5061 sao bloqueadas pelos navegadores (SIP)
+}
 $localDirectory = Join-Path $PSScriptRoot ('.ci-results/' + $manualName)
 $envFile = Join-Path $localDirectory '.env'
 $composeFile = Join-Path $appDirectory 'docker-compose.yml'
@@ -68,8 +77,8 @@ if (-not (Test-Path -LiteralPath $envFile)) {
         'DB_PASSWORD=' + (New-LocalSecret)
         'POSTGRES_ADMIN_PASSWORD=' + (New-LocalSecret)
         'DATA_ENCRYPTION_KEY=' + (New-EncryptionKey)
-        'DB_NAME=edufast_manual'
-        'DB_USER=edufast_manual'
+        ('DB_NAME=' + $dbName)
+        ('DB_USER=' + $dbName)
         'DB_PORT=5432'
     ) -join "`n"
     # Never overwrite credentials, including on simultaneous launches.
@@ -107,7 +116,9 @@ else:
 '@
             $mode = if ($PrepararBancoNovo) { 'prepare' } else { 'ensure' }
             Invoke-ManualCompose -DockerArguments @('run', '--rm', '--no-deps', '-T', '--entrypoint', 'python', 'app', '-c', $schemaCommand, $mode)
-            Invoke-ManualCompose -DockerArguments @('run', '--rm', '--no-deps', '-T', '--entrypoint', 'python', 'app', 'manual_test_data.py')
+            if (-not $gravacao) {
+                Invoke-ManualCompose -DockerArguments @('run', '--rm', '--no-deps', '-T', '--entrypoint', 'python', 'app', 'manual_test_data.py')
+            }
             Invoke-ManualCompose -DockerArguments @('up', '-d', '--no-build', '--wait', '--wait-timeout', '180', 'app')
             $url = "http://localhost:$Porta"
             $ready = $false
@@ -120,8 +131,13 @@ else:
             }
             if (-not $ready) { throw 'Aplicacao sem resposta saudavel. Confira .\iniciar-educafast.ps1 -Acao Logs.' }
             Write-Host "Aplicacao pronta: $url"
-            Write-Host 'Contas locais: superadmin@teste.local, admin@teste.local, professor@teste.local, aluno@teste.local'
-            Write-Host 'Senha inicial das contas novas: Teste-local-2026! (somente testes locais).'
+            if ($gravacao) {
+                Write-Host 'Escola vazia, sem contas. Crie o superadministrador com:'
+                Write-Host '  .\iniciar-educafast.ps1 -Ambiente Gravacao -Acao CriarAdmin -SuperAdmin'
+            } else {
+                Write-Host 'Contas locais: superadmin@teste.local, admin@teste.local, professor@teste.local, aluno@teste.local'
+                Write-Host 'Senha inicial das contas novas: Teste-local-2026! (somente testes locais).'
+            }
             Write-Host 'Ambiente manual isolado. Parar nao apaga os dados.'
             if (-not $SemNavegador) { Start-Process $url }
         }
