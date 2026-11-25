@@ -14,13 +14,19 @@ from two_school_test_data import initialize
 
 
 def seed(app):
-    accounts = {}
     with get_session() as db:
-        for name in ('professor01','admin'):
-            u = db.query(UsuarioModel).filter_by(email=name+'@teste01.local').one()
-            accounts[name] = (u.id,u.tipo,u.auth_version)
         db.get(TurmaModel,1).nome = 'Preparatório ENEM — 2026'
         db.commit()
+    montar_curso_enem(app,'professor01@teste01.local','admin@teste01.local',disciplina_id=1,turma_disciplina_id=1)
+
+
+def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma_disciplina_id, laboratorio=True):
+    """Monta e publica o curso de Matemática para o ENEM pelas rotas reais (também usado pela demo completa)."""
+    accounts = {}
+    with get_session() as db:
+        for name, email in (('professor01', professor_email), ('admin', admin_email)):
+            u = db.query(UsuarioModel).filter_by(email=email).one()
+            accounts[name] = (u.id,u.tipo,u.auth_version)
     def client(name):
         uid,role,version = accounts[name]
         c = app.test_client()
@@ -34,7 +40,7 @@ def seed(app):
             raise RuntimeError(f'Falha ao preparar {path}: {r.status_code} {r.text}')
         return r.json
     content = json.loads((Path(__file__).parent/'demo/matematica_enem.json').read_text(encoding='utf-8'))
-    cid = post(teacher,'/api/cursos',{'disciplina_id':1,'titulo':content['titulo'],'descricao':content['descricao']})['curso_id']
+    cid = post(teacher,'/api/cursos',{'disciplina_id':disciplina_id,'titulo':content['titulo'],'descricao':content['descricao']})['curso_id']
     version = 1
     def edit(**fields):
         nonlocal version
@@ -59,12 +65,15 @@ def seed(app):
     proposal = post(teacher,f'/api/cursos/{cid}/solicitar-publicacao',{'versao':version})
     post(admin,f'/solicitacoes/alteracoes/{proposal["id"]}/decidir',{'decisao':'aprovar'})
     version = teacher.get(f'/api/cursos/{cid}').json['curso']['versao']
-    offer = post(admin,f'/api/cursos/{cid}/ofertas',{'versao':version,'turma_disciplina_id':1})
+    offer = post(admin,f'/api/cursos/{cid}/ofertas',{'versao':version,'turma_disciplina_id':turma_disciplina_id})
+    if not laboratorio:
+        return {'curso':cid,'oferta':offer['id']}
     draft = post(teacher,f'/api/cursos/{cid}/duplicar',{'versao':offer['versao']})['curso_id']
     post(teacher,f'/api/cursos/{draft}/estrutura',{'versao':1,'acao':'curso',
         'titulo':'Matemática para o ENEM — laboratório do professor',
         'descricao':'Cópia em rascunho para testar organização, aulas e publicação. O curso dos alunos permanece preservado.'})
     print(json.dumps({'curso':cid,'oferta':offer['id'],'rascunho':draft,'aulas':12},ensure_ascii=False),flush=True)
+    return {'curso':cid,'oferta':offer['id'],'rascunho':draft}
 
 
 def main():
