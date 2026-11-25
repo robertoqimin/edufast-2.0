@@ -164,6 +164,23 @@ Tabela nova `usuario_unidades`, com usuário, unidade e estado.
 | Supremo | O diretório de pessoas passa a informar a unidade |
 | Testes | Contratos de isolamento rota por rota (abaixo) e concorrência em PostgreSQL |
 
+## Atualização de 25/11/2026 (pedido do usuário)
+
+- **Cadastro no Supremo:** a janela "Que tipo de instituição é esta?" oferece três opções:
+  só escola, escola com faculdade, ou só faculdade (o mesmo sistema, com os nomes da
+  faculdade).
+- **Subida automática pelo CPF:**
+  - quando a faculdade cadastra o CPF de um aluno que **concluiu o 3º ano**, o sistema sobe o
+    perfil dele para a faculdade, com o histórico e os documentos, sem conta nova;
+  - o "Levar para a Faculdade" manual fica só para aluno sem CPF.
+- **Nova ordem das migrations:**
+  - 010 = unidades;
+  - 011 = Row-Level Security;
+  - 012 = ofertas (B4);
+  - 013 = passagem de ano.
+- Detalhes em [PROPOSTA_010_UNIDADES](PROPOSTA_010_UNIDADES_2026-11-25.md). As tabelas
+  abaixo ficam como registro do estudo original.
+
 ## Ordem das migrations
 
 | Nº | Conteúdo | Situação |

@@ -24,7 +24,8 @@ vale o registro acima.
   repositório, porque bancos criados por ela a citam no registro.
 - **Gerador:** o `gerar_postgresql.py` inclui propostas manuais posteriores à 008 na base e no
   manifesto, sem reescrevê-las.
-- **Ofertas extras:** a proposta B4 passou a ser `propostas/010_ofertas_extras.sql`.
+- **Unidades (colégio e faculdade):** proposta `propostas/010_unidades.sql`, com `010_unidades_desfazer.sql`, pendente de revisão ([ficha](../../Documentos/planejamento/PROPOSTA_010_UNIDADES_2026-11-25.md)).
+- **Ofertas extras:** a proposta B4 passou a ser `propostas/012_ofertas_extras.sql` (011 = Row-Level Security das unidades).
 
 Validação:
 

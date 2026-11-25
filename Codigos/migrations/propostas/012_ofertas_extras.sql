@@ -4,6 +4,9 @@
 -- PostgreSQL 17, transacional: uma falha desfaz tudo. Só acrescenta colunas com padrão e
 -- tabelas novas; nenhum dado existente é alterado. Turmas existentes ficam 'regular'.
 -- Renumerada de 009 para 010 em 25/11/2026 (a 009 passou a ser a de vídeos enviados, U2b).
+-- Renumerada de 010 para 012 em 25/11/2026: 010 = unidades, 011 = Row-Level Security. Com as
+-- unidades, a tabela escola_termos desta proposta sai (os rótulos ficam em unidades) e as ofertas
+-- vivem dentro da unidade de nível superior; a revisão final ajusta isso.
 -- Depois de aprovada, será movida para Codigos/migrations/ como 010_*.sql, gerada a partir
 -- dos modelos e congelada em checksums.json, como as demais.
 BEGIN;

@@ -17,8 +17,12 @@ API esperada:
     HTTP:
         POST /unidade  (unidade_id = número ou 'todas'; CSRF) troca a unidade ativa;
             sessão em session['unidade_id']; sem vínculo -> 403 e nada muda.
-        POST /admin/alunos/<id>/levar-para-unidade  (destino_id; CSRF): passagem do aluno do
-            colégio para a faculdade, com histórico e documentos (adendo da decisão B).
+        POST /admin/alunos/<id>/concluir  (CSRF): o colégio marca que o aluno concluiu o 3º ano.
+        POST /cadastro/alunos com o CPF de um concluinte do colégio: sobe o perfil para a faculdade
+            (mesma conta, histórico e documentos), sem conta nova (regra do usuário, 25/11/2026).
+        POST /admin/alunos/<id>/levar-para-unidade  (destino_id; CSRF): subida manual, para aluno
+            sem CPF, liberada só pela unidade de origem.
+    Ficha da migration: Documentos/planejamento/PROPOSTA_010_UNIDADES_2026-11-25.md
     Recurso de outra unidade -> 404 (não confirma que existe).
 """
 from unittest import TestCase, skipUnless
@@ -223,49 +227,87 @@ class ContratosUnidades(TestCase):
             with unidades().escopo_banco(db, [1]):
                 self.assertEqual(db.execute(text('SELECT count(*) FROM disciplinas WHERE id = 21')).scalar(), 0)
 
-    # ---------- 11: cadastro de quem já existe na outra unidade ----------
-    def test_11_cadastrar_email_que_ja_existe_na_outra_unidade_so_vincula(self):
+    # ---------- 11: professor que já existe na outra unidade ----------
+    def test_11_cadastrar_professor_com_cpf_existente_so_vincula(self):
         c = self.cliente(10, unidade=2)
-        r = c.post('/cadastro/alunos', json={'nome': 'Aluno', 'email': 'u2@example.test', 'senha': 'test-password-123',
-                                             'matricula': 'F2'}, headers={'X-CSRF-Token': CSRF})
+        r = c.post('/cadastro/professores', json={'nome': 'Professor 2', 'email': 'outro@example.test',
+                                                  'senha': 'test-password-123', 'cpf': '22222222222'},
+                   headers={'X-CSRF-Token': CSRF})
         self.assertIn(r.status_code, (200, 201))
         texto = r.get_data(as_text=True)
-        for dado_do_colegio in ('M1', '1º ano A', 'Matematica'):
+        for dado_do_colegio in ('u4@example.test', '1º ano A', 'Matematica'):
             self.assertNotIn(dado_do_colegio, texto, 'a resposta não pode expor dados do colégio')
         _, Vinculo, _ = modelos()
         with get_session() as db:
-            self.assertEqual(db.query(UsuarioModel).filter_by(email='u2@example.test').count(), 1, 'nenhuma conta nova')
-            self.assertTrue(db.query(Vinculo).filter_by(usuario_id=2, unidade_id=2).first())
-            self.assertEqual(db.query(AlunoModel).filter_by(usuario_id=2).count(), 1, 'um cadastro só (decisão B)')
+            self.assertIsNone(db.query(UsuarioModel).filter_by(email='outro@example.test').first(), 'nenhuma conta nova')
+            self.assertTrue(db.query(Vinculo).filter_by(usuario_id=4, unidade_id=2).first(), 'mesmo login nas duas')
 
-    # ---------- 12–14: adendo da decisão B (do 3º ano para a faculdade) ----------
-    def test_12_aluno_vai_para_a_faculdade_com_historico_e_documentos(self):
+    # ---------- 12–14: subida do colégio para a faculdade pelo CPF (regra do usuário) ----------
+    CPF = '52998224725'
+
+    def preparar_cpf(self):
+        with get_session() as db:
+            db.get(AlunoModel, 1).cpf = self.CPF
+            db.commit()
+
+    def cadastrar_na_faculdade(self, cpf):
+        return self.cliente(10, unidade=2).post('/cadastro/alunos', json={
+            'nome': 'Aluno', 'email': 'calouro@example.test', 'senha': 'test-password-123',
+            'matricula': 'F2', 'cpf': cpf}, headers={'X-CSRF-Token': CSRF})
+
+    def test_12_concluinte_do_3o_ano_sobe_para_a_faculdade_pelo_cpf(self):
+        self.preparar_cpf()
         faculdade = self.cliente(10, unidade=2)
-        self.assertEqual(faculdade.get('/admin/alunos/1').status_code, 404, 'antes da passagem a faculdade não vê')
-        r = self.post(self.cliente(1, unidade=1), '/admin/alunos/1/levar-para-unidade', destino_id=2)
-        self.assertEqual(r.status_code, 302)
-        detalhe = self.corpo(faculdade, '/admin/alunos/1')
-        self.assertIn('RG', detalhe, 'documentos do colégio acompanham o aluno')
+        self.assertEqual(faculdade.get('/admin/alunos/1').status_code, 404, 'antes da subida a faculdade não vê')
+        self.assertEqual(self.post(self.cliente(1, unidade=1), '/admin/alunos/1/concluir').status_code, 302)
+        r = self.cadastrar_na_faculdade(self.CPF)
+        self.assertIn(r.status_code, (200, 201))
+        _, Vinculo, Transferencia = modelos()
+        with get_session() as db:
+            self.assertIsNone(db.query(UsuarioModel).filter_by(email='calouro@example.test').first(), 'sem conta nova')
+            self.assertEqual(db.query(AlunoModel).filter_by(cpf=self.CPF).count(), 1, 'um cadastro só')
+            self.assertEqual(db.query(Vinculo).filter_by(usuario_id=2, unidade_id=1).one().situacao, 'concluido')
+            self.assertEqual(db.query(Vinculo).filter_by(usuario_id=2, unidade_id=2).one().situacao, 'ativo')
+            t = db.query(Transferencia).one()
+            self.assertEqual((t.aluno_id, t.origem_id, t.destino_id, t.autor_id, t.motivo), (1, 1, 2, 10, 'cpf_concluinte'))
+        self.assertIn('RG', self.corpo(faculdade, '/admin/alunos/1'), 'documentos do colégio sobem junto')
         self.assertEqual(faculdade.get('/academico/alunos/1/boletim').status_code, 200, 'histórico escolar do colégio')
         aluno = self.cliente(2)  # o mesmo login do colégio
         self.assertEqual(self.post(aluno, '/unidade', unidade_id=2).status_code, 302)
-        self.assertEqual(self.post(aluno, '/unidade', unidade_id=1).status_code, 302, 'o histórico no colégio continua dele')
-        self.assertEqual(self.turma_do_aluno(1), [1], 'a passagem não matricula sozinha em turma da faculdade')
+        self.assertEqual(self.turma_do_aluno(1), [1], 'a subida não matricula sozinha em turma da faculdade')
 
-    def test_13_so_a_unidade_de_origem_libera_a_passagem(self):
-        self.assertEqual(self.post(self.cliente(10, unidade=2), '/admin/alunos/1/levar-para-unidade', destino_id=2).status_code, 404)
-        self.assertEqual(self.post(self.cliente(3, unidade=1), '/admin/alunos/1/levar-para-unidade', destino_id=2).status_code, 403)
+    def test_13_cpf_de_quem_nao_concluiu_e_recusado_sem_expor_dados(self):
+        self.preparar_cpf()
+        r = self.cadastrar_na_faculdade(self.CPF)
+        self.assertEqual(r.status_code, 409)
+        texto = r.get_data(as_text=True)
+        self.assertIn('ainda não concluiu', texto)
+        for dado_do_colegio in ('M1', '1º ano A', 'u2@example.test'):
+            self.assertNotIn(dado_do_colegio, texto)
+        # Só o colégio marca "concluiu"; a faculdade e o professor não podem.
+        self.assertEqual(self.post(self.cliente(10, unidade=2), '/admin/alunos/1/concluir').status_code, 404)
+        self.assertEqual(self.post(self.cliente(3, unidade=1), '/admin/alunos/1/concluir').status_code, 403)
         _, Vinculo, Transferencia = modelos()
         with get_session() as db:
             self.assertIsNone(db.query(Vinculo).filter_by(usuario_id=2, unidade_id=2).first())
             self.assertEqual(db.query(Transferencia).count(), 0)
 
-    def test_14_passagem_fica_registrada_e_nao_se_repete(self):
-        c = self.cliente(1, unidade=1)
-        self.assertEqual(self.post(c, '/admin/alunos/1/levar-para-unidade', destino_id=2).status_code, 302)
-        self.assertEqual(self.post(c, '/admin/alunos/1/levar-para-unidade', destino_id=2).status_code, 409)
+    def test_14_subida_nao_se_repete_e_aluno_sem_cpf_sobe_pelo_colegio(self):
+        self.preparar_cpf()
+        self.post(self.cliente(1, unidade=1), '/admin/alunos/1/concluir')
+        self.assertIn(self.cadastrar_na_faculdade(self.CPF).status_code, (200, 201))
+        r = self.cadastrar_na_faculdade(self.CPF)
+        self.assertEqual(r.status_code, 409)
+        self.assertIn('já está na faculdade', r.get_data(as_text=True))
+        # Aluno sem CPF: a secretaria do colégio libera manualmente; a faculdade não puxa sozinha.
+        with get_session() as db:
+            db.add(UsuarioModel(id=15, email='u15@example.test', senha='-', tipo='aluno'))
+            db.flush()
+            db.add(AlunoModel(id=15, usuario_id=15, nome='Sem CPF', matricula='M15'))
+            unidades().vincular(db, 15, 1)
+            db.commit()
+        self.assertEqual(self.post(self.cliente(10, unidade=2), '/admin/alunos/15/levar-para-unidade', destino_id=2).status_code, 404)
+        self.assertEqual(self.post(self.cliente(1, unidade=1), '/admin/alunos/15/levar-para-unidade', destino_id=2).status_code, 302)
         _, _, Transferencia = modelos()
         with get_session() as db:
-            t = db.query(Transferencia).one()
-            self.assertEqual((t.aluno_id, t.origem_id, t.destino_id, t.autor_id), (1, 1, 2, 1))
-            self.assertIsNotNone(t.criado_em)
+            self.assertEqual(sorted((t.aluno_id, t.motivo) for t in db.query(Transferencia)), [(1, 'cpf_concluinte'), (15, 'manual')])

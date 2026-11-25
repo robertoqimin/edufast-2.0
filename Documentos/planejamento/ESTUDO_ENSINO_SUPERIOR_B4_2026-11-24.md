@@ -7,8 +7,8 @@ acontece só depois de o modelo ser aprovado. Nada aqui foi executado em banco.
 > **Atualização em 25/11/2026:** o usuário decidiu que o colégio e a faculdade serão
 > **unidades** da mesma instalação, com secretarias separadas
 > ([estudo das unidades](ESTUDO_UNIDADES_2026-11-25.md)). As ofertas desta B4 passam a viver
-> dentro da unidade de nível superior, a migration das unidades vira a 010 e esta proposta
-> será renumerada para 011. Os rótulos (`escola_termos`) passam para a tabela de unidades.
+> dentro da unidade de nível superior, a migration das unidades vira a 010, a Row-Level Security a
+> 011, e esta proposta passou a ser a **012** (`propostas/012_ofertas_extras.sql`). Os rótulos (`escola_termos`) passam para a tabela de unidades.
 
 ## O que o usuário pediu
 
@@ -70,7 +70,7 @@ agrupar ofertas.
 
 ## Proposta de esquema (não executada)
 
-[`Codigos/migrations/propostas/010_ofertas_extras.sql`](../../Codigos/migrations/propostas/010_ofertas_extras.sql)
+[`Codigos/migrations/propostas/012_ofertas_extras.sql`](../../Codigos/migrations/propostas/012_ofertas_extras.sql)
 (renumerada de 009 para 010 em 25/11/2026, quando a 009 passou a ser a de vídeos enviados),
 PostgreSQL e transacional. Ela fica fora da pasta de migrations ativas até a aprovação.
 
