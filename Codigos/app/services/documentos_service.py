@@ -29,7 +29,7 @@ def request_student_document(aluno_id, data, *, session_factory=get_session):
     mensagem = (data.get("mensagem") or "").strip()
 
     if not titulo:
-        return {"erro": "Titulo do documento e obrigatorio"}, 400
+        return {"erro": "Título do documento é obrigatório"}, 400
 
     db = session_factory()
     try:
@@ -38,7 +38,7 @@ def request_student_document(aluno_id, data, *, session_factory=get_session):
             return replay
         aluno = db.get(AlunoModel, aluno_id)
         if not aluno:
-            return {"erro": "Aluno nao encontrado"}, 404
+            return {"erro": "Aluno não encontrado"}, 404
 
         solicitacao = SolicitacaoDocumentoModel(
             aluno_id=aluno.id,
@@ -57,7 +57,7 @@ def request_professor_document(professor_id, data, *, session_factory=get_sessio
     mensagem = (data.get("mensagem") or "").strip()
 
     if not titulo:
-        return {"erro": "Titulo do documento e obrigatorio"}, 400
+        return {"erro": "Título do documento é obrigatório"}, 400
 
     db = session_factory()
     try:
@@ -66,7 +66,7 @@ def request_professor_document(professor_id, data, *, session_factory=get_sessio
             return replay
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
-            return {"erro": "Professor nao encontrado"}, 404
+            return {"erro": "Professor não encontrado"}, 404
 
         solicitacao = SolicitacaoDocumentoModel(
             professor_id=professor.id,

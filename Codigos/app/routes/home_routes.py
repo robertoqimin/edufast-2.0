@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from app.views.respostas import resposta_erro
 
 from app.auth import normalize_role
 from app.controllers.admin_controller import (
@@ -179,7 +180,7 @@ def admin_solicitar_documento_aluno(aluno_id):
     admin_required()
     response, status = request_student_document(aluno_id, request.form)
     if status >= 400:
-        return jsonify(response), status
+        return resposta_erro(response, status)
     return redirect(url_for("home.admin_detalhes_aluno", aluno_id=aluno_id))
 
 
@@ -188,7 +189,7 @@ def admin_editar_aluno(aluno_id):
     admin_required()
     response, status = update_student_data(aluno_id, request.form, request.files)
     if status >= 400:
-        return jsonify(response), status
+        return resposta_erro(response, status)
     return redirect(url_for("home.admin_detalhes_aluno", aluno_id=aluno_id))
 
 
@@ -209,7 +210,7 @@ def admin_editar_professor(professor_id):
     admin_required()
     response, status = update_professor_data(professor_id, request.form, request.files)
     if status >= 400:
-        return jsonify(response), status
+        return resposta_erro(response, status)
     return redirect(url_for("home.admin_detalhes_professor", professor_id=professor_id))
 
 
@@ -218,7 +219,7 @@ def admin_solicitar_documento_professor(professor_id):
     admin_required()
     response, status = request_professor_document(professor_id, request.form)
     if status >= 400:
-        return jsonify(response), status
+        return resposta_erro(response, status)
     return redirect(url_for("home.admin_detalhes_professor", professor_id=professor_id))
 
 

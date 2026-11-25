@@ -53,7 +53,7 @@ def generate_token(user):
 def decode_token_from_request():
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
-        return None, (jsonify({"erro": "Token JWT nao informado"}), 401)
+        return None, (jsonify({"erro": "Token JWT não informado"}), 401)
 
     token = auth_header.replace("Bearer ", "", 1).strip()
     try:
@@ -61,20 +61,20 @@ def decode_token_from_request():
         message = f"{header_part}.{payload_part}"
         expected_signature = _sign(message)
         if not hmac.compare_digest(signature, expected_signature):
-            return None, (jsonify({"erro": "Token JWT invalido"}), 401)
+            return None, (jsonify({"erro": "Token JWT inválido"}), 401)
 
         header = json.loads(_b64url_decode(header_part))
         payload = json.loads(_b64url_decode(payload_part))
     except (ValueError, json.JSONDecodeError, UnicodeDecodeError, binascii.Error):
-        return None, (jsonify({"erro": "Token JWT invalido"}), 401)
+        return None, (jsonify({"erro": "Token JWT inválido"}), 401)
 
     if not isinstance(header, dict) or not isinstance(payload, dict) or header.get("alg") != "HS256" or header.get("typ") != "JWT":
-        return None, (jsonify({"erro": "Token JWT invalido"}), 401)
+        return None, (jsonify({"erro": "Token JWT inválido"}), 401)
 
     try:
         exp = int(payload.get("exp", 0))
     except (TypeError, ValueError):
-        return None, (jsonify({"erro": "Token JWT invalido"}), 401)
+        return None, (jsonify({"erro": "Token JWT inválido"}), 401)
 
     if exp < int(datetime.now(timezone.utc).timestamp()):
         return None, (jsonify({"erro": "Token JWT expirado"}), 401)

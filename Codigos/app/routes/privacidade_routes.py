@@ -44,11 +44,11 @@ def meus_pedidos():
             tipo = request.form.get("tipo", "")
             detalhe = request.form.get("detalhe", "").strip()
             if tipo not in TIPOS or len(detalhe) > 2000:
-                abort(400, "Solicitacao invalida; limite de 2000 caracteres.")
+                abort(400, "Solicitação inválida; limite de 2000 caracteres.")
             db.query(UsuarioModel).filter_by(id=user_id).with_for_update().one()
             if db.query(PedidoPrivacidadeModel).filter(PedidoPrivacidadeModel.usuario_id == user_id,
                                                      PedidoPrivacidadeModel.status.in_(["aberto", "em_analise"])).count() >= 5:
-                abort(409, "Voce ja possui cinco pedidos abertos. Acompanhe os protocolos existentes.")
+                abort(409, "Você já possui cinco pedidos abertos. Acompanhe os protocolos existentes.")
             pedido = PedidoPrivacidadeModel(usuario_id=user_id, tipo=tipo, detalhe=detalhe)
             db.add(pedido)
             db.flush()
@@ -103,7 +103,7 @@ def responder(pedido_id):
     status = request.form.get("status", "")
     resposta = request.form.get("resposta", "").strip()
     if status not in {"em_analise", "concluido", "indeferido"} or not resposta or len(resposta) > 2000:
-        abort(400, "Informe status e resposta fundamentada de ate 2000 caracteres.")
+        abort(400, "Informe status e resposta fundamentada de até 2000 caracteres.")
     with get_session() as db:
         pedido = db.get(PedidoPrivacidadeModel, pedido_id)
         if not pedido:
@@ -115,7 +115,7 @@ def responder(pedido_id):
             PedidoPrivacidadeModel.status.in_(["aberto", "em_analise"])
         ).update({"status": status, "resposta": resposta}, synchronize_session=False)
         if not changed:
-            abort(409, "Pedido encerrado por outro atendimento. Recarregue a pagina.")
+            abort(409, "Pedido encerrado por outro atendimento. Recarregue a página.")
         db.add(AuditoriaPrivacidadeModel(ator_id=titular(), acao="pedido_" + status, referencia=pedido.id))
         db.commit()
     return redirect(url_for("privacidade.administrar"))

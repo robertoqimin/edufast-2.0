@@ -19,7 +19,7 @@ def check_version(record, data):
     try:
         expected = int(data.get("versao", ""))
     except (ValueError, TypeError):
-        raise MutationConflict("Recarregue o formulario antes de salvar: versao obrigatoria", 428)
+        raise MutationConflict("Recarregue o formulário antes de salvar: versão obrigatória", 428)
     if expected != (record.versao if record else 0):
         raise MutationConflict("Registro alterado por outro envio; recarregue antes de salvar")
     if record:
@@ -47,12 +47,12 @@ def insert_if_missing(db, model, defaults=None, **keys):
 def begin_submission(db, operation, actor=None):
     key = request.headers.get("Idempotency-Key") or request.form.get("idempotency_key")
     if not key or len(key) > 128:
-        raise MutationConflict("Informe Idempotency-Key (ate 128 caracteres)", 428)
+        raise MutationConflict("Informe Idempotency-Key (até 128 caracteres)", 428)
     # Fixed-length digest keeps opaque keys bounded and collation-independent.
     key = hashlib.sha256(key.encode("utf-8")).hexdigest()
     actor = str(actor if actor is not None else web_session.get("user_id", ""))
     if not actor:
-        raise MutationConflict("Autenticacao obrigatoria", 401)
+        raise MutationConflict("Autenticação obrigatória", 401)
     payload = {"form": sorted((k, request.form.getlist(k)) for k in request.form
                               if k not in {"idempotency_key", "csrf_token"}), "files": []}
     payload["json"] = request.get_json(silent=True) if request.is_json else None
@@ -70,7 +70,7 @@ def begin_submission(db, operation, actor=None):
     if entry.status_http == 0:
         return entry, None
     if entry.fingerprint != fingerprint:
-        raise MutationConflict("Chave de envio reutilizada com conteudo diferente")
+        raise MutationConflict("Chave de envio reutilizada com conteúdo diferente")
     return entry, (json.loads(entry.resposta), entry.status_http)
 
 

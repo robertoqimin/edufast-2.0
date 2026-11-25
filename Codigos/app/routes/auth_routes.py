@@ -95,7 +95,7 @@ def cadastro_professor():
 @professor_required
 def teste_professor():
     # Rota simples para validar se o JWT pertence a um professor.
-    return jsonify({"mensagem": "Permissao de professor validada"}), 200
+    return jsonify({"mensagem": "Permissão de professor validada"}), 200
 
 
 @auth_bp.route('/alunos/busca', methods=['GET'])

@@ -34,12 +34,12 @@ def install(app):
             if not request.headers.get('Authorization'):
                 supplied = request.headers.get('X-CSRF-Token') or request.form.get('csrf_token', '')
                 if not supplied or not hmac.compare_digest(str(session.get('csrf_token', '')), supplied):
-                    raise MutationConflict('Token CSRF obrigatorio', 400)
+                    raise MutationConflict('Token CSRF obrigatório', 400)
             if (identity.papel == 'professor' and request.blueprint in {'cursos', 'academico'}):
                 from app.services.aprovacoes_service import submit_proposal
                 payload = request.get_json(silent=True) if request.is_json else request.form.to_dict()
                 if not isinstance(payload, dict):
-                    raise MutationConflict('Corpo invalido', 400)
+                    raise MutationConflict('Corpo inválido', 400)
                 payload = {k: v for k, v in payload.items() if k not in {'csrf_token', 'idempotency_key'}}
                 body, status = submit_proposal('operacao_restaurada', {
                     'endpoint': request.endpoint, 'params': dict(request.view_args or {}), 'payload': payload})

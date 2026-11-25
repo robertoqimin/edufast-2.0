@@ -59,7 +59,7 @@ def _items(identity):
 def painel():
     identity = current_identity()
     if identity.papel not in {"admin", "super_admin", "professor"}:
-        raise MutationConflict("Acesso nao autorizado", 403)
+        raise MutationConflict("Acesso não autorizado", 403)
     alunos = []
     docentes = []
     if identity.admin:
@@ -82,7 +82,7 @@ def painel():
 def alteracoes():
     identity = current_identity()
     if identity.papel not in {"admin", "super_admin", "professor"}:
-        raise MutationConflict("Acesso nao autorizado", 403)
+        raise MutationConflict("Acesso não autorizado", 403)
     if request.method == "GET":
         return jsonify({"solicitacoes": _items(identity)})
     data = dict(_data() or {})
@@ -112,9 +112,9 @@ def arquivo(proposal_id):
     with get_session() as db:
         row = db.get(SolicitacaoAlteracaoModel, proposal_id)
         if row is None or not row.arquivo:
-            raise MutationConflict("Arquivo nao encontrado", 404)
+            raise MutationConflict("Arquivo não encontrado", 404)
         if row.solicitante_id != identity.id and not can_review(db, identity, row):
-            raise MutationConflict("Arquivo nao encontrado", 404)
+            raise MutationConflict("Arquivo não encontrado", 404)
         return send_from_directory(caminho_uploads(current_app.config["UPLOAD_FOLDER"]), row.arquivo, as_attachment=True)
 
 
@@ -122,27 +122,27 @@ def arquivo(proposal_id):
 def permissoes(user_id):
     identity = current_identity()
     if not identity.admin:
-        raise MutationConflict("Acesso nao autorizado", 403)
+        raise MutationConflict("Acesso não autorizado", 403)
     data = _data() or {}
     if set(data) - {"papel", "revisor_materiais"}:
-        raise MutationConflict("Campos nao permitidos", 400)
+        raise MutationConflict("Campos não permitidos", 400)
     with get_session() as db:
         user = db.query(UsuarioModel).filter_by(id=user_id).with_for_update().first()
         if not user or user.estado != "ativo":
-            raise MutationConflict("Usuario ativo nao encontrado", 404)
+            raise MutationConflict("Usuário ativo não encontrado", 404)
         role = data.get("papel", user.tipo)
         if not isinstance(role, str):
-            raise MutationConflict("Papel invalido", 400)
+            raise MutationConflict("Papel inválido", 400)
         role = role.lower()
         if user.tipo == 'super_admin' and role != user.tipo:
-            raise MutationConflict('O superperfil protegido nao pode ser rebaixado', 403)
+            raise MutationConflict('O superperfil protegido não pode ser rebaixado', 403)
         if "papel" in data and (identity.papel != "super_admin" or identity.id == user.id):
             raise MutationConflict("Somente superadmin pode atribuir papeis a outras contas", 403)
         if role not in {"admin", "super_admin", "professor", "aluno"}:
-            raise MutationConflict("Papel invalido", 400)
+            raise MutationConflict("Papel inválido", 400)
         flag = data.get("revisor_materiais", user.revisor_materiais)
         if flag not in (True, False, "true", "false", "1", "0"):
-            raise MutationConflict("Permissao invalida", 400)
+            raise MutationConflict("Permissão inválida", 400)
         reviewer = flag in (True, "true", "1")
         if (role == "professor" or reviewer) and db.query(ProfessorModel.id).filter_by(usuario_id=user_id).first() is None:
             raise MutationConflict("Conta sem cadastro docente", 400)

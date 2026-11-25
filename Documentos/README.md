@@ -5,6 +5,7 @@
 | Documento | Conteúdo |
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
+| [U1 — Clareza, acessibilidade e estado — 24/11](testes/U1_EXPERIENCIA_2026-11-24.md) | Mensagens corrigidas, erro amigável no navegador, acessibilidade 64/64 com auditoria no CI, estado de cada envio visível |
 | [Plano de experiência do usuário — 24/11](planejamento/PLANO_UX_2026-11-24.md) | Diagnóstico medido (acessibilidade 56/64, 12 telas antigas, 81 mensagens sem acento), objetivos O1–O7 com metas e etapas U1–U5; estudar sem baixar |
 | [C1 — Demo única — 24/11](testes/DEMO_COMPLETA_C1_2026-11-24.md) | `node infra/demo-completa.cjs start`: escola fictícia completa (notas, chamadas, materiais, abas, curso ENEM) e painel Supremo; tabela de logins |
 | [B4 — Ensino superior: ofertas extras — 24/11](planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md) · [registro](testes/B4_ESTUDO_SUPERIOR_2026-11-24.md) | Disciplinas e cursos extras pegos pela turma inteira ou por um aluno; proposta 009 e contratos RED, aguardando aprovação |

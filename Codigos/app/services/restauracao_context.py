@@ -34,7 +34,7 @@ class _SessionProxy:
     def __exit__(self, *args): return False
     def commit(self): self.db.flush()
     def close(self): pass
-    def rollback(self): raise MutationConflict('A operacao conflitou; nenhuma alteracao aplicada')
+    def rollback(self): raise MutationConflict('A operação conflitou; nenhuma alteração aplicada')
 
 
 def get_session():
@@ -55,13 +55,13 @@ def _snapshot(db, operation):
         from app.services.cursos import estrutura
         row = db.query(CursoModel).filter_by(id=params['curso_id']).with_for_update().first()
         if row is None:
-            raise MutationConflict('Curso nao encontrado', 404)
+            raise MutationConflict('Curso não encontrado', 404)
         values = {'curso': {c.name: getattr(row, c.name) for c in CursoModel.__table__.columns},
                   'estrutura': estrutura(db, row.id)}
     elif 'avaliacao_id' in params:
         row = db.query(AvaliacaoModel).filter_by(id=params['avaliacao_id']).with_for_update().first()
         if row is None:
-            raise MutationConflict('Avaliacao nao encontrada', 404)
+            raise MutationConflict('Avaliacao não encontrada', 404)
         notes = db.query(LancamentoNotaModel).filter_by(avaliacao_id=row.id).order_by(LancamentoNotaModel.id).all()
         values = {'avaliacao': {c.name: getattr(row, c.name) for c in AvaliacaoModel.__table__.columns},
                   'notas': [{c.name: getattr(n, c.name) for c in LancamentoNotaModel.__table__.columns} for n in notes]}
@@ -74,14 +74,14 @@ def execute(db, user_id, operation, *, validate=False):
     from app.models import UsuarioModel
     endpoint, params, payload = operation.get('endpoint'), operation.get('params'), operation.get('payload')
     if not isinstance(endpoint, str) or endpoint not in ALLOWED_ACTIONS or not isinstance(params, dict) or not isinstance(payload, dict):
-        raise MutationConflict('Operacao nao permitida', 400)
+        raise MutationConflict('Operação não permitida', 400)
     if set(payload) - FIELDS[endpoint] or len(json.dumps(payload, ensure_ascii=False).encode('utf-8')) > 50000:
-        raise MutationConflict('Campos nao permitidos ou conteudo muito grande', 400)
+        raise MutationConflict('Campos não permitidos ou conteúdo muito grande', 400)
     rule = next((r for r in current_app.url_map.iter_rules(endpoint) if 'POST' in r.methods), None)
     if rule is None or set(params) != rule.arguments:
-        raise MutationConflict('Parametros da operacao invalidos', 400)
+        raise MutationConflict('Parametros da operação inválidos', 400)
     if any(not isinstance(value, int) or isinstance(value, bool) or value < 1 for value in params.values()):
-        raise MutationConflict('Recurso invalido', 400)
+        raise MutationConflict('Recurso inválido', 400)
     user = db.get(UsuarioModel, user_id)
     if not user or user.tipo != 'professor' or user.estado != 'ativo':
         raise MutationConflict('Professor sem acesso ativo', 403)
@@ -89,7 +89,7 @@ def execute(db, user_id, operation, *, validate=False):
     try:
         path = url_for(endpoint, **params)
     except Exception:
-        raise MutationConflict('Parametros da operacao invalidos', 400)
+        raise MutationConflict('Parametros da operação inválidos', 400)
     from app.services.identidade_service import Identidade
     token = _transaction.set(db)
     principal_token = _principal.set(Identidade(user.id, user.tipo, user.revisor_materiais, user.auth_version))
@@ -101,12 +101,12 @@ def execute(db, user_id, operation, *, validate=False):
         if validate:
             operation['_snapshot'] = snapshot
         elif operation.get('_snapshot') != snapshot:
-            raise MutationConflict('O conteudo mudou desde o envio; revise antes de aprovar')
+            raise MutationConflict('O conteúdo mudou desde o envio; revise antes de aprovar')
         with current_app.test_request_context(path, method='POST', json=payload):
             session.update(user_id=user.id, user_role=user.tipo, user_email=user.email, auth_version=user.auth_version)
             response = current_app.make_response(current_app.view_functions[endpoint](**params))
             if response.status_code >= 400:
-                raise MutationConflict('A operacao nao pode ser aplicada', response.status_code)
+                raise MutationConflict('A operação não pode ser aplicada', response.status_code)
         db.flush()
     except HTTPException as error:
         raise MutationConflict(error.description, error.code)

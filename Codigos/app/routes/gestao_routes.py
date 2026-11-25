@@ -56,7 +56,7 @@ def usuarios():
         abort(403)
     if status not in {200, 201}:
         return _render(error=body.get('erro', 'Nao foi possivel criar a conta.'), status=status)
-    flash('Usuario criado. O acesso esta disponivel.', 'success')
+    flash('Usuário criado. O acesso está disponível.', 'success')
     return redirect(url_for('gestao.usuarios'))
 
 
@@ -85,7 +85,7 @@ def perfil(user_id):
                 return _render(permission_error='Informe nome e matricula para o aluno.', edit_user_id=user_id, status=400)
             db.add(AlunoModel(usuario_id=user_id, nome=name, matricula=number, status_matricula='Ativo'))
         if request.form.get('versao') != str(user.auth_version):
-            raise MutationConflict('Permissoes alteradas em outra sessao; recarregue a pagina')
+            raise MutationConflict('Permissões alteradas em outra sessão; recarregue a página')
         user.tipo, user.revisor_materiais = role, False
         user.auth_version += 1
         try:
@@ -93,7 +93,7 @@ def perfil(user_id):
         except IntegrityError:
             db.rollback()
             return _render(permission_error='CPF ou matricula ja cadastrado.', edit_user_id=user_id, status=409)
-    flash('Perfil atualizado. As sessoes anteriores foram revogadas.', 'success')
+    flash('Perfil atualizado. As sessões anteriores foram revogadas.', 'success')
     return redirect(url_for('gestao.usuarios'))
 
 

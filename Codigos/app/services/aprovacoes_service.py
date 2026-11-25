@@ -33,10 +33,17 @@ FIELDS = {
 LEGADOS = {"salvar_nota": "Notas agora sao lancadas no diario da avaliacao (/academico)."}
 
 
+# U1/O4: nomes de campo legíveis nas mensagens (nunca o nome interno do formulário).
+ROTULOS = {'titulo': 'título', 'nome': 'nome', 'codigo': 'código', 'descricao': 'descrição', 'data_entrega': 'data de entrega',
+           'turma_id': 'turma', 'disciplina_id': 'disciplina', 'aluno_id': 'aluno', 'ano_letivo': 'ano letivo',
+           'carga_horaria': 'carga horária', 'curso_serie': 'curso/série', 'versao': 'versão', 'turno': 'turno',
+           'solicitacao_id': 'solicitação', 'observacao': 'observação'}
+
+
 def _text(data, name, maximum, required=False):
     value = str(data.get(name) or "").strip()
     if (required and not value) or len(value) > maximum:
-        raise MutationConflict(f"Campo invalido: {name}", 400)
+        raise MutationConflict(f"Confira o campo {ROTULOS.get(name, name)}.", 400)
     return value
 
 
@@ -50,7 +57,7 @@ def _integer(data, name, minimum=1):
             raise ValueError()
         return result
     except (TypeError, ValueError):
-        raise MutationConflict(f"Campo invalido: {name}", 400)
+        raise MutationConflict(f"Confira o campo {ROTULOS.get(name, name)}.", 400)
 
 
 def _teacher(db, user_id):
@@ -68,7 +75,7 @@ def _scope(db, professor, turma_id, disciplina_id, aluno_id=None):
     if aluno_id is not None:
         pairs.append((AlunoTurmaModel, {"aluno_id": aluno_id, "turma_id": turma_id}))
     if any(db.query(model.id).filter_by(**keys).first() is None for model, keys in pairs):
-        raise MutationConflict("Recurso fora dos vinculos autorizados", 403)
+        raise MutationConflict("Recurso fora dos vínculos autorizados", 403)
 
 
 def _student(db, professor, aluno_id):
@@ -76,13 +83,13 @@ def _student(db, professor, aluno_id):
            .join(ProfessorTurmaModel, ProfessorTurmaModel.turma_id == AlunoTurmaModel.turma_id)
            .filter(AlunoModel.id == aluno_id, ProfessorTurmaModel.professor_id == professor.id).first())
     if row is None:
-        raise MutationConflict("Aluno nao encontrado no escopo autorizado", 404)
+        raise MutationConflict("Aluno não encontrado no escopo autorizado", 404)
     return row
 
 
 def validate_proposal(db, user_id, kind, raw):
     if not isinstance(kind, str) or kind not in FIELDS or not isinstance(raw, dict) or set(raw) - FIELDS[kind]:
-        raise MutationConflict("Operacao ou campos nao permitidos", 400)
+        raise MutationConflict("Operação ou campos não permitidos", 400)
     professor = _teacher(db, user_id)
     data = dict(raw)
     if kind == 'publicar_curso':
@@ -122,7 +129,7 @@ def validate_proposal(db, user_id, kind, raw):
         try:
             data["data_entrega"] = date.fromisoformat(value).isoformat() if value else None
         except ValueError:
-            raise MutationConflict("Data de entrega invalida", 400)
+            raise MutationConflict("Data de entrega inválida", 400)
     if kind == "enviar_documento":
         _student(db, professor, data["aluno_id"])
         turma = (db.query(AlunoTurmaModel.turma_id)
@@ -137,9 +144,9 @@ def validate_proposal(db, user_id, kind, raw):
     if kind == "responder_documento":
         row = db.query(SolicitacaoDocumentoModel).filter_by(id=data["solicitacao_id"], professor_id=professor.id).first()
         if row is None:
-            raise MutationConflict("Solicitacao nao encontrada", 404)
+            raise MutationConflict("Solicitação não encontrada", 404)
         if row.status != "pendente":
-            raise MutationConflict("Solicitacao ja respondida")
+            raise MutationConflict("Solicitação já respondida")
     return data
 
 
@@ -150,7 +157,7 @@ def submit_proposal(kind, data, files=None):
     if isinstance(kind, str) and kind in LEGADOS:
         raise MutationConflict(LEGADOS[kind], 410)
     if not isinstance(kind, str) or kind not in FIELDS:
-        raise MutationConflict("Operacao ou campos nao permitidos", 400)
+        raise MutationConflict("Operação ou campos não permitidos", 400)
     db = get_session()
     filename = None
     committed = False
@@ -171,11 +178,11 @@ def submit_proposal(kind, data, files=None):
         if kind in {'publicar_material','publicar_curso'} and file:
             raise MutationConflict('Anexe o arquivo ao rascunho antes de pedir publicação.',400)
         if kind in {"enviar_documento", "responder_documento"} and (not file or not file.filename):
-            raise MutationConflict("Arquivo obrigatorio", 400)
+            raise MutationConflict("Arquivo obrigatório", 400)
         if file and file.filename:
             original = secure_filename(file.filename)
             if not original:
-                raise MutationConflict("Nome de arquivo invalido", 400)
+                raise MutationConflict("Nome de arquivo inválido", 400)
             filename = "pendente_" + uuid4().hex + "_" + original
             os.makedirs(caminho_uploads(current_app.config["UPLOAD_FOLDER"]), exist_ok=True)
             file.save(os.path.join(caminho_uploads(current_app.config["UPLOAD_FOLDER"]), filename))
@@ -190,12 +197,12 @@ def submit_proposal(kind, data, files=None):
             payload=json.dumps(normalized, ensure_ascii=False), estado="pendente", arquivo=filename, recurso_pendente=resource)
         db.add(proposal)
         db.flush()
-        result = finish_submission(db, entry, {"id": proposal.id, "estado": "pendente", "mensagem": "Solicitacao enviada para aprovacao"}, 202)
+        result = finish_submission(db, entry, {"id": proposal.id, "estado": "pendente", "mensagem": "Solicitação enviada para aprovação"}, 202)
         committed = True
         return result
     except IntegrityError:
         db.rollback()
-        raise MutationConflict("Ja existe solicitacao pendente para este recurso")
+        raise MutationConflict("Já existe solicitação pendente para este recurso")
     finally:
         db.close()
         if filename and not committed:
@@ -223,7 +230,7 @@ def can_review(db, identity, proposal):
 
 def _apply(db, proposal):
     if proposal.tipo in LEGADOS:
-        raise MutationConflict("Proposta de nota do painel antigo: rejeite e peca o lancamento no diario da avaliacao")
+        raise MutationConflict("Proposta de nota do painel antigo: rejeite e peça o lançamento no diário da avaliação")
     data = json.loads(proposal.payload)
     if proposal.tipo == 'publicar_curso':
         from app.services.cursos_ms04.publicacao import preparar_publicacao
@@ -244,7 +251,7 @@ def _apply(db, proposal):
         profile = ProfessorModel if role == "professor" else AlunoModel
         if (role not in {"professor", "aluno"} or user is None or user.id != proposal.solicitante_id
                 or user.estado != "pendente" or db.query(profile.id).filter_by(usuario_id=user.id).first() is None):
-            raise MutationConflict("Cadastro pendente invalido")
+            raise MutationConflict("Cadastro pendente inválido")
         user.tipo, user.estado, user.revisor_materiais = role, "ativo", False
         user.auth_version += 1
         if role == "aluno":
@@ -268,7 +275,7 @@ def _apply(db, proposal):
         from app.controllers.document_controller import _get_or_create_disciplina
         row = db.query(SolicitacaoDocumentoModel).filter_by(id=data["solicitacao_id"], professor_id=professor.id).with_for_update().one()
         if row.status != "pendente":
-            raise MutationConflict("Solicitacao ja respondida")
+            raise MutationConflict("Solicitação já respondida")
         disciplina, _ = _get_or_create_disciplina(db)
         document = DocumentoModel(professor_id=professor.id, disciplina_id=disciplina.id,
                                   titulo=row.titulo, caminho_arquivo=proposal.arquivo)
@@ -280,15 +287,15 @@ def _apply(db, proposal):
 def decide_proposal(proposal_id, decision, reason=""):
     identity = current_identity()
     if decision not in {"aprovar", "rejeitar"}:
-        raise MutationConflict("Decisao invalida", 400)
+        raise MutationConflict("Decisão inválida", 400)
     with get_session() as db:
         proposal = db.query(SolicitacaoAlteracaoModel).filter_by(id=proposal_id).with_for_update().first()
         if proposal is None:
-            raise MutationConflict("Solicitacao nao encontrada", 404)
+            raise MutationConflict("Solicitação não encontrada", 404)
         if identity.id == proposal.solicitante_id or not can_review(db, identity, proposal):
-            raise MutationConflict("Sem permissao para decidir esta solicitacao", 403)
+            raise MutationConflict("Sem permissão para decidir esta solicitação", 403)
         if proposal.estado != "pendente":
-            raise MutationConflict("Solicitacao ja decidida")
+            raise MutationConflict("Solicitação já decidida")
         if decision == "aprovar":
             _apply(db, proposal)
         proposal.estado = "aprovada" if decision == "aprovar" else "rejeitada"
@@ -299,5 +306,5 @@ def decide_proposal(proposal_id, decision, reason=""):
             db.commit()
         except IntegrityError:
             db.rollback()
-            raise MutationConflict("Alteracao conflita com dados existentes")
+            raise MutationConflict("Alteração conflita com dados existentes")
         return {"id": proposal.id, "estado": proposal.estado}, 200

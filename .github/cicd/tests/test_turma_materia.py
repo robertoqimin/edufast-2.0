@@ -73,9 +73,9 @@ class TurmaMateriaTests(TestCase):
     def test_registro_repetido_arquivada_e_dados_invalidos_sao_recusados(self):
         self.post(action='associate_subject', turma_id=2, disciplina_id=2)
         html = self.post(action='associate_subject', turma_id=2, disciplina_id=2).get_data(as_text=True)
-        self.assertIn('ja esta registrada nesta materia', html)
-        self.assertIn('Materia nao encontrada', self.post(action='associate_subject', turma_id=2, disciplina_id=99).get_data(as_text=True))
-        self.assertIn('obrigatorias', self.post(action='associate_subject', turma_id=2).get_data(as_text=True))
+        self.assertIn('já está registrada nesta matéria', html)
+        self.assertIn('Matéria não encontrada', self.post(action='associate_subject', turma_id=2, disciplina_id=99).get_data(as_text=True))
+        self.assertIn('obrigatórias', self.post(action='associate_subject', turma_id=2).get_data(as_text=True))
         with get_session() as db:
             db.add(EstadoTurmaModel(turma_id=2, arquivada=True))
             db.commit()
@@ -103,7 +103,7 @@ class TurmaMateriaTests(TestCase):
     def test_professor_sem_materia_da_turma_e_recusado(self):
         self.post(action='associate_subject', turma_id=2, disciplina_id=2)  # o professor 2 só leciona Matemática
         html = self.post(action='associate_teacher', professor_id=2, turma_id=2).get_data(as_text=True)
-        self.assertIn('nao leciona nenhuma materia desta turma', html)
+        self.assertIn('não leciona nenhuma matéria desta turma', html)
         with get_session() as db:
             self.assertIsNone(db.query(ProfessorTurmaModel).filter_by(professor_id=2, turma_id=2).first())
         self.assertEqual(self.materias(), [2])
@@ -132,7 +132,7 @@ class TurmaMateriaTests(TestCase):
             db.add(AvaliacaoModel(turma_disciplina_id=vinculo.id, periodo_id=periodo.id, titulo='Prova', peso=1))
             db.commit()
         html = self.post(action='remove_subject', turma_id=2, disciplina_id=2).get_data(as_text=True)
-        self.assertIn('nao pode ser retirada', html)
+        self.assertIn('não pode ser retirada', html)
         self.assertEqual(self.materias(), [2])
         self.assertEqual(self.matriculas(), [(1, 2), (2, 2)])
 

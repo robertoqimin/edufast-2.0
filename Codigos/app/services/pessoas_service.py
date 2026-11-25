@@ -79,13 +79,13 @@ def update_student_data(aluno_id, data, files=None, *, session_factory=get_sessi
         aluno = db.get(AlunoModel, aluno_id)
         if not aluno:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Aluno nao encontrado"}, 404
+            return {"erro": "Aluno não encontrado"}, 404
 
         version_check(aluno, data)
         usuario = db.get(UsuarioModel, aluno.usuario_id)
         if not usuario:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Usuario do aluno nao encontrado"}, 404
+            return {"erro": "Usuário do aluno não encontrado"}, 404
 
         nome = (data.get("nome") or "").strip()
         email = (data.get("email") or "").strip()
@@ -93,7 +93,7 @@ def update_student_data(aluno_id, data, files=None, *, session_factory=get_sessi
 
         if not nome or not email or not matricula:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Nome, e-mail e matricula sao obrigatorios"}, 400
+            return {"erro": "Nome, e-mail e matrícula são obrigatórios"}, 400
 
         foto_antiga = aluno.foto_perfil
         aluno.nome = nome[:120]
@@ -117,7 +117,7 @@ def update_student_data(aluno_id, data, files=None, *, session_factory=get_sessi
     except IntegrityError:
         db.rollback()
         _remove_saved_file(foto_perfil)
-        return {"erro": "E-mail, CPF ou matricula ja cadastrados"}, 409
+        return {"erro": "E-mail, CPF ou matrícula já cadastrados"}, 409
     except Exception:
         db.rollback()
         _remove_saved_file(foto_perfil)
@@ -135,13 +135,13 @@ def update_professor_data(professor_id, data, files=None, *, session_factory=get
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Professor nao encontrado"}, 404
+            return {"erro": "Professor não encontrado"}, 404
 
         version_check(professor, data)
         usuario = db.get(UsuarioModel, professor.usuario_id)
         if not usuario:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Usuario do professor nao encontrado"}, 404
+            return {"erro": "Usuário do professor não encontrado"}, 404
 
         nome = (data.get("nome") or "").strip()
         email = (data.get("email") or "").strip()
@@ -149,7 +149,7 @@ def update_professor_data(professor_id, data, files=None, *, session_factory=get
 
         if not nome or not email or not cpf:
             _remove_saved_file(foto_perfil)
-            return {"erro": "Nome, e-mail e CPF sao obrigatorios"}, 400
+            return {"erro": "Nome, e-mail e CPF são obrigatórios"}, 400
 
         foto_antiga = professor.foto_perfil
         professor.nome = nome[:120]
@@ -178,7 +178,7 @@ def update_professor_data(professor_id, data, files=None, *, session_factory=get
     except IntegrityError:
         db.rollback()
         _remove_saved_file(foto_perfil)
-        return {"erro": "E-mail ou CPF ja cadastrados"}, 409
+        return {"erro": "E-mail ou CPF já cadastrados"}, 409
     except Exception:
         db.rollback()
         _remove_saved_file(foto_perfil)

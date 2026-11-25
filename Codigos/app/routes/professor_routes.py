@@ -1,4 +1,5 @@
-from flask import Blueprint, abort, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, session, url_for
+from app.views.respostas import resposta_erro
 
 from app.controllers.professor_controller import (
     get_teacher_area_data,
@@ -25,7 +26,7 @@ def dashboard():
 def salvar_nota():
     """Aposentada na B1: notas são lançadas no diário da avaliação, com aprovação."""
     teacher_required()
-    return jsonify({"erro": "Notas agora sao lancadas no diario da avaliacao.",
+    return jsonify({"erro": "Notas agora são lançadas no diário da avaliação.",
                     "destino": url_for("academico.painel")}), 410
 
 
@@ -34,9 +35,10 @@ def lancar_atividade():
     identity = teacher_required()
     response, status = launch_activity(identity.id, request.form, request.files)
     if 200 <= status < 300:
+        flash(response.get("mensagem") or "Enviado.", "success")
         return redirect(url_for("professor.dashboard"))
 
-    return jsonify(response), status
+    return resposta_erro(response, status)
 
 
 @professor_bp.route("/professor/documentos/upload", methods=["POST"])
@@ -48,6 +50,7 @@ def upload_documento_professor():
         request.files,
     )
     if 200 <= status < 300:
+        flash(response.get("mensagem") or "Enviado.", "success")
         return redirect(url_for("professor.dashboard"))
 
-    return jsonify(response), status
+    return resposta_erro(response, status)

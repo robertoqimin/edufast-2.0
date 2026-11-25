@@ -21,19 +21,19 @@ from app.services.senha_service import problema_senha
 PROFILE_PHOTO_EXTENSIONS = {"jpg", "jpeg", "png"}
 # Hash ficticio: e-mail inexistente passa pela mesma verificacao (mesmo tempo de resposta).
 _HASH_FICTICIO = generate_password_hash("conta-inexistente-nunca-usada")
-CREDENCIAIS_INVALIDAS = {"erro": "E-mail ou senha invalidos"}
+CREDENCIAIS_INVALIDAS = {"erro": "E-mail ou senha inválidos"}
 MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024
 
 
 def login_usuario(data):
     if not data:
-        return {"erro": "Dados nao informados"}, 400
+        return {"erro": "Dados não informados"}, 400
 
     email = data.get("email")
     senha = data.get("senha")
 
     if not email or not senha or not isinstance(email, str) or not isinstance(senha, str):
-        return {"erro": "E-mail e senha sao obrigatorios"}, 400
+        return {"erro": "E-mail e senha são obrigatórios"}, 400
     email = normalizar_email(email)
 
     session = get_session()
@@ -51,7 +51,7 @@ def login_usuario(data):
             return CREDENCIAIS_INVALIDAS, 401
         # Senha correta: so entao o estado da conta e revelado (pendente/inativa).
         if user.estado != "ativo":
-            resposta = ({"erro": "Cadastro pendente de aprovacao ou acesso inativo"}, 403)
+            resposta = ({"erro": "Cadastro pendente de aprovação ou acesso inativo"}, 403)
         else:
             role = normalize_role(user.tipo)
             resposta = ({
@@ -83,7 +83,7 @@ def _parse_date(value):
 
 def cadastrar_usuario(data, files=None, *, aprovado=False):
     if not data:
-        return {"erro": "Dados nao informados"}, 400
+        return {"erro": "Dados não informados"}, 400
 
     tipo = normalize_role(data.get("tipo") or data.get("role"))
     email = data.get("email")
@@ -91,10 +91,10 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
     nome = data.get("nome")
 
     if tipo not in {"professor", "aluno"}:
-        return {"erro": "Tipo de usuario deve ser professor ou aluno"}, 400
+        return {"erro": "Tipo de usuário deve ser professor ou aluno"}, 400
 
     if not email or not senha or not nome:
-        return {"erro": "E-mail, senha e nome sao obrigatorios"}, 400
+        return {"erro": "E-mail, senha e nome são obrigatórios"}, 400
 
     erro_senha = problema_senha(senha)
     if erro_senha:
@@ -112,7 +112,7 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
     try:
         if session.query(UsuarioModel).filter(UsuarioModel.email == normalizar_email(email)).first():
             _remove_saved_file(foto_perfil)
-            return {"erro": "E-mail ja cadastrado"}, 409
+            return {"erro": "E-mail já cadastrado"}, 409
 
         usuario = UsuarioModel(
             email=email,
@@ -130,7 +130,7 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
             if not cpf:
                 session.rollback()
                 _remove_saved_file(foto_perfil)
-                return {"erro": "CPF e obrigatorio para professor"}, 400
+                return {"erro": "CPF é obrigatório para professor"}, 400
 
             session.add(
                 ProfessorModel(
@@ -153,7 +153,7 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
             if not matricula:
                 session.rollback()
                 _remove_saved_file(foto_perfil)
-                return {"erro": "Matricula e obrigatoria para aluno"}, 400
+                return {"erro": "Matrícula é obrigatória para aluno"}, 400
 
             session.add(
                 AlunoModel(
@@ -188,7 +188,7 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
     except IntegrityError:
         session.rollback()
         _remove_saved_file(foto_perfil)
-        return {"erro": "Dados duplicados: verifique CPF, matricula ou e-mail"}, 409
+        return {"erro": "Dados duplicados: verifique CPF, matrícula ou e-mail"}, 409
     except Exception:
         session.rollback()
         _remove_saved_file(foto_perfil)
@@ -202,7 +202,7 @@ def buscar_alunos(termo):
     from app.repositories.pessoas_repository import search_students
     identity = current_identity()
     if identity.papel not in {"professor", "admin", "super_admin"}:
-        return {"erro": "Acesso nao autorizado"}, 403
+        return {"erro": "Acesso não autorizado"}, 403
     termo = (termo or "").strip()
     if not termo:
         return {"erro": "Informe um termo de busca"}, 400

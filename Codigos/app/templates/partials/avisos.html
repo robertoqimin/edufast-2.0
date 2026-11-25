@@ -1,0 +1,2 @@
+{# U1: avisos da ação anterior, com estilo de erro ou de sucesso. Usado no layout padrão e nas telas antigas. #}
+{% for categoria, aviso in get_flashed_messages(with_categories=true) %}<div class="notice {{ 'notice-error' if categoria == 'error' else 'notice-success' }}" role="{{ 'alert' if categoria == 'error' else 'status' }}">{{ aviso }}</div>{% endfor %}

@@ -69,15 +69,15 @@ def criar_disciplina(data, *, session_factory=get_session):
     carga_horaria_raw = (data.get("carga_horaria") or "").strip()
 
     if not nome or not codigo or not carga_horaria_raw:
-        return {"erro": "Nome, codigo e carga horaria sao obrigatorios"}, 400
+        return {"erro": "Nome, código e carga horária são obrigatórios"}, 400
 
     try:
         carga_horaria = int(carga_horaria_raw)
     except ValueError:
-        return {"erro": "Carga horaria deve ser um numero inteiro"}, 400
+        return {"erro": "Carga horária deve ser um número inteiro"}, 400
 
     if carga_horaria < 0:
-        return {"erro": "Carga horaria nao pode ser negativa"}, 400
+        return {"erro": "Carga horária não pode ser negativa"}, 400
 
     db = session_factory()
     try:
@@ -91,7 +91,7 @@ def criar_disciplina(data, *, session_factory=get_session):
         return {"id": disciplina.id}, 201
     except IntegrityError:
         db.rollback()
-        return {"erro": "Codigo de disciplina ja cadastrado"}, 409
+        return {"erro": "Código de disciplina já cadastrado"}, 409
     finally:
         db.close()
 
@@ -100,14 +100,14 @@ def associar_professor_disciplina(data, *, session_factory=get_session):
     disciplina_id = data.get("disciplina_id", type=int)
 
     if not professor_id or not disciplina_id:
-        return {"erro": "Professor e disciplina sao obrigatorios"}, 400
+        return {"erro": "Professor e disciplina são obrigatórios"}, 400
 
     db = session_factory()
     try:
         if not db.get(ProfessorModel, professor_id):
-            return {"erro": "Professor nao encontrado"}, 404
+            return {"erro": "Professor não encontrado"}, 404
         if not db.get(DisciplinaModel, disciplina_id):
-            return {"erro": "Disciplina nao encontrada"}, 404
+            return {"erro": "Disciplina não encontrada"}, 404
 
         db.add(
             ProfessorDisciplinaModel(
@@ -119,7 +119,7 @@ def associar_professor_disciplina(data, *, session_factory=get_session):
         return {"mensagem": "Professor associado a disciplina"}, 201
     except IntegrityError:
         db.rollback()
-        return {"erro": "Este professor ja esta associado a esta disciplina"}, 409
+        return {"erro": "Este professor já está associado a esta disciplina"}, 409
     finally:
         db.close()
 
@@ -130,15 +130,15 @@ def criar_turma(data, *, session_factory=get_session):
     turno = (data.get("turno") or "").strip()
 
     if not nome or not codigo or not ano_letivo_raw:
-        return {"erro": "Nome, codigo e ano letivo sao obrigatorios"}, 400
+        return {"erro": "Nome, código e ano letivo são obrigatórios"}, 400
 
     try:
         ano_letivo = int(ano_letivo_raw)
     except ValueError:
-        return {"erro": "Ano letivo deve ser um numero inteiro"}, 400
+        return {"erro": "Ano letivo deve ser um número inteiro"}, 400
 
     if ano_letivo < 2000:
-        return {"erro": "Ano letivo invalido"}, 400
+        return {"erro": "Ano letivo inválido"}, 400
 
     db = session_factory()
     try:
@@ -153,7 +153,7 @@ def criar_turma(data, *, session_factory=get_session):
         return {"id": turma.id}, 201
     except IntegrityError:
         db.rollback()
-        return {"erro": "Codigo de turma ja cadastrado"}, 409
+        return {"erro": "Código de turma já cadastrado"}, 409
     finally:
         db.close()
 
@@ -162,14 +162,14 @@ def associar_aluno_turma(data, *, session_factory=get_session):
     turma_id = data.get("turma_id", type=int)
 
     if not aluno_id or not turma_id:
-        return {"erro": "Aluno e turma sao obrigatorios"}, 400
+        return {"erro": "Aluno e turma são obrigatórios"}, 400
 
     db = session_factory()
     try:
         if not db.get(AlunoModel, aluno_id):
-            return {"erro": "Aluno nao encontrado"}, 404
+            return {"erro": "Aluno não encontrado"}, 404
         if not db.get(TurmaModel, turma_id):
-            return {"erro": "Turma nao encontrada"}, 404
+            return {"erro": "Turma não encontrada"}, 404
 
         db.add(AlunoTurmaModel(aluno_id=aluno_id, turma_id=turma_id))
         db.flush()
@@ -179,7 +179,7 @@ def associar_aluno_turma(data, *, session_factory=get_session):
         return {"mensagem": "Aluno associado a turma"}, 201
     except IntegrityError:
         db.rollback()
-        return {"erro": "Este aluno ja esta associado a esta turma"}, 409
+        return {"erro": "Este aluno já está associado a esta turma"}, 409
     finally:
         db.close()
 
@@ -188,15 +188,15 @@ def associar_professor_turma(data, *, session_factory=get_session):
     turma_id = data.get("turma_id", type=int)
 
     if not professor_id or not turma_id:
-        return {"erro": "Professor e turma sao obrigatorios"}, 400
+        return {"erro": "Professor e turma são obrigatórios"}, 400
 
     db = session_factory()
     try:
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
-            return {"erro": "Professor nao encontrado"}, 404
+            return {"erro": "Professor não encontrado"}, 404
         if not db.get(TurmaModel, turma_id):
-            return {"erro": "Turma nao encontrada"}, 404
+            return {"erro": "Turma não encontrada"}, 404
 
         disciplinas_professor = (
             db.query(ProfessorDisciplinaModel)
@@ -205,14 +205,14 @@ def associar_professor_turma(data, *, session_factory=get_session):
             .all()
         )
         if not disciplinas_professor:
-            return {"erro": "Este professor nao possui disciplinas associadas"}, 400
+            return {"erro": "Este professor não possui disciplinas associadas"}, 400
 
         # Turma com matérias registradas: o professor só leciona as que ela já tem, sem trazer
         # outras matérias dele. Turma ainda sem matérias mantém o fluxo antigo e recebe as dele.
         da_turma = {d for d, in db.query(TurmaDisciplinaModel.disciplina_id).filter_by(turma_id=turma_id)}
         do_professor = {vinculo.disciplina_id for vinculo in disciplinas_professor}
         if da_turma and not da_turma & do_professor:
-            return {"erro": "Este professor nao leciona nenhuma materia desta turma. "
+            return {"erro": "Este professor não leciona nenhuma matéria desta turma. "
                             "Registre antes a turma na materia dele."}, 400
 
         db.add(ProfessorTurmaModel(professor_id=professor_id, turma_id=turma_id))
@@ -225,7 +225,7 @@ def associar_professor_turma(data, *, session_factory=get_session):
         return {"mensagem": "Professor associado a turma"}, 201
     except IntegrityError:
         db.rollback()
-        return {"erro": "Este professor ja esta associado a esta turma"}, 409
+        return {"erro": "Este professor já está associado a esta turma"}, 409
     finally:
         db.close()
 
@@ -236,24 +236,24 @@ def registrar_turma_disciplina(data, *, session_factory=get_session):
     disciplina_id = data.get("disciplina_id", type=int)
 
     if not turma_id or not disciplina_id:
-        return {"erro": "Turma e materia sao obrigatorias"}, 400
+        return {"erro": "Turma e matéria são obrigatórias"}, 400
 
     from app.services.cursos import turma_ativa
     from app.services.matriculas import registrar_disciplina
     db = session_factory()
     try:
         if not db.get(TurmaModel, turma_id):
-            return {"erro": "Turma nao encontrada"}, 404
+            return {"erro": "Turma não encontrada"}, 404
         if not db.get(DisciplinaModel, disciplina_id):
-            return {"erro": "Materia nao encontrada"}, 404
+            return {"erro": "Matéria não encontrada"}, 404
         if not turma_ativa(db, turma_id):
-            return {"erro": "Turma arquivada: nao recebe novas materias"}, 409
+            return {"erro": "Turma arquivada: não recebe novas matérias"}, 409
         if db.query(TurmaDisciplinaModel.id).filter_by(turma_id=turma_id, disciplina_id=disciplina_id).first():
-            return {"erro": "Esta turma ja esta registrada nesta materia"}, 409
+            return {"erro": "Esta turma já está registrada nesta matéria"}, 409
 
         registrar_disciplina(db, turma_id, disciplina_id)
         db.commit()
-        return {"mensagem": "Turma registrada na materia"}, 201
+        return {"mensagem": "Turma registrada na matéria"}, 201
     finally:
         db.close()
 
@@ -264,7 +264,7 @@ def retirar_turma_disciplina(data, *, session_factory=get_session):
     disciplina_id = data.get("disciplina_id", type=int)
 
     if not turma_id or not disciplina_id:
-        return {"erro": "Turma e materia sao obrigatorias"}, 400
+        return {"erro": "Turma e matéria são obrigatórias"}, 400
 
     from app.services.matriculas import historico_da_disciplina, retirar_disciplina
     db = session_factory()
@@ -273,13 +273,13 @@ def retirar_turma_disciplina(data, *, session_factory=get_session):
                    .filter_by(turma_id=turma_id, disciplina_id=disciplina_id)
                    .with_for_update().first())
         if not vinculo:
-            return {"erro": "Esta turma nao esta registrada nesta materia"}, 404
+            return {"erro": "Esta turma não está registrada nesta matéria"}, 404
         if historico_da_disciplina(db, vinculo.id):
-            return {"erro": "A materia ja tem notas, chamadas, materiais, cursos ou professor atribuido "
-                            "nesta turma e nao pode ser retirada. O historico fica preservado."}, 409
+            return {"erro": "A matéria já tem notas, chamadas, materiais, cursos ou professor atribuído "
+                            "nesta turma e não pode ser retirada. O histórico fica preservado."}, 409
 
         retirar_disciplina(db, vinculo)
         db.commit()
-        return {"mensagem": "Materia retirada da turma"}, 201
+        return {"mensagem": "Matéria retirada da turma"}, 201
     finally:
         db.close()

@@ -108,3 +108,24 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14
+
+  acessibilidade:
+    name: Auditar acessibilidade (WCAG 2.1 AA) na demonstração completa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Instalar Playwright e axe-core (versões fixas)
+        run: |
+          npm install --no-audit --no-fund --prefix .ci-results/demo-video playwright@1.49.1 axe-core@4.10.2
+          npx --prefix .ci-results/demo-video playwright install --with-deps chromium
+      - name: Subir a demonstração completa (sem o painel Supremo)
+        run: node infra/demo-completa.cjs start --sem-supremo
+      - name: Auditar 64 páginas; qualquer violação reprova
+        env:
+          AUDIT_CHANNEL: chromium
+        run: node Codigos/tests/auditar_acessibilidade.cjs

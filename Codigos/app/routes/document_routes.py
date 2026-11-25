@@ -1,5 +1,6 @@
 import os
 from uuid import uuid4
+from app.views.respostas import resposta_erro
 
 from flask import Blueprint, jsonify, redirect, request, send_from_directory, session
 from werkzeug.utils import secure_filename
@@ -35,10 +36,10 @@ def upload_arquivo():
     is_admin = identity.admin
     jwt_payload = {"sub": str(identity.id), "role": identity.papel}
     if not is_admin and identity.papel != "professor":
-        raise MutationConflict("Acesso nao autorizado", 403)
+        raise MutationConflict("Acesso não autorizado", 403)
 
     if "arquivo" not in request.files:
-        return jsonify({"erro": "Arquivo nao enviado"}), 400
+        return jsonify({"erro": "Arquivo não enviado"}), 400
 
     response, status = upload_documento(
         request.form,
@@ -51,6 +52,8 @@ def upload_arquivo():
     if 200 <= status < 300 and redirect_to and redirect_to.startswith("/") and not redirect_to.startswith("//") and "\\" not in redirect_to:
         return redirect(redirect_to)
 
+    if status >= 400:
+        return resposta_erro(response, status)
     return jsonify(response), status
 
 
@@ -62,10 +65,10 @@ def download_arquivo(filename):
 def _serve_authorized_file(filename, *, profile=False):
     identity = current_identity()
     if filename != secure_filename(filename):
-        raise MutationConflict("Arquivo nao encontrado", 404)
+        raise MutationConflict("Arquivo não encontrado", 404)
     with get_session() as db:
         if not allowed_file(db, identity, filename, profile=profile):
-            raise MutationConflict("Arquivo nao encontrado", 404)
+            raise MutationConflict("Arquivo não encontrado", 404)
     response = send_from_directory(get_upload_folder(), filename, as_attachment=not profile)
     response.headers["Cache-Control"] = "private, no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -79,15 +82,15 @@ def upload_arquivo_professor(professor_id):
         return jsonify({"erro": "Acesso permitido apenas para administradores"}), 403
 
     if "arquivo" not in request.files:
-        return jsonify({"erro": "Arquivo nao enviado"}), 400
+        return jsonify({"erro": "Arquivo não enviado"}), 400
 
     arquivo = request.files["arquivo"]
     if not arquivo.filename:
-        return jsonify({"erro": "Nome do arquivo nao informado"}), 400
+        return jsonify({"erro": "Nome do arquivo não informado"}), 400
 
     original_filename = secure_filename(arquivo.filename)
     if not original_filename:
-        return jsonify({"erro": "Nome do arquivo invalido"}), 400
+        return jsonify({"erro": "Nome do arquivo inválido"}), 400
 
     upload_folder = get_upload_folder()
     os.makedirs(upload_folder, exist_ok=True)
@@ -105,7 +108,7 @@ def upload_arquivo_professor(professor_id):
             return jsonify(response), status
         professor = db.get(ProfessorModel, professor_id)
         if not professor:
-            return jsonify({"erro": "Professor nao encontrado"}), 404
+            return jsonify({"erro": "Professor não encontrado"}), 404
 
         disciplina = _get_or_create_disciplina_geral(db)
         arquivo.save(saved_path)

@@ -24,7 +24,7 @@ def _get_or_create_disciplina(session_db, disciplina_id=None):
         if disciplina:
             return disciplina, None
 
-        return None, ({"erro": "Disciplina nao encontrada"}, 404)
+        return None, ({"erro": "Disciplina não encontrada"}, 404)
 
     disciplina = insert_if_missing(session_db, DisciplinaModel,
                                    codigo="GERAL", defaults={"nome": "Geral", "carga_horaria": 0})
@@ -40,15 +40,15 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
     is_admin = True
     current_user = {"sub": str(identity.id)}
     if "arquivo" not in files:
-        return {"erro": "Arquivo nao enviado"}, 400
+        return {"erro": "Arquivo não enviado"}, 400
 
     aluno_id = aluno_id_override or form.get("aluno_id", type=int)
     if not aluno_id:
-        return {"erro": "aluno_id e obrigatorio"}, 400
+        return {"erro": "Selecione o aluno"}, 400
 
     arquivo = files["arquivo"]
     if not arquivo.filename:
-        return {"erro": "Nome do arquivo nao informado"}, 400
+        return {"erro": "Nome do arquivo não informado"}, 400
 
     session_db = get_session()
     upload_folder = get_upload_folder()
@@ -63,7 +63,7 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
             return replay
         aluno = session_db.get(AlunoModel, aluno_id)
         if not aluno:
-            return {"erro": "Aluno nao encontrado"}, 404
+            return {"erro": "Aluno não encontrado"}, 404
 
         professor = None
         if not is_admin and current_user:
@@ -73,7 +73,7 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
                 .first()
             )
             if not professor:
-                return {"erro": "Professor nao encontrado para o usuario autenticado"}, 403
+                return {"erro": "Professor não encontrado para o usuário autenticado"}, 403
 
         disciplina, error = _get_or_create_disciplina(
             session_db,
@@ -84,7 +84,7 @@ def upload_documento(form, files, current_user=None, is_admin=False, aluno_id_ov
 
         original_filename = secure_filename(arquivo.filename)
         if not original_filename:
-            return {"erro": "Nome do arquivo invalido"}, 400
+            return {"erro": "Nome do arquivo inválido"}, 400
 
         filename = f"{uuid4().hex}_{original_filename}"
         saved_path = os.path.join(upload_folder, filename)
@@ -127,7 +127,7 @@ def upload_requested_document_for_owner(owner_column, owner_id, request_id, file
     arquivo = files.get("arquivo")
     original = secure_filename(arquivo.filename or "") if arquivo else ""
     if not request_id or not original:
-        return {"erro": "Solicitacao e arquivo sao obrigatorios"}, 400
+        return {"erro": "Solicitação e arquivo são obrigatórios"}, 400
     db = get_session()
     saved_path = None
     committed = False
@@ -139,7 +139,7 @@ def upload_requested_document_for_owner(owner_column, owner_id, request_id, file
         ).values(status="enviado", completed_at=datetime.now()))
         if result.rowcount != 1:
             exists = db.query(SolicitacaoDocumentoModel.id).filter(*criteria).first()
-            return {"erro": "Solicitacao ja respondida" if exists else "Solicitacao nao encontrada"}, 409 if exists else 404
+            return {"erro": "Solicitação já respondida" if exists else "Solicitacao nao encontrada"}, 409 if exists else 404
         solicitacao = db.get(SolicitacaoDocumentoModel, request_id)
         disciplina, _ = _get_or_create_disciplina(db)
         folder = get_upload_folder()

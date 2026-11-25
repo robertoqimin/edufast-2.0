@@ -44,9 +44,9 @@
 .login-error { margin: 0; padding: 11px 13px; border: 1px solid #f8717130; border-radius: 8px; background: #f871710a; color: #fca5a5; font-size: 11px; }
 .login-card > .login-help { text-align: center; font-size: 10px; color: #677f9b; margin-top: 25px; line-height: 1.9; }
 .login-access-footer { width: 100%; text-align: center; margin-top: 55px; }
-.login-access-footer > span { display: inline-flex; align-items: center; gap: 6px; font-size: 9px; color: #6f879f; }
+.login-access-footer > span { display: inline-flex; align-items: center; gap: 6px; font-size: 9px; color: var(--muted); }
 .login-access-footer .icon { width: 12px; height: 12px; }
-.login-access-footer small { display: block; color: #49627d; font-size: 9px; margin-top: 13px; }
+.login-access-footer small { display: block; color: var(--muted); font-size: 9px; margin-top: 13px; }
 @media (min-width: 1600px) { .login-story { padding-left: 10vw; padding-right: 6vw; } .school-illustration { margin-top: 35px; margin-bottom: 25px; } }
 @media (max-width: 1050px) { .login-story { padding: 35px; } .login-intro h1 { font-size: 47px; } .login-features { gap: 12px; } .school-illustration { width: 290px; } }
 @media (max-width: 760px) { .login-layout { grid-template-columns: 1fr; } .login-story { padding: 24px; border-right: 0; border-bottom: 1px solid var(--line); } .login-story .brand { margin: 0; font-size: 22px; } .login-story .brand-mark { width: 37px; height: 37px; } .login-intro, .school-illustration, .login-features, .login-story-footer { display: none; } .login-access { padding: 40px 24px 22px; min-height: calc(100dvh - 91px); } .login-card { padding-top: 0; } .login-card h2 { font-size: 31px; } .login-access-footer { margin-top: 40px; } }

@@ -70,7 +70,7 @@
                 <div class="access-preview">{{ icon('shield') }}<p data-role-preview>O aluno pode consultar suas disciplinas, notas e mensagens.</p></div>
                 <div class="form-section-heading"><span>01</span><h3>Dados de acesso</h3></div>
                 <div class="form-grid">
-                    <label class="field field-full">Nome completo <input name="nome" required maxlength="120" placeholder="Como a pessoa se chama?" autocomplete="name" value="{{ request.form.get('nome','') if error else '' }}"></label>
+                    <label class="field field-full" data-academic="nome">Nome completo <input name="nome" required maxlength="120" placeholder="Como a pessoa se chama?" autocomplete="name" value="{{ request.form.get('nome','') if error else '' }}"></label>
                     <label class="field">E-mail <input name="email" type="email" required maxlength="120" placeholder="nome@escola.com.br" autocomplete="email" value="{{ request.form.get('email','') if error else '' }}"></label>
                     <label class="field">Senha de acesso <span class="password-field"><input name="senha" type="password" required minlength="12" autocomplete="new-password" placeholder="Pelo menos 12 caracteres, com um caractere especial"><button type="button" class="icon-button" data-toggle-password aria-label="Mostrar senha" aria-pressed="false">{{ icon('eye') }}</button></span><small>Compartilhe a senha com o novo usuário.</small></label>
                 </div>

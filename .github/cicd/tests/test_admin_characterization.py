@@ -60,9 +60,9 @@ class AdminCharacterization(TestCase):
     def test_validation_errors_are_preserved(self):
         self.assertEqual(admin.criar_disciplina(MultiDict())[1], 400)
         self.assertEqual(admin.criar_disciplina(MultiDict({'nome': 'X', 'codigo': 'X', 'carga_horaria': '-1'})),
-                         ({'erro': 'Carga horaria nao pode ser negativa'}, 400))
+                         ({'erro': 'Carga horária não pode ser negativa'}, 400))
         self.assertEqual(admin.criar_turma(MultiDict({'nome': 'X', 'codigo': 'X', 'ano_letivo': '1999'})),
-                         ({'erro': 'Ano letivo invalido'}, 400))
+                         ({'erro': 'Ano letivo inválido'}, 400))
         self.assertEqual(admin.associar_aluno_turma(MultiDict({'aluno_id': '999', 'turma_id': '1'}))[1], 404)
 
     def test_request_and_communication_shapes(self):

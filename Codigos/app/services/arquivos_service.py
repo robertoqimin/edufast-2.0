@@ -17,7 +17,7 @@ def _save_profile_photo(files):
 
     original_filename = secure_filename(foto.filename)
     if not original_filename or "." not in original_filename:
-        return None, ({"erro": "Nome da foto invalido"}, 400)
+        return None, ({"erro": "Nome da foto inválido"}, 400)
 
     extension = original_filename.rsplit(".", 1)[1].lower()
     if extension not in PROFILE_PHOTO_EXTENSIONS:
@@ -27,7 +27,7 @@ def _save_profile_photo(files):
     file_size = foto.stream.tell()
     foto.stream.seek(0)
     if file_size > MAX_PROFILE_PHOTO_BYTES:
-        return None, ({"erro": "A foto deve ter no maximo 2MB"}, 400)
+        return None, ({"erro": "A foto deve ter no máximo 2MB"}, 400)
 
     upload_folder = caminho_uploads(current_app.config["UPLOAD_FOLDER"])
     os.makedirs(upload_folder, exist_ok=True)

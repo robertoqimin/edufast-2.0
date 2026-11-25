@@ -47,13 +47,14 @@ def create_app():
         if not request.is_json and request.accept_mimetypes.best_match(['application/json', 'text/html']) == 'text/html':
             if error.status == 401:
                 session.clear()
-            return render_template('erro.html', codigo=error.status,
-                titulo='Nao foi possivel concluir esta acao', mensagem=error.message), error.status
+            from app.views.respostas import pagina_erro
+            return pagina_erro(error.message, error.status)
         return jsonify(erro=error.message), error.status
 
     @app.errorhandler(StaleDataError)
     def stale_data(error):
-        return jsonify(erro="Registro alterado por outro envio; recarregue antes de salvar"), 409
+        from app.views.respostas import resposta_erro
+        return resposta_erro({'erro': 'Registro alterado por outro envio; recarregue antes de salvar.'}, 409)
 
     @app.context_processor
     def submission_context():

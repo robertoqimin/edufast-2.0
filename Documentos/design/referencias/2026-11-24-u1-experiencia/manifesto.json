@@ -1,0 +1,39 @@
+{
+  "base_commit": "docs: traca plano de experiencia do usuario (UX) com linha de base medida",
+  "relatorio": "Documentos/testes/U1_EXPERIENCIA_2026-11-24.md",
+  "data": "2026-11-24",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa (Colégio Horizonte), somente dados fictícios",
+  "capturas": [
+    {
+      "arquivo": "erro-formulario-celular.png",
+      "sha256": "5946cc16a2ee1e8840a1455049e92ac0cd5a8e8fd9a8ad30e68ad53c90da9740",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "erro-formulario-desktop.png",
+      "sha256": "8fba53f15eaae9cc899c7c0ff13d0309b18259b44f2009b653184de6fd18c5d0",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "professor-menu-aba-notas-celular.png",
+      "sha256": "f1172218e39978f89039d4667568566b9b1efd0a2bce2580d3503435ba68162e",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "professor-menu-aba-notas-desktop.png",
+      "sha256": "a3d2c3c9feafba73d0cb8efccc4353467826f77cb832930e030fe514a3ddc188",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "super-novo-admin-celular.png",
+      "sha256": "d6a91a688129e4e10e60f12eda30ea2014f24c4fe81a7c85d437682f0cfde778",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "super-novo-admin-desktop.png",
+      "sha256": "2fc4bd3ebdea253757569e7a4d7304ae10b1e800b30a03bd3f72d0fcceed8fb8",
+      "viewport": "1440x1000"
+    }
+  ]
+}

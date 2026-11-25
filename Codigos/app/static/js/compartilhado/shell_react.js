@@ -93,6 +93,9 @@
     function ativarAba(tabs, panels, abaAtiva, config) {
         tabs.forEach(function (tab) {
             const ativa = tab.dataset[config.chaveAba] === abaAtiva;
+            // U1/O6: o item do menu acompanha a aba aberta (antes ficava preso na primeira).
+            tab.classList.toggle("active", ativa);
+            tab.setAttribute("aria-pressed", String(ativa));
 
             tab.classList.toggle("bg-cyan-500/10", ativa);
             tab.classList.toggle("text-cyan-400", ativa);

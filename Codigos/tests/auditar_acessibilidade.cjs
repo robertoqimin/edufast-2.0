@@ -6,7 +6,9 @@ const fs = require('node:fs');
 const ROOT = path.resolve(__dirname, '..', '..');
 const LOCAL = path.join(ROOT, '.ci-results/demo-video/node_modules');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || path.join(LOCAL, 'playwright'));
-const AXE = fs.readFileSync(require.resolve(path.join(LOCAL, 'axe-core/axe.min.js')), 'utf8');
+const AXE = fs.readFileSync(process.env.AXE_MODULE || path.join(LOCAL, 'axe-core/axe.min.js'), 'utf8');
+// No CI não há Edge: AUDIT_CHANNEL=chromium usa o Chromium do Playwright.
+const CANAL = process.env.AUDIT_CHANNEL === 'chromium' ? {} : {channel: 'msedge'};
 const ESCOLA = 'http://localhost:5095';
 const SENHA = 'Demo-EduFast-2026!';
 const D = 'demo.edufast.test';
@@ -22,7 +24,7 @@ const PERFIS = [
 ];
 
 (async () => {
-  const browser = await chromium.launch({channel: 'msedge', headless: true});
+  const browser = await chromium.launch({...CANAL, headless: true});
   const paginas = [];
   for (const [perfil, email, urls] of PERFIS) {
     for (const [vp, w, h] of [['desktop', 1440, 1000], ['celular', 390, 844]]) {
@@ -58,5 +60,6 @@ const PERFIS = [
   fs.writeFileSync(SAIDA, JSON.stringify({total_paginas: paginas.length, resumo, paginas}, null, 2));
   const semFalha = paginas.filter((p) => !p.violacoes.length).length;
   console.log(`${paginas.length} páginas auditadas (${semFalha} sem violações).`);
+  process.exitCode = resumo.length ? 1 : 0;  // qualquer violação reprova (meta O5: 64/64)
   for (const r of resumo) console.log(`${r.impacto.padEnd(8)} ${r.id.padEnd(28)} ${String(r.paginas).padStart(3)} pág. ${String(r.nos).padStart(4)} elem.  ${r.ajuda}  [ex.: ${r.exemplo.slice(0, 70)}]`);
 })().catch((e) => { console.error(e); process.exitCode = 2; });

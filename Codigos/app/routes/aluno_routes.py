@@ -6,6 +6,7 @@ from app.controllers.aluno_controller import (
     get_aluno_by_user_id,
 )
 from app.routes.guards import aluno_required
+from app.views.respostas import resposta_erro
 
 aluno_bp = Blueprint("aluno", __name__)
 
@@ -36,14 +37,14 @@ def upload_documento_aluno():
     identity = aluno_required()
     aluno = get_aluno_by_user_id(identity.id)
     if not aluno:
-        return jsonify({"erro": "Aluno nao encontrado"}), 404
+        return jsonify({"erro": "Aluno não encontrado"}), 404
 
     solicitacao_id = request.form.get("solicitacao_id", type=int)
     if not solicitacao_id:
-        return jsonify({"erro": "Solicitacao de documento nao informada"}), 400
+        return resposta_erro({"erro": "Selecione a solicitação de documento."}, 400)
 
     response, status = upload_requested_document_for_owner(
         "aluno_id", aluno["id"], solicitacao_id, request.files)
     if 200 <= status < 300:
         return redirect(url_for("aluno.dashboard"))
-    return jsonify(response), status
+    return resposta_erro(response, status)

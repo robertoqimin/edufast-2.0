@@ -43,7 +43,7 @@ def criar_comunicado(data, criado_por=None, *, session_factory=get_session):
     mensagem = (data.get("mensagem") or "").strip()
 
     if not titulo or not mensagem:
-        return {"erro": "Titulo e mensagem sao obrigatorios"}, 400
+        return {"erro": "Título e mensagem são obrigatórios"}, 400
 
     db = session_factory()
     try:

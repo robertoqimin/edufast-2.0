@@ -25,7 +25,7 @@ def load_identity(user_id, claimed_role, version):
     try:
         user_id, version = int(user_id), int(version)
     except (TypeError, ValueError):
-        raise MutationConflict("Autenticacao invalida", 401)
+        raise MutationConflict("Autenticação inválida", 401)
     with get_session() as db:
         user = db.get(UsuarioModel, user_id)
         if (not user or user.estado != "ativo" or user.auth_version != version
@@ -40,17 +40,17 @@ def current_identity(*, required=True):
         from app.auth import decode_token_from_request
         payload, error = decode_token_from_request()
         if error:
-            raise MutationConflict("Autenticacao invalida", 401)
+            raise MutationConflict("Autenticação inválida", 401)
         return load_identity(payload.get("sub"), payload.get("role"), payload.get("ver", 0))
     if session.get("user_id"):
         return load_identity(session.get("user_id"), session.get("user_role"), session.get("auth_version", 0))
     if required:
-        raise MutationConflict("Autenticacao obrigatoria", 401)
+        raise MutationConflict("Autenticação obrigatória", 401)
     return None
 
 
 def require_role(*roles):
     identity = current_identity(required=False)
     if not identity or identity.papel not in roles:
-        raise MutationConflict("Acesso nao autorizado", 403)
+        raise MutationConflict("Acesso não autorizado", 403)
     return identity

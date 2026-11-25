@@ -13,7 +13,7 @@
     <template id="professor-painel-template">
     {% include 'partials/workspace_sidebar.html' %}
 
-    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">
+    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
         <header class="flex justify-between items-center mb-10">
             <div>
                 <h1 class="text-3xl font-bold">Olá, Prof. {{ professor.nome }}!</h1>
@@ -69,15 +69,15 @@
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                         <input type="hidden" name="turma_id" value="{{ turma.id }}">
-                        <select name="disciplina_id" required>
+                        <select name="disciplina_id" required aria-label="Disciplina da atividade">
                             {% for disciplina in turma.disciplinas %}
                             <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
                             {% endfor %}
                         </select>
-                        <input name="titulo" type="text" placeholder="Título da atividade" required>
-                        <input name="data_entrega" type="date">
-                        <input name="arquivo" type="file">
-                        <textarea name="descricao" placeholder="Descrição da atividade"></textarea>
+                        <input name="titulo" type="text" placeholder="Título da atividade" aria-label="Título da atividade" required>
+                        <input name="data_entrega" type="date" aria-label="Data de entrega (opcional)">
+                        <input name="arquivo" type="file" aria-label="Anexo da atividade (opcional)">
+                        <textarea name="descricao" placeholder="Descrição da atividade" aria-label="Descrição da atividade"></textarea>
                         <button>Lançar atividade</button>
                     </form>
                     {% else %}
