@@ -97,3 +97,15 @@ Quando a implementação for aprovada, os contratos passam para a regressão.
 | 2 | Inscrição pelo aluno é imediata ou precisa de aprovação? | Imediata, com a secretaria podendo desfazer. Não há nota nem material envolvido no ato |
 | 3 | Rótulos configuráveis já neste modelo? | Sim (série/semestre; turma/oferta/eletiva) |
 | 4 | Implementar neste ciclo ou no próximo? | Próximo ciclo, depois da C1–C5, como o plano prevê |
+
+## Decisões registradas (24/11/2026)
+
+| # | Decisão do usuário |
+| --- | --- |
+| 1 | **Sim:** o aluno se inscreve sozinho em ofertas que a secretaria marcar como abertas, enquanto houver vaga |
+| 2 | **Vale na hora:** inscrição imediata, e a secretaria pode desfazer |
+| 3 | **Rótulos configuráveis:** série/semestre e turma/oferta/eletiva |
+| 4 | **Próximo ciclo:** a implementação entra depois da frente de venda (C1–C5) |
+
+Modelo aprovado. Na implementação, a proposta 009 passa por revisão final antes de ser
+executada (AGENTS.md), e os 10 contratos entram na regressão.

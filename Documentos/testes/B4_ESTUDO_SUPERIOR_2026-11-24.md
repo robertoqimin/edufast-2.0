@@ -28,7 +28,7 @@ sem mudar regras de acesso.
   contratos não é descoberta pela regressão.
 - **Banco e código:** nenhuma migration executada e nenhum código de produção alterado.
 
-## Pendente
+## Decisões
 
-As 4 decisões do usuário listadas no estudo: inscrição pelo próprio aluno, aprovação ou
-inscrição imediata, rótulos configuráveis e momento da implementação.
+Modelo aprovado em 24/11/2026: o aluno se inscreve sozinho em ofertas abertas, com efeito
+imediato; rótulos configuráveis; implementação no próximo ciclo, depois da frente de venda.
