@@ -211,17 +211,27 @@ async function jornadaAluno() {
   await destacar(page.locator('.leitor-selo').first());
   await legenda('Os materiais abertos estão com "✓ Visto".', 5000);
 
-  await tela('7. Vídeo do YouTube embutido', 'O player só carrega depois do clique, no modo sem cookies do YouTube.');
+  await tela('7. Vídeo do YouTube embutido', 'O aluno entra no material e o vídeo já está na página, pronto para assistir (modo sem cookies do YouTube).');
   await page.goto(B + '/estudos');
   await clicar(page.getByRole('link', {name: /Biologia/}).first(), 1200);
   await clicar(page.getByRole('link', {name: 'Citologia'}), 1200);
   await clicar(page.getByRole('link', {name: 'Vídeo de exemplo do player'}), 1000);
-  await legenda('Antes do clique, nada do YouTube é carregado.', 5000);
-  await clicar(page.getByRole('button', {name: 'Assistir ao vídeo aqui'}), 3000);
+  await destacar(page.locator('.leitor-video'));
+  await legenda('O player já aparece embutido, sem botão extra para carregar.', 5000);
   await page.frameLocator('.course-player iframe').locator('.ytp-large-play-button').click({timeout: 8000}).catch(() => {});
   await legenda('O vídeo toca dentro da plataforma.', 12000);
 
-  await tela('8. Material de aula nos cursos', 'Nos cursos, os materiais de cada aula usam o mesmo leitor.');
+  await tela('8. Aula em vídeo no curso', 'Nos cursos, a aula de vídeo também abre com o player pronto.');
+  await page.goto(B + '/aprendizagem');
+  await clicar(page.getByRole('button', {name: 'Continuar estudando'}).first(), 1500);
+  const aulaVideo = page.locator('.course-index button').filter({hasText: 'Videoaula de exemplo'}).first();
+  if (await aulaVideo.count()) {
+    await clicar(aulaVideo, 1500);
+    if (await page.getByRole('button', {name: 'Abrir aula'}).count()) await clicar(page.getByRole('button', {name: 'Abrir aula'}), 1500);
+    await destacar(page.locator('.leitor-video').first());
+    await legenda('Aula de vídeo: o aluno entra e o vídeo já está lá para assistir.', 9000);
+  }
+  await tela('9. Material de aula nos cursos', 'Nos cursos, os materiais de cada aula usam o mesmo leitor.');
   await page.goto(B + '/aprendizagem');
   await clicar(page.getByRole('button', {name: 'Continuar estudando'}).first(), 1500);
   await clicar(page.getByRole('button', {name: /Leitura de gráficos e pontos/}).first(), 1500);
@@ -236,7 +246,7 @@ async function jornadaAluno() {
 }
 
 async function jornadaProfessora() {
-  await tela('9. A professora vê o mesmo leitor', 'Quem publica confere o material como o aluno vai ver; para docentes não há marcação de visto.');
+  await tela('10. A professora vê o mesmo leitor', 'Quem publica confere o material como o aluno vai ver; para docentes não há marcação de visto.');
   await entrar(`ana.ribeiro@${D}`, 'professora Ana Ribeiro (Matemática)');
   await page.goto(B + '/estudos/conteudos/4');
   await esperarLeitor();
@@ -248,7 +258,7 @@ async function jornadaCelular(browser) {
   const anterior = page;
   page = await ctx.newPage();
   await page.goto(B + '/');
-  await tela('10. No celular', 'Mesma jornada numa tela de 390 × 844: a barra do leitor quebra em duas linhas e nada sai da tela.');
+  await tela('11. No celular', 'Mesma jornada numa tela de 390 × 844: a barra do leitor quebra em duas linhas e nada sai da tela.');
   await entrar(`carla.souza@${D}`, 'aluna Carla Souza (celular)');
   await page.goto(B + '/estudos/conteudos/4');
   await esperarLeitor();

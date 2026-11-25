@@ -1,6 +1,6 @@
-// U2/O7: estudar sem baixar. Leitor de PDF (PDF.js local), imagem ampliável e vídeo do YouTube.
+// U2/O7: estudar sem baixar. Leitor de PDF (PDF.js local) e imagem ampliável (o vídeo do YouTube já vem embutido no HTML).
 // O arquivo vem da mesma rota protegida (?modo=ler) e é desenhado em canvas: nenhuma página é
-// enquadrada e a CSP não muda. Elementos: [data-leitor="pdf|imagem"][data-src], [data-video].
+// enquadrada e a CSP não muda. Elementos: [data-leitor="pdf|imagem"][data-src].
 const PDFJS = new URL('../../vendor/pdfjs/pdf.min.mjs', import.meta.url).href;
 const WORKER = new URL('../../vendor/pdfjs/pdf.worker.min.mjs', import.meta.url).href;
 let biblioteca;
@@ -181,19 +181,4 @@ document.querySelectorAll('[data-leitor]').forEach((host) => {
   const caixa = host.closest('details');
   if (caixa && !caixa.open) caixa.addEventListener('toggle', () => caixa.open && abrir(host));
   else abrir(host);
-});
-
-// Vídeo: carrega o player do YouTube (sem cookies) só depois do clique.
-document.querySelectorAll('[data-load-video]').forEach((button) => {
-  button.addEventListener('click', () => {
-    const host = button.closest('[data-video]');
-    if (!/^[A-Za-z0-9_-]{11}$/.test(host.dataset.video)) return;
-    const frame = document.createElement('iframe');
-    frame.src = 'https://www.youtube-nocookie.com/embed/' + host.dataset.video;
-    frame.title = host.dataset.titulo ? 'Vídeo: ' + host.dataset.titulo : 'Vídeo da aula';
-    frame.allow = 'encrypted-media; picture-in-picture; fullscreen';
-    frame.allowFullscreen = true;
-    frame.referrerPolicy = 'strict-origin-when-cross-origin';
-    host.replaceChildren(frame);
-  });
 });

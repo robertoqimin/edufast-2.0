@@ -1,0 +1,4 @@
+{# U2/O7: vídeo do YouTube já embutido na página (modo sem cookies; única origem liberada em frame-src). #}
+{% macro player(video_id, titulo, lazy=false) -%}
+<div class="course-player leitor-video"><iframe src="https://www.youtube-nocookie.com/embed/{{ video_id }}" title="Vídeo: {{ titulo }}" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"{% if lazy %} loading="lazy"{% endif %}></iframe></div>
+{%- endmacro %}

@@ -20,7 +20,7 @@ def seed(app):
     montar_curso_enem(app,'professor01@teste01.local','admin@teste01.local',disciplina_id=1,turma_disciplina_id=1)
 
 
-def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma_disciplina_id, laboratorio=True):
+def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma_disciplina_id, laboratorio=True, video_exemplo=None):
     """Monta e publica o curso de Matemática para o ENEM pelas rotas reais (também usado pela demo completa)."""
     accounts = {}
     with get_session() as db:
@@ -51,6 +51,10 @@ def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma
         mid = edit(acao='adicionar',tipo='capitulo',titulo=module['titulo'])
         for chapter in module['capitulos']:
             chapter_id = edit(acao='adicionar',tipo='tema',pai_id=mid,titulo=chapter['titulo'])
+            if video_exemplo:  # U2: uma aula em vídeo para mostrar o player embutido
+                edit(acao='adicionar',tipo='aula',pai_id=chapter_id,titulo='Videoaula de exemplo',tipo_aula='video',
+                     video=video_exemplo,descricao='Aula em vídeo: o player já aparece pronto para assistir.')
+                video_exemplo = None
             for lesson in chapter['aulas']:
                 aid = edit(acao='adicionar',tipo='aula',pai_id=chapter_id,titulo=lesson['titulo'],tipo_aula='texto',corpo=lesson['corpo'])
                 if lesson['titulo']=='Leitura de gráficos e pontos':

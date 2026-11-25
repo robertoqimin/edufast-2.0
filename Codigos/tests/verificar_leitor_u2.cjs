@@ -85,8 +85,7 @@ const ok = (cond, msg) => { log.push((cond ? 'OK   ' : 'FALHA') + ' ' + msg); if
     await p.getByRole('link', {name: /Biologia/}).first().click();
     await p.getByRole('link', {name: 'Citologia'}).click();
     await p.getByRole('link', {name: 'Vídeo de exemplo do player'}).click();
-    ok(await p.locator('iframe').count() === 0, `${vp}: vídeo não carrega antes do clique`);
-    await p.getByRole('button', {name: 'Assistir ao vídeo aqui'}).click();
+    ok(await p.locator('.leitor-video iframe').count() === 1, `${vp}: vídeo já embutido ao abrir, sem clique extra`);
     const src = await p.locator('.course-player iframe').getAttribute('src');
     ok(src === 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ', `${vp}: player embutido sem cookies (${src})`);
     await p.waitForTimeout(2500);
@@ -113,6 +112,16 @@ const ok = (cond, msg) => { log.push((cond ? 'OK   ' : 'FALHA') + ' ' + msg); if
     await ctx.request.post(B + '/login', {data: {email: `carla.souza@${D}`, senha: S}, headers: {Origin: B}});
     await p.goto(B + '/aprendizagem');
     await p.getByRole('button', {name: 'Continuar estudando'}).first().click();
+    // Aula em vídeo: o player já está na página ao entrar.
+    await p.getByRole('button', {name: /Videoaula de exemplo/}).first().click();
+    await p.waitForLoadState('load');
+    if (await p.getByRole('button', {name: 'Abrir aula'}).count()) await p.getByRole('button', {name: 'Abrir aula'}).click();
+    await p.waitForLoadState('load');
+    const player = await p.locator('.course-reading .leitor-video iframe').getAttribute('src').catch(() => null);
+    ok(player === 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ', `${vp}: aula em vídeo já abre com o player (${player})`);
+    await p.waitForTimeout(2500);
+    await p.locator('.course-reading .leitor-video').scrollIntoViewIfNeeded();
+    await p.screenshot({path: path.join(OUT, `curso-aula-video-${vp}.png`)});
     await p.getByRole('button', {name: /Leitura de gráficos e pontos/}).first().click();
     await p.waitForLoadState('load');
     if (await p.getByRole('button', {name: 'Abrir aula'}).count()) await p.getByRole('button', {name: 'Abrir aula'}).click();

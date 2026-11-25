@@ -271,7 +271,8 @@ def main():
         with get_session() as db:
             matematica = db.query(DisciplinaModel.id).filter_by(nome='Matemática').one()[0]
         montar_curso_enem(app, email('ana.ribeiro'), email('secretaria'), disciplina_id=matematica,
-                          turma_disciplina_id=pares['Matemática'], laboratorio=False)
+                          turma_disciplina_id=pares['Matemática'], laboratorio=False,
+                          video_exemplo='https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     print(json.dumps({'escola': ESCOLA, 'senha': SENHA, 'contas': contas()}, ensure_ascii=False), flush=True)
 
 

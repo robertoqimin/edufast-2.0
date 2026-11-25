@@ -68,12 +68,12 @@ class LeitorEstudoTests(TestCase):
         self.assertIn("frame-ancestors 'none'", csp)
         self.assertIn("object-src 'none'", csp)
 
-    def test_video_do_youtube_embutido_sob_clique(self):
+    def test_video_do_youtube_ja_embutido_na_pagina(self):
         rid = self.material(tipo='link', titulo='Vídeo', link='https://www.youtube.com/watch?v=aqz-KE-bpKQ')
         html = self.client(2).get(f'/estudos/conteudos/{rid}').get_data(as_text=True)
-        self.assertIn('data-video="aqz-KE-bpKQ"', html)
-        self.assertIn('Assistir ao vídeo aqui', html)
-        self.assertNotIn('<iframe', html)  # só carrega depois do clique
+        self.assertIn('<iframe src="https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ" title="Vídeo: Vídeo"', html)
+        self.assertNotIn('data-load-video', html)  # sem clique extra para carregar
+        self.assertNotIn('leitor_material.js', html)  # página de vídeo não precisa do leitor de PDF
 
     def test_outro_link_continua_saindo_em_nova_aba(self):
         rid = self.material(tipo='link', titulo='Site', link='https://exemplo.test/aula')
@@ -130,7 +130,7 @@ class LeitorCursoTests(TestCase):
         html = self.client(2).get(f'/aprendizagem/ofertas/{offer}?aula={lessons[0]}').get_data(as_text=True)
         leitura = f'/api/aprender/{offer}/aulas/{lessons[0]}/recursos/{rid}/arquivo?modo=ler'
         self.assertIn(f'data-src="{leitura}"', html)
-        self.assertIn('data-video="aqz-KE-bpKQ"', html)
+        self.assertIn('src="https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ"', html)
         self.assertIn('js/paginas/leitor_material.js', html)
         self.assertNotIn('cursos_ms04.js', html)
         self.assertEqual(self.client(2).get(leitura).status_code, 200)
@@ -146,3 +146,16 @@ class LeitorArquivosTests(TestCase):
         self.assertIn('isEvalSupported: false', script)
         self.assertIn('disableRange: true', script)
         self.assertNotIn('https://', script.replace('https://www.youtube-nocookie.com/embed/', ''))
+
+
+class VideoNaAulaTests(TestCase):
+    setUpClass = classmethod(lambda cls: study.StudyTests.setUpClass.__func__(cls))
+    locals().update(emprestar(ms04.CourseApiTests, 'setUp', 'client', 'post', 'decide', 'create', 'version', 'edit', 'tree', 'publish'))
+
+    def test_aula_em_video_ja_mostra_o_player(self):
+        cid, module, chapter, lessons = self.tree(text=False, count=1)
+        offer = self.publish(cid)
+        self.assertEqual(self.post(f'/api/aprender/{offer}/aulas/{lessons[0]}/abrir', {'versao': 0}, uid=2).status_code, 200)
+        html = self.client(2).get(f'/aprendizagem/ofertas/{offer}?aula={lessons[0]}').get_data(as_text=True)
+        self.assertIn('<iframe src="https://www.youtube-nocookie.com/embed/abcdefghijk" title="Vídeo: Aula 1"', html)
+        self.assertNotIn('Carregar vídeo do YouTube', html)
