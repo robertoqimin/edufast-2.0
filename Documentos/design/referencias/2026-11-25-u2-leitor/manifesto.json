@@ -1,0 +1,80 @@
+{
+  "base_commit": "feat: melhora clareza, acessibilidade e estado visivel (U1)",
+  "relatorio": "Documentos/testes/U2_LEITOR_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa (Colégio Horizonte), somente dados fictícios; vídeo de exemplo: Big Buck Bunny (Blender Foundation)",
+  "verificador": "node Codigos/tests/verificar_leitor_u2.cjs <pasta>",
+  "capturas": [
+    {
+      "arquivo": "curso-recurso-imagem-celular.png",
+      "sha256": "9fe13c7f7f6d01fe16499b5345adf5204ec06b2eb1fb20ff2b45629ee6ac3074",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "curso-recurso-imagem-desktop.png",
+      "sha256": "eb6d37ed9c2d310c697012830fe1766fd461d9ac8ffa7cc84af47890c777c9e5",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "imagem-celular.png",
+      "sha256": "cce0f1413326e3d4bab0ff4042bfc770a699ad7fdf37bf611c67b963c79efa23",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "imagem-desktop.png",
+      "sha256": "a67b3a3283da73425fe7147a169452849532d3aeaca7bd8a9a1ec9f2d1003537",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "lista-antes-celular.png",
+      "sha256": "863ebfd11656dd31258d1f38d566a17d741144dd5a823c27c9f56455bd43c972",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "lista-antes-desktop.png",
+      "sha256": "f2f166dee9a2785d119372a545956091699ad4e9f69ec467189224bbf7026c4d",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "lista-depois-celular.png",
+      "sha256": "863ebfd11656dd31258d1f38d566a17d741144dd5a823c27c9f56455bd43c972",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "lista-depois-desktop.png",
+      "sha256": "7a83527d9162ff5795538789dec9e75be0c3e1b50ffe4b6a6f63ab031e7cf935",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "pdf-pagina-1-celular.png",
+      "sha256": "e9be203a9d155666aa97ea35d8bd6e3d6fbde58c88094658bd8fc609ef662b57",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "pdf-pagina-1-desktop.png",
+      "sha256": "1c6f8ba1226ff3258b76287029d5f9b79902ab390f1def5c168b9dc3e34526cf",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "pdf-pagina-3-zoom-celular.png",
+      "sha256": "bc461048d7960d00d144886b3f06c57505cecfb82be9ee0529b02fbfd69f7b2b",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "pdf-pagina-3-zoom-desktop.png",
+      "sha256": "c7db4a035b7e31c2a68cc1e830c61a6b50e0302efdc788513476f064ad3745d0",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "video-celular.png",
+      "sha256": "d53db6e1ebd568fb7f0e8b8b75a0162637f61326612110391d1c03d54030cc8b",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "video-desktop.png",
+      "sha256": "ecc867f8b14aeacc9974e971aeaebd9e69b6370b46fa8aceccd9097e175ab89b",
+      "viewport": "1440x1000"
+    }
+  ]
+}

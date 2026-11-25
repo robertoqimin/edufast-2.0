@@ -56,6 +56,9 @@ def create_app():
         from app.views.respostas import resposta_erro
         return resposta_erro({'erro': 'Registro alterado por outro envio; recarregue antes de salvar.'}, 409)
 
+    from app.services.leitor import youtube as youtube_id
+    app.add_template_filter(youtube_id, 'youtube_id')  # U2/O7: links do YouTube viram player embutido
+
     @app.context_processor
     def submission_context():
         if "csrf_token" not in session:

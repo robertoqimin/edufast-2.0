@@ -19,8 +19,11 @@ const PERFIS = [
   ['secretaria', `secretaria@${D}`, ['/admin/dashboard', '/admin/cadastro-alunos', '/admin/turmas', '/admin/disciplinas',
     '/admin/alunos/1', '/academico', '/academico/alunos/1/boletim', '/frequencia', '/solicitacoes', '/aprendizagem', '/admin/gestao-turmas']],
   ['professora', `ana.ribeiro@${D}`, ['/professor/dashboard', '/academico', '/academico/avaliacoes/1', '/frequencia',
-    '/frequencia/turmas/1/chamada', '/estudos/disciplinas/1', '/estudos/disciplinas/1/novo', '/aprendizagem', '/mensagens']],
-  ['aluno', `bruno.lima@${D}`, ['/aluno/dashboard', '/boletim', '/estudos', '/estudos/disciplinas/1', '/aprendizagem', '/frequencia', '/minha-privacidade']],
+    '/frequencia/turmas/1/chamada', '/estudos/disciplinas/1', '/estudos/disciplinas/1/novo', '/aprendizagem', '/mensagens',
+    '/estudos/conteudos/4']],
+  ['aluno', `bruno.lima@${D}`, ['/aluno/dashboard', '/boletim', '/estudos', '/estudos/disciplinas/1', '/aprendizagem', '/frequencia', '/minha-privacidade',
+    // U2: leitor de PDF (slides), imagem, vídeo e aula do curso com recurso
+    '/estudos/conteudos/4', '/estudos/conteudos/3', '/estudos/conteudos/9', '/aprendizagem/ofertas/1']],
 ];
 
 (async () => {
@@ -37,6 +40,9 @@ const PERFIS = [
       for (const url of urls) {
         await page.goto(ESCOLA + url);
         await page.waitForLoadState('networkidle').catch(() => {});
+        // U2: espera o leitor terminar de desenhar o material antes de auditar.
+        for (let i = 0; i < 100 && await page.evaluate(() => [...document.querySelectorAll('[data-leitor]')]
+          .some((h) => !h.closest('details:not([open])') && !h.dataset.estado)); i++) await page.waitForTimeout(100);
         await page.evaluate(AXE);
         const r = await page.evaluate(async () => {
           const res = await window.axe.run(document, {runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']}});
@@ -60,6 +66,6 @@ const PERFIS = [
   fs.writeFileSync(SAIDA, JSON.stringify({total_paginas: paginas.length, resumo, paginas}, null, 2));
   const semFalha = paginas.filter((p) => !p.violacoes.length).length;
   console.log(`${paginas.length} páginas auditadas (${semFalha} sem violações).`);
-  process.exitCode = resumo.length ? 1 : 0;  // qualquer violação reprova (meta O5: 64/64)
+  process.exitCode = resumo.length ? 1 : 0;  // qualquer violação reprova (meta O5: todas as páginas)
   for (const r of resumo) console.log(`${r.impacto.padEnd(8)} ${r.id.padEnd(28)} ${String(r.paginas).padStart(3)} pág. ${String(r.nos).padStart(4)} elem.  ${r.ajuda}  [ex.: ${r.exemplo.slice(0, 70)}]`);
 })().catch((e) => { console.error(e); process.exitCode = 2; });

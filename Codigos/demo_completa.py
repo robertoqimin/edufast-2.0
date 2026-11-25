@@ -51,12 +51,18 @@ def contas():
     return linhas
 
 
-def pdf(titulo, linhas):
-    corpo = '\n'.join([f'BT /F1 20 Tf 50 760 Td ({titulo}) Tj ET'] +
-                      [f'BT /F1 12 Tf 50 {720 - i * 20} Td ({l}) Tj ET' for i, l in enumerate(linhas)])
-    objs = ['<</Type/Catalog/Pages 2 0 R>>', '<</Type/Pages/Kids[3 0 R]/Count 1>>',
-            '<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
-            f'<</Length {len(corpo)}>>stream\n{corpo}\nendstream', '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>']
+def pdf(titulo, linhas, paginas=None):
+    """PDF mínimo sem dependências. ``paginas``: lista de (título, linhas) para slides com várias páginas."""
+    paginas = paginas or [(titulo, linhas)]
+    objs = ['<</Type/Catalog/Pages 2 0 R>>', None, '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>']
+    kids = []
+    for t, ls in paginas:
+        corpo = '\n'.join([f'BT /F1 20 Tf 50 760 Td ({t}) Tj ET'] +
+                          [f'BT /F1 12 Tf 50 {720 - i * 20} Td ({l}) Tj ET' for i, l in enumerate(ls)])
+        objs.append(f'<</Length {len(corpo)}>>stream\n{corpo}\nendstream')
+        objs.append(f'<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents {len(objs)} 0 R/Resources<</Font<</F1 3 0 R>>>>>>')
+        kids.append(f'{len(objs)} 0 R')
+    objs[1] = f'<</Type/Pages/Kids[{" ".join(kids)}]/Count {len(kids)}>>'
     saida, offsets = '%PDF-1.4\n', []
     for i, o in enumerate(objs):
         offsets.append(len(saida))
@@ -197,6 +203,12 @@ def conteudos(app, turma_id):
                 {'tipo': 'arquivo', 'titulo': 'Apostila — funções do 1º grau', 'texto': 'Leitura obrigatória antes da prova.',
                  'arquivo': ('apostila-funcoes.pdf', pdf('Apostila - Funcoes do 1o grau', ['1. O que e uma funcao', '2. Funcao afim: f(x) = ax + b', '3. Exercicios resolvidos']))},
                 {'tipo': 'arquivo', 'titulo': 'Gráfico da função afim', 'texto': 'Use para a atividade da aula 3.', 'arquivo': ('funcao-afim.png', grafico)},
+                {'tipo': 'arquivo', 'titulo': 'Slides — função afim na prática', 'texto': 'Slides da aula 2. Leia aqui mesmo, página por página.',
+                 'arquivo': ('slides-funcao-afim.pdf', pdf('', [], [
+                     ('Funcao afim na pratica', ['Aula 2 - Matematica - 1o ano', 'Profa. Ana Ribeiro']),
+                     ('1. Onde aparece', ['Taxi: bandeirada + preco por km', 'Conta de agua: taxa fixa + consumo']),
+                     ('2. Lendo o grafico', ['a > 0: reta crescente', 'b: onde a reta corta o eixo y']),
+                     ('3. Desafio', ['Uma corrida custa R$ 5 + R$ 2 por km.', 'Quanto custa uma corrida de 8 km?'])]))},
                 {'tipo': 'link', 'titulo': 'Exercícios online', 'texto': 'Lista para treinar em casa.', 'link': 'https://www.khanacademy.org/math'},
             ])],
         ('carlos.mendes', 'Língua Portuguesa'): [
@@ -208,7 +220,8 @@ def conteudos(app, turma_id):
         ('beatriz.lopes', 'Biologia'): [
             ('Citologia', [
                 {'tipo': 'aviso', 'titulo': 'Aula prática no laboratório', 'texto': 'Na próxima semana: observação de células ao microscópio. Uso de jaleco obrigatório.'},
-                {'tipo': 'link', 'titulo': 'Vídeo: a célula', 'texto': 'Assista antes da aula prática.', 'link': 'https://www.youtube.com/'},
+                {'tipo': 'link', 'titulo': 'Vídeo de exemplo do player', 'texto': 'Exemplo de vídeo do YouTube aberto dentro da plataforma (curta da Blender Foundation).',
+                 'link': 'https://www.youtube.com/watch?v=aqz-KE-bpKQ'},
             ])],
     }
     for (prof, disciplina), abas in planos.items():

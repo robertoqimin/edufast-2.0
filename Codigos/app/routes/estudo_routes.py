@@ -5,15 +5,16 @@ from pathlib import Path
 from uuid import uuid4
 from cryptography.fernet import InvalidToken
 from flask import Blueprint, current_app, flash, g, jsonify, redirect, render_template, request, send_file, session, url_for
-from sqlalchemy import inspect, or_
+from sqlalchemy import distinct, func, inspect, or_
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 from app.concurrency import MutationConflict, begin_submission, check_version, finish_submission
 from app.database import engine, get_session
-from app.models import (ConteudoEstudoModel, SolicitacaoAlteracaoModel, TurmaModel,
+from app.models import (AuditoriaEstudoModel, ConteudoEstudoModel, SolicitacaoAlteracaoModel, TurmaModel,
     DisciplinaModel, SecaoEstudoModel, ConteudoSecaoEstudoModel)
 from app.services.identidade_service import require_role
 from app.services import estudo_service as service
+from app.services import leitor
 from config import caminho_uploads
 
 estudo_bp = Blueprint('estudos', __name__)
@@ -91,6 +92,34 @@ def disciplinas():
             has_next=page*service.PAGE_SIZE<total)
 
 
+def consulta_aba(db, identity, pair_id, section, tab, enabled):
+    """Conteúdos que esta pessoa vê em uma aba (lista da disciplina e anterior/próximo)."""
+    query = db.query(ConteudoEstudoModel).filter_by(turma_disciplina_id=pair_id)
+    if section:
+        query = query.join(ConteudoSecaoEstudoModel,ConteudoSecaoEstudoModel.conteudo_id == ConteudoEstudoModel.id).filter(ConteudoSecaoEstudoModel.secao_id == section.id)
+    else:
+        query = query.filter(ConteudoEstudoModel.tipo == 'aviso' if tab == 'avisos' else ConteudoEstudoModel.tipo.in_(['link','arquivo']))
+        if enabled:
+            query = query.filter(~db.query(ConteudoSecaoEstudoModel.conteudo_id).filter(
+                ConteudoSecaoEstudoModel.conteudo_id == ConteudoEstudoModel.id).exists())
+    if not identity.admin:
+        query = query.filter(or_(ConteudoEstudoModel.estado == 'publicado',ConteudoEstudoModel.autor_id == identity.id)
+            if identity.papel == 'professor' else ConteudoEstudoModel.estado == 'publicado')
+    return query
+
+
+def vizinhos(db, identity, row, section):
+    """Material anterior e próximo na ordem da lista (mais recente primeiro) e a posição deste."""
+    tab = None if section else ('avisos' if row.tipo == 'aviso' else 'materiais')
+    query = consulta_aba(db,identity,row.turma_disciplina_id,section,tab,service.sections_enabled(db))
+    ids = ConteudoEstudoModel.id
+    anterior = query.filter(ids > row.id).order_by(ids.asc()).with_entities(ids).first()
+    proximo = query.filter(ids < row.id).order_by(ids.desc()).with_entities(ids).first()
+    antes = query.filter(ids > row.id).count()
+    return {'anterior': anterior and anterior[0], 'proximo': proximo and proximo[0],
+            'posicao': antes + 1, 'total': antes + 1 + query.filter(ids < row.id).count()}
+
+
 @estudo_bp.get('/estudos/disciplinas/<int:pair_id>')
 def disciplina(pair_id):
     identity, page = g.estudo_identity, page_number()
@@ -105,17 +134,7 @@ def disciplina(pair_id):
             section = service.section_access(db,identity,tab[6:])
             if section.turma_disciplina_id != pair.id:
                 raise MutationConflict('Aba não encontrada nesta disciplina.',404)
-        query = db.query(ConteudoEstudoModel).filter_by(turma_disciplina_id=pair.id)
-        if section:
-            query = query.join(ConteudoSecaoEstudoModel,ConteudoSecaoEstudoModel.conteudo_id == ConteudoEstudoModel.id).filter(ConteudoSecaoEstudoModel.secao_id == section.id)
-        else:
-            query = query.filter(ConteudoEstudoModel.tipo == 'aviso' if tab == 'avisos' else ConteudoEstudoModel.tipo.in_(['link','arquivo']))
-            if enabled:
-                query = query.filter(~db.query(ConteudoSecaoEstudoModel.conteudo_id).filter(
-                    ConteudoSecaoEstudoModel.conteudo_id == ConteudoEstudoModel.id).exists())
-        if not identity.admin:
-            query = query.filter(or_(ConteudoEstudoModel.estado == 'publicado',ConteudoEstudoModel.autor_id == identity.id)
-                if identity.papel == 'professor' else ConteudoEstudoModel.estado == 'publicado')
+        query = consulta_aba(db,identity,pair.id,section,tab,enabled)
         total = query.count()
         rows = query.order_by(ConteudoEstudoModel.id.desc()).offset((page-1)*service.PAGE_SIZE).limit(service.PAGE_SIZE).all()
         tabs = service.sections(db,pair.id) if enabled else []
@@ -130,7 +149,17 @@ def disciplina(pair_id):
                     SolicitacaoAlteracaoModel.tipo == 'publicar_material', SolicitacaoAlteracaoModel.estado == 'pendente',
                     SolicitacaoAlteracaoModel.recurso_pendente.in_([f'estudo:{r.id}:{r.versao}' for r in rows])):
                 aguardando.add(int(recurso.split(':')[1]))
+        # U2/O7: o aluno vê o que já estudou e quanto falta na aba.
+        vistos, total_vistos = set(), 0
+        if identity.papel == 'aluno' and rows:
+            vistos = {i for i, in db.query(AuditoriaEstudoModel.conteudo_id).filter(
+                AuditoriaEstudoModel.ator_id == identity.id, AuditoriaEstudoModel.acao == 'visualizar',
+                AuditoriaEstudoModel.conteudo_id.in_([r.id for r in rows])).distinct()}
+            total_vistos = db.query(func.count(distinct(AuditoriaEstudoModel.conteudo_id))).filter(
+                AuditoriaEstudoModel.ator_id == identity.id, AuditoriaEstudoModel.acao == 'visualizar',
+                AuditoriaEstudoModel.conteudo_id.in_(query.with_entities(ConteudoEstudoModel.id))).scalar()
         return render_template('estudo_disciplina.html',pair=pair,turma=classroom,disciplina=subject,aguardando=aguardando,
+            vistos=vistos,total_vistos=total_vistos,
             cursos_enabled=cursos_habilitados(db,required=False),
             rows=rows,tab=tab,page=page,total=total,has_next=page*service.PAGE_SIZE<total,identity=identity,
             sections=tabs,section=section,sections_enabled=enabled)
@@ -203,8 +232,17 @@ def conteudo(content_id):
         if wants_json():
             return jsonify(id=row.id,titulo=row.titulo,texto=row.texto,tipo=row.tipo,link=row.link,
                 estado=row.estado,versao=row.versao,turma_disciplina_id=pair.id)
+        # U2/O7: abrir o material conta como visto (uma vez por aluno) e o leitor fica na página.
+        visto = False
+        if identity.papel == 'aluno' and row.estado == 'publicado':
+            visto = db.query(AuditoriaEstudoModel.id).filter_by(conteudo_id=row.id,ator_id=identity.id,acao='visualizar').first() is not None
+            if not visto:
+                service.audit(db,row,identity.id,'visualizar')
+                db.commit()
         return render_template('estudo_conteudo.html',row=row,pair=pair,turma=classroom,disciplina=subject,
-            identity=identity,section=section,pending=pending(db,row),can_edit=identity.admin or (identity.papel=='professor' and identity.id==row.autor_id))
+            identity=identity,section=section,pending=pending(db,row),visto_antes=visto,
+            navegacao=vizinhos(db,identity,row,section),video=leitor.youtube(row.link) if row.tipo=='link' else None,
+            can_edit=identity.admin or (identity.papel=='professor' and identity.id==row.autor_id))
 
 
 @estudo_bp.route('/estudos/conteudos/<int:content_id>/editar', methods=['GET','POST'])
@@ -291,7 +329,7 @@ def arquivo(content_id):
             content = cipher().decrypt(encoded[len(FILE_PREFIX):])
         except (InvalidToken,ValueError,UnicodeError):
             raise MutationConflict('Arquivo indisponível. Avise a administração.',409)
-        service.audit(db,row,identity.id,'baixar_arquivo')
+        service.audit(db,row,identity.id,'ler_arquivo' if leitor.modo_leitura() else 'baixar_arquivo')
         db.commit()
         extension = {'application/pdf':'.pdf','image/png':'.png','image/jpeg':'.jpg'}[row.mime]
         response = send_file(io.BytesIO(content),mimetype=row.mime,as_attachment=True,

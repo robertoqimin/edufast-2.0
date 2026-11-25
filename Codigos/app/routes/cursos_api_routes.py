@@ -12,6 +12,7 @@ from app.models import (CursoModel, CursoVersaoModel, ProfessorModel, ProfessorD
     DisciplinaModel, OfertaCursoModel, TurmaDisciplinaModel, RecursoAulaCursoModel,
     SolicitacaoAlteracaoModel, AlunoModel)
 from app.services import cursos as base
+from app.services import leitor
 from app.services.identidade_service import require_role
 from app.services.cursos_ms04 import comum, autoria, publicacao, retomada, conteudo, leitura
 
@@ -325,7 +326,7 @@ def arquivo(oferta_id,aula_id,recurso_id):
         if not row:
             raise MutationConflict('Recurso não encontrado.',404)
         data = conteudo.ler_arquivo(row)
-        base.auditar(db,user.id,'ms04_baixar_recurso',f'{offer.id}:{row.id}')
+        base.auditar(db,user.id,'ms04_ler_recurso' if leitor.modo_leitura() else 'ms04_baixar_recurso',f'{offer.id}:{row.id}')
         db.commit()
         ext = {'application/pdf':'.pdf','image/png':'.png','image/jpeg':'.jpg'}[row.mime]
         return send_file(io.BytesIO(data),mimetype=row.mime,as_attachment=True,download_name=(secure_filename(row.titulo) or 'material')+ext)
