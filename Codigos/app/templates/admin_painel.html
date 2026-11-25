@@ -1,89 +1,34 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | EduFast</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/painel.css') }}">
-    {% include "partials/react_runtime.html" %}
-</head>
-<body class="app-page"><a class="skip-link" href="#main-content">Pular para o conteudo</a>
-    <div id="admin-painel-root" class="flex w-full" data-react-shell data-react-template="admin-painel-template"></div>
-    <template id="admin-painel-template">
-        {% include 'partials/workspace_sidebar.html' %}
+{% extends 'gestao_base.html' %}{% set page_title = 'Visão geral' %}
+{% from 'partials/gestao_icons.html' import icon %}
+{% block page_class %}visao-geral{% endblock %}
+{% block content %}
+<section class="page-heading"><div><span class="eyebrow">{{ 'DIREÇÃO' if papel == 'super_admin' else 'SECRETARIA' }}</span><h1>Visão geral</h1><p>Olá, {{ session.get('user_email', 'equipe') }}. Acompanhe a implantação e o movimento da escola.</p></div></section>
 
-        <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
-            <header class="flex justify-between items-center mb-10">
-                <div>
-                    <h1 class="text-3xl font-bold">Olá, {{ session.get("user_email", "Administrador") }}!</h1>
-                    <p class="text-slate-300">Bem-vindo ao centro de controle da sua escola.</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <p class="text-sm font-bold">Admin Secretaria</p>
-                        <p class="text-[10px] text-cyan-300">Online agora</p>
-                    </div>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 border-2 border-white/20"></div>
-                </div>
-            </header>
+{% set pp = primeiros_passos %}
+{% if pp.concluido %}<details class="panel course-panel primeiros-passos primeiros-passos-concluido"><summary><strong>{{ icon('check') }} Implantação concluída</strong> · {{ pp.feitos }} de {{ pp.total }} passos. Ver o checklist</summary>
+{% else %}<section class="panel course-panel primeiros-passos" aria-labelledby="primeiros-passos-titulo">{% endif %}
+<div class="primeiros-passos-cabecalho"><div><span class="eyebrow">PRIMEIROS PASSOS</span><h2 id="primeiros-passos-titulo">{{ 'Escola pronta para usar' if pp.concluido else 'Configure a escola em ' ~ pp.total ~ ' passos' }}</h2>
+<p>{{ pp.feitos }} de {{ pp.total }} concluídos. {{ "Use “Revisar” para ajustar o que for preciso." if pp.concluido else "Siga a ordem: cada passo libera o seguinte." }}</p></div>
+<progress value="{{ pp.feitos }}" max="{{ pp.total }}" aria-label="Passos concluídos da implantação">{{ pp.percentual }}%</progress></div>
+<ol class="passos-lista">{% for p in pp.passos %}
+<li class="passo{% if p.feito %} passo-feito{% elif p.chave == pp.proximo %} passo-proximo{% endif %}"{% if p.chave == pp.proximo %} aria-current="step"{% endif %}>
+<span class="passo-marca" aria-hidden="true">{% if p.feito %}✓{% else %}{{ loop.index }}{% endif %}</span>
+<div class="passo-texto"><h3>{{ p.titulo }}{% if p.opcional %} <span class="passo-etiqueta">opcional</span>{% endif %}</h3><p>{{ p.descricao }}</p>
+<p class="course-meta"><span class="sr-only">{{ 'Concluído.' if p.feito else 'Pendente.' }} </span>{{ p.detalhe }} · {{ p.quem }}</p></div>
+<div class="passo-acao">{% if p.feito %}{% if p.url %}<a class="button button-secondary" href="{{ p.url }}" aria-label="Revisar: {{ p.titulo }}">Revisar</a>{% endif %}
+{% elif p.url %}<a class="button {{ 'button-primary' if p.chave == pp.proximo else 'button-secondary' }}" href="{{ p.url }}">{{ p.acao }}</a>
+{% else %}<span class="course-meta">A cargo da direção</span>{% endif %}</div></li>{% endfor %}</ol>
+{% if pp.concluido %}</details>{% else %}</section>{% endif %}
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="glass-card p-6 rounded-3xl">
-                    <p class="text-slate-300 text-sm">Total de Alunos</p>
-                    <h2 class="text-4xl font-bold mt-2">{{ total_alunos }}</h2>
-                    <div class="mt-4 text-xs text-emerald-300">Registros cadastrados</div>
-                </div>
-                <div class="glass-card p-6 rounded-3xl">
-                    <p class="text-slate-300 text-sm">Professores Cadastrados</p>
-                    <h2 class="text-4xl font-bold mt-2">{{ total_professores }}</h2>
-                    <div class="mt-4 text-xs text-cyan-300">Todos os departamentos</div>
-                </div>
-                <div class="glass-card p-6 rounded-3xl">
-                    <p class="text-slate-300 text-sm">Matrículas Pendentes</p>
-                    <h2 class="text-4xl font-bold mt-2">{{ matriculas_pendentes }}</h2>
-                    <div class="mt-4 text-xs text-violet-300">{{ matriculas_hoje }} criadas hoje</div>
-                </div>
-            </div>
+<section class="stats-grid" aria-label="Resumo da escola">
+{% for rotulo, valor, simbolo, cor in [('Alunos', total_alunos, 'cap', 'cyan'), ('Professores', total_professores, 'book', 'violet'), ('Matrículas pendentes', matriculas_pendentes, 'users', 'amber'), ('Matrículas criadas hoje', matriculas_hoje, 'check', 'green')] %}
+<div class="stat-card"><span class="stat-icon {{ cor }}">{{ icon(simbolo) }}</span><div><span>{{ rotulo }}</span><strong>{{ valor }}</strong></div></div>{% endfor %}
+</section>
 
-            <div class="glass-card p-8 rounded-[32px]">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Últimos Registros</h3>
-                    <button class="text-sm text-cyan-300 hover:underline">Ver todos</button>
-                </div>
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="text-slate-400 text-xs uppercase tracking-wider">
-                            <th class="pb-4 font-medium">Nome</th>
-                            <th class="pb-4 font-medium">Tipo</th>
-                            <th class="pb-4 font-medium">Data</th>
-                            <th class="pb-4 font-medium text-right">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm">
-                        {% for registro in registros_recentes %}
-                        <tr class="border-t border-white/5">
-                            <td class="py-4 font-medium text-white">{{ registro.nome }}</td>
-                            <td class="py-4 text-slate-300">{{ registro.tipo }}</td>
-                            <td class="py-4 text-slate-300">{{ registro.created_at_label }}</td>
-                            <td class="py-4 text-right">
-                                {% if registro.aluno_id %}
-                                <a href="{{ url_for('home.admin_detalhes_aluno', aluno_id=registro.aluno_id) }}" class="bg-white/10 px-3 py-1 rounded-lg hover:bg-white/20">Gerenciar</a>
-                                {% else %}
-                                <button class="bg-white/10 px-3 py-1 rounded-lg opacity-60">Gerenciar</button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr class="border-t border-white/5">
-                            <td class="py-6 text-slate-300" colspan="4">Nenhum registro encontrado.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-    </main></div>
-    </template>
-    <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
-</body>
-</html>
+<section class="panel course-panel"><h2>Últimos registros</h2>
+{% if registros_recentes %}<div class="course-scroll"><table class="course-table"><thead><tr><th scope="col">Nome</th><th scope="col">Tipo</th><th scope="col">Data</th><th scope="col"><span class="sr-only">Ação</span></th></tr></thead><tbody>
+{% for r in registros_recentes %}<tr><td>{{ r.nome }}</td><td>{{ r.tipo }}</td><td>{{ r.created_at_label }}</td><td>{% if r.aluno_id %}<a class="button button-secondary" href="{{ url_for('home.admin_detalhes_aluno', aluno_id=r.aluno_id) }}" aria-label="Gerenciar {{ r.nome }}">Gerenciar</a>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p>Nenhum aluno ou professor cadastrado ainda. Próximo passo: siga o checklist acima; os cadastros novos aparecem aqui.</p>{% endif %}
+</section>
+{% endblock %}

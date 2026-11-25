@@ -54,7 +54,7 @@
                         {% for disciplina in turma.disciplinas %}
                         <span class="professor-chip">{{ disciplina.nome }}</span>
                         {% else %}
-                        <span class="text-sm text-gray-400">Nenhuma disciplina associada ao professor nesta turma.</span>
+                        <span class="text-sm text-gray-400">Nenhuma disciplina associada ao professor nesta turma. Peça à secretaria a atribuição da disciplina.</span>
                         {% endfor %}
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                             <small>{{ atividade.data }}</small>
                         </article>
                         {% else %}
-                        <div class="professor-empty-line">Nenhuma atividade lançada para esta turma.</div>
+                        <div class="professor-empty-line">Nenhuma atividade lançada para esta turma. Use o formulário de atividade para lançar a primeira.</div>
                         {% endfor %}
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                             </tr>
                             {% else %}
                             <tr class="border-t border-white/5">
-                                <td class="py-6 text-gray-400" colspan="2">Nenhum aluno associado a esta turma.</td>
+                                <td class="py-6 text-gray-400" colspan="2">Nenhum aluno associado a esta turma. Peça à secretaria para matricular os alunos.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -129,7 +129,7 @@
             </article>
             {% else %}
             <div class="glass-card professor-card rounded-[28px] p-6 text-gray-400">
-                Nenhuma turma associada ao seu cadastro.
+                Nenhuma turma associada ao seu cadastro. Peça à secretaria para atribuir suas turmas e disciplinas.
             </div>
             {% endfor %}
         </section>
@@ -221,7 +221,7 @@
                         </tr>
                         {% else %}
                         <tr class="border-t border-white/5">
-                            <td class="py-6 text-gray-400" colspan="6">Nenhuma nota aprovada no diário até o momento.</td>
+                            <td class="py-6 text-gray-400" colspan="6">Nenhuma nota aprovada no diário até o momento. Lance as notas em Diário e avaliações.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

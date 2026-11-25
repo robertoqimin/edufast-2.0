@@ -82,8 +82,8 @@
 
     function redirecionarPorPerfil(data) {
         const destinos = {
-            SUPER_ADMIN: "/super/usuarios",
-            SUPERADMIN: "/super/usuarios",
+            SUPER_ADMIN: "/admin/dashboard",  // U4: a direção começa pela Visão geral (checklist)
+            SUPERADMIN: "/admin/dashboard",
             ADMIN: "/admin/dashboard",
             ALUNO: "/aluno",
             PROFESSOR: "/professor"

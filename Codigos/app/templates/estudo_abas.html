@@ -18,5 +18,5 @@
 <form class="course-form" method="post" action="{{ url_for('estudos.alterar_aba',section_id=item.id,action='arquivar') }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="versao" value="{{ item.versao }}">
 <p>Arquivar retira a aba e seus conteúdos do acesso dos alunos, inclusive downloads. O histórico e os arquivos são preservados.</p><button class="button button-secondary">Arquivar aba</button></form>
-{% endif %}</article>{% else %}<p>Nenhuma aba criada. Avisos e Materiais de estudo já estão disponíveis.</p>{% endfor %}</section>
+{% endif %}</article>{% else %}<p>Nenhuma aba criada. Avisos e Materiais de estudo já estão disponíveis. Crie uma aba para organizar os materiais por unidade.</p>{% endfor %}</section>
 {% endblock %}

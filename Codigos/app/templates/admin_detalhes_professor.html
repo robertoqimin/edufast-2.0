@@ -124,7 +124,7 @@
                         </div>
                         {% else %}
                         <div class="bg-white/5 p-4 rounded-xl mb-4 border border-white/5 text-gray-400">
-                            Nenhuma disciplina associada a este professor.
+                            Nenhuma disciplina associada a este professor. Atribua turma e disciplina em <a href="{{ url_for('cursos.gestao_turmas') }}">Gestão acadêmica</a>.
                         </div>
                         {% endfor %}
                     </div>
@@ -141,7 +141,7 @@
                         </div>
                         {% else %}
                         <div class="bg-white/5 p-4 rounded-xl mb-4 border border-white/5 text-gray-400">
-                            Nenhuma nota lançada por este professor.
+                            Nenhuma nota lançada por este professor. As notas aprovadas no diário aparecem aqui.
                         </div>
                         {% endfor %}
                     </div>
@@ -159,7 +159,7 @@
                         </div>
                     {% else %}
                         <div class="bg-white/5 p-4 rounded-xl mb-4 border border-white/5 text-gray-400">
-                            Nenhum documento enviado por este professor.
+                            Nenhum documento enviado por este professor. Os documentos enviados aparecem aqui.
                         </div>
                     {% endfor %}
                 </div>
@@ -221,7 +221,7 @@
                         </div>
                         {% else %}
                         <div class="bg-white/5 p-4 rounded-xl mb-4 border border-white/5 text-gray-400">
-                            Nenhuma solicitação enviada para este professor.
+                            Nenhuma solicitação enviada para este professor. Para pedir um documento, use o formulário de solicitação desta página.
                         </div>
                         {% endfor %}
                     </div>
@@ -239,7 +239,7 @@
                         </div>
                     {% else %}
                         <div class="bg-white/5 p-4 rounded-xl mb-4 border border-white/5 text-gray-400">
-                            Nenhum arquivo enviado para este professor.
+                            Nenhum arquivo enviado para este professor. Os arquivos enviados aparecem aqui.
                         </div>
                     {% endfor %}
                 </div>

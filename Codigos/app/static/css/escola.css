@@ -89,3 +89,27 @@
 .aprovacao-notas tbody th { text-transform:none; letter-spacing:normal; font-size:inherit; font-weight:600; color:var(--text); }
 .diario-tabela tbody th { text-transform:none; letter-spacing:normal; font-size:inherit; color:var(--text); }
 .diario-lote > button { justify-self:start; }
+/* U4/O2: checklist "Primeiros passos" e telas vazias com o próximo passo. */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.primeiros-passos { margin-bottom:24px; }
+.primeiros-passos > summary { cursor:pointer; padding:4px 0; }
+.primeiros-passos > summary .icon { width:16px; height:16px; vertical-align:-3px; color:var(--accent); }
+.primeiros-passos-cabecalho { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:end; gap:16px; margin-bottom:12px; }
+.primeiros-passos-cabecalho h2 { margin:4px 0 6px; }
+.primeiros-passos-cabecalho p { margin:0; color:var(--muted); }
+.primeiros-passos-cabecalho progress { width:min(320px,100%); height:12px; accent-color:var(--accent); }
+.passos-lista { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.passo { display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:14px; align-items:center; padding:14px 16px; border:1px solid var(--line); border-radius:var(--school-radius); background:var(--page); }
+.passo h3 { margin:0 0 4px; font-size:15px; }
+.passo p { margin:0; }
+.passo .course-meta { margin-top:4px; font-size:12px; }
+.passo-marca { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; border:1px solid var(--line); color:var(--muted); font-weight:700; }
+.passo-feito .passo-marca { background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent); border-color:color-mix(in srgb, var(--accent) 45%, transparent); }
+.passo-proximo { border-color:color-mix(in srgb, var(--accent) 60%, transparent); box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.passo-proximo .passo-marca { background:var(--accent); color:var(--page); border-color:var(--accent); }
+.passo-etiqueta { font-size:11px; font-weight:600; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin-left:6px; }
+.passo-acao { justify-self:end; }
+@media (max-width:640px) {
+ .passo { grid-template-columns:32px minmax(0,1fr); }
+ .passo-acao { grid-column:2; justify-self:start; }
+}

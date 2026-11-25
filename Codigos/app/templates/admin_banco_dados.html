@@ -123,12 +123,12 @@
                         {% endfor %}
 
                         <tr id="banco-empty-row" class="hidden border-t border-white/5">
-                            <td class="py-6 text-gray-400" colspan="6">Nenhum registro encontrado para o filtro selecionado.</td>
+                            <td class="py-6 text-gray-400" colspan="6">Nenhum registro encontrado para o filtro selecionado. Escolha outro filtro.</td>
                         </tr>
 
                         {% if not alunos and not professores %}
                         <tr class="border-t border-white/5">
-                            <td class="py-6 text-gray-400" colspan="6">Nenhum registro cadastrado.</td>
+                            <td class="py-6 text-gray-400" colspan="6">Nenhum registro cadastrado. Cadastre alunos e professores para vê-los aqui.</td>
                         </tr>
                         {% endif %}
                     </tbody>

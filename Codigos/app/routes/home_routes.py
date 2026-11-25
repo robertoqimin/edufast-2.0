@@ -55,8 +55,15 @@ def home():
 @home_blueprint.route("/admin_painel.html", methods=["GET"])
 def admin_dashboard():
     admin_required()
-
-    context = {"title": "Dashboard da Secretaria", **get_admin_data()}
+    # U4/O2: checklist de implantação no topo da visão geral (calculado, nada é gravado).
+    from flask import g
+    from app.database import get_session
+    from app.services import primeiros_passos
+    from app.services.identidade_service import current_identity
+    identity = current_identity()
+    with get_session() as db:
+        passos = primeiros_passos.resumo(db, identity.papel, getattr(g, 'cursos_ms04', False))
+    context = {"title": "Visão geral", **get_admin_data(), "primeiros_passos": passos, "papel": identity.papel}
     return render_dashboard(context)
 
 

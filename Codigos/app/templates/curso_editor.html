@@ -41,7 +41,7 @@
 <section class="panel course-panel"><h2>Turmas e anos que utilizam este curso</h2>
 {% for oferta,turma in ofertas %}<div class="course-actions"><span>{{ turma.nome }} · {{ turma.ano_letivo }} · {{ 'Liberado' if oferta.ativa else 'Suspenso' }}</span>{% if oferta.ativa and session.user_role in ['admin','super_admin'] %}<form method="post" action="{{ url_for('cursos.revogar_oferta',oferta_id=oferta.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<button class="button">Suspender acesso</button></form>{% endif %}</div>{% else %}<p>Nenhuma turma vinculada.</p>{% endfor %}
+<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<button class="button">Suspender acesso</button></form>{% endif %}</div>{% else %}<p>Nenhuma turma vinculada. Depois de publicado, libere o curso para uma turma.</p>{% endfor %}
 {% if session.user_role in ['admin','super_admin'] and curso.estado == 'publicado' %}<form class="course-form" method="post" action="{{ url_for('cursos.ofertar',curso_id=curso.id) }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<label>Reutilizar na turma<select name="turma_id" required><option value="">Selecione</option>{% for turma in turmas %}<option value="{{ turma.id }}">{{ turma.nome }} · {{ turma.ano_letivo }}</option>{% endfor %}</select></label><button class="button button-primary">Liberar para a turma</button></form><p>A disciplina do curso precisa estar atribuída à turma.</p>{% endif %}</section>

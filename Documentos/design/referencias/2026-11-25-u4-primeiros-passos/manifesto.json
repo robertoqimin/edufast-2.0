@@ -1,0 +1,30 @@
+{
+  "base_commit": "chore: adiciona demonstracao em camera lenta da U3 no Edge",
+  "relatorio": "Documentos/testes/U4_PRIMEIROS_PASSOS_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Escola nova vazia (ambiente de gravação, porta 5070), somente dados fictícios",
+  "verificador": "node scripts/ver-u4.cjs --capturas <pasta> (escola de gravação recriada vazia)",
+  "capturas": [
+    {
+      "arquivo": "01-direcao-escola-vazia-desktop.png",
+      "sha256": "33c6b731a93f07515fb756fcf723e8709ed80287ba687f0c09427fcd660d901a",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "02-secretaria-continua-desktop.png",
+      "sha256": "75ff352e5dabebbb3349232dd04a1194a21943b478a13eb625503a64ac5c9ef2",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "03-implantacao-concluida-desktop.png",
+      "sha256": "e1ef964b8fa4082bf139250fe1493e4f5b87075ba0a64d015c1c7f5ff765893b",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "04-checklist-celular.png",
+      "sha256": "336bc12dec651f8dbabf08efbbf5eecfb26b8d00bae9f224e5c1f6bf3b180531",
+      "viewport": "390x844"
+    }
+  ]
+}

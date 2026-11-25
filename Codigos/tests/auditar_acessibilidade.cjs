@@ -15,7 +15,7 @@ const D = 'demo.edufast.test';
 const SAIDA = process.argv[2] || path.join(ROOT, '.ci-results/ux/acessibilidade.json');
 const PERFIS = [
   ['login', null, ['/']],
-  ['super-admin', `diretoria@${D}`, ['/super/usuarios', '/super/escola', '/super/layout', '/calendario-escolar']],
+  ['super-admin', `diretoria@${D}`, ['/admin/dashboard', '/super/usuarios', '/super/escola', '/super/layout', '/calendario-escolar']],
   ['secretaria', `secretaria@${D}`, ['/admin/dashboard', '/admin/cadastro-alunos', '/admin/turmas', '/admin/disciplinas',
     '/admin/alunos/1', '/academico', '/academico/alunos/1/boletim', '/frequencia', '/solicitacoes', '/aprendizagem', '/admin/gestao-turmas']],
   ['professora', `ana.ribeiro@${D}`, ['/professor/dashboard', '/academico', '/academico/avaliacoes/1', '/frequencia',

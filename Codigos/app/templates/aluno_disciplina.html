@@ -42,7 +42,7 @@
                 {% for professor in disciplina.professores %}
                 <span class="aluno-chip">{{ professor }}</span>
                 {% else %}
-                <span class="text-sm text-gray-400">Nenhum professor associado.</span>
+                <span class="text-sm text-gray-400">Nenhum professor associado ainda; ele aparece aqui quando a secretaria fizer a atribuição.</span>
                 {% endfor %}
             </div>
         </section>
@@ -67,7 +67,7 @@
                     {% endif %}
                 </article>
                 {% else %}
-                <div class="aluno-activity-empty">Nenhuma atividade lançada nesta disciplina.</div>
+                <div class="aluno-activity-empty">Nenhuma atividade lançada nesta disciplina. Quando o professor lançar uma atividade, ela aparece aqui.</div>
                 {% endfor %}
             </div>
         </section>
