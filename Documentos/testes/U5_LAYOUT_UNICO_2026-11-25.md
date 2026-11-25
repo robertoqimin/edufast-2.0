@@ -122,6 +122,12 @@ percorre:
      - em Decididas aparece "Decidida por … em …".
    - **Aluno:** o painel abre no layout padrão, com Matemática e a professora.
 
+Execuções em 25/11:
+
+- validação rápida e invisível (ritmo 0,3): 48 de 48;
+- **execução visível no ritmo 1**, depois do commit da U5: **48 de 48**, sem falha, em cerca de 10 minutos depois
+  da preparação da escola vazia.
+
 Capturas:
 
 - [`2026-11-25-u4-u5-juntas/`](../design/referencias/2026-11-25-u4-u5-juntas/): 7 imagens.

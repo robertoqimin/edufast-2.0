@@ -375,7 +375,9 @@ async function percursoU5() {
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'celular: checklist sem rolagem horizontal');
   await legenda('No celular, o checklist empilha cada passo.', 4500);
   await capturar('04-checklist-celular');
-  await tela('Fim da U4', 'Escola nova configurada seguindo o checklist: calendário, boletim, equipe, disciplina, turma, professora, alunos e boletim aplicado.');
+  await tela(COM_U5 ? 'Fim da U4 + U5' : 'Fim da U4', COM_U5
+    ? 'Escola nova configurada pelo checklist e usada nas telas unificadas: uma tela de turma, layout padrão e Solicitações com filtro.'
+    : 'Escola nova configurada seguindo o checklist: calendário, boletim, equipe, disciplina, turma, professora, alunos e boletim aplicado.');
   await ctx.close();
   page = anterior;
   await browser.close();
