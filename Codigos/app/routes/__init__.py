@@ -8,6 +8,7 @@ from app.routes.frequencia_routes import frequencia_bp
 from app.routes.estudo_routes import estudo_bp
 from app.routes.cursos_api_routes import cursos_api_bp
 from app.routes.cursos_web_routes import cursos_web_bp
+from app.routes.video_routes import video_bp
 
 
 def register_routes(app):
@@ -21,3 +22,4 @@ def register_routes(app):
     app.register_blueprint(estudo_bp)
     app.register_blueprint(cursos_api_bp)
     app.register_blueprint(cursos_web_bp)
+    app.register_blueprint(video_bp)

@@ -64,7 +64,8 @@ agrupar ofertas.
 
 ## Proposta de esquema (não executada)
 
-[`Codigos/migrations/propostas/009_ofertas_extras.sql`](../../Codigos/migrations/propostas/009_ofertas_extras.sql),
+[`Codigos/migrations/propostas/010_ofertas_extras.sql`](../../Codigos/migrations/propostas/010_ofertas_extras.sql)
+(renumerada de 009 para 010 em 25/11/2026, quando a 009 passou a ser a de vídeos enviados),
 PostgreSQL e transacional. Ela fica fora da pasta de migrations ativas até a aprovação.
 
 | Mudança | Para quê |
@@ -107,5 +108,5 @@ Quando a implementação for aprovada, os contratos passam para a regressão.
 | 3 | **Rótulos configuráveis:** série/semestre e turma/oferta/eletiva |
 | 4 | **Próximo ciclo:** a implementação entra depois da frente de venda (C1–C5) |
 
-Modelo aprovado. Na implementação, a proposta 009 passa por revisão final antes de ser
+Modelo aprovado. Na implementação, a proposta 010 passa por revisão final antes de ser
 executada (AGENTS.md), e os 10 contratos entram na regressão.

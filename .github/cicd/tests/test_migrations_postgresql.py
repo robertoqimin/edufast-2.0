@@ -155,13 +155,18 @@ class PostgresMigrationTests(TestCase):
                 'SELECT versao, origem, arquivo FROM educafast_migracoes ORDER BY versao'))]
 
     def test_008_registers_every_complete_previous_migration(self):
-        self.apply()
-        expected = [(m['versao'], 'detectada', m['arquivo']) for m in self.migrations[:-1]]
-        expected.append((self.migrations[-1]['versao'], 'aplicada', self.migrations[-1]['arquivo']))
+        # A 008 cria o registro: detecta 001-007 e se marca aplicada. Propostas posteriores (009...)
+        # sao registradas pelo aplicar_migracoes.py, coberto em test_aplicador_postgresql.
+        self.apply(until=8)
+        ate_008 = [m for m in self.migrations if m['versao'] <= 8]
+        expected = [(m['versao'], 'detectada', m['arquivo']) for m in ate_008[:-1]]
+        expected.append((8, 'aplicada', '008_registro_migracoes.sql'))
         self.assertEqual(self.registry(), expected)
         report = inventory(engine)
         self.assertEqual(report['alertas'], [])
-        self.assertEqual(report['versoes_registradas'], [m['versao'] for m in self.migrations])
+        self.assertEqual(report['versoes_registradas'], [m['versao'] for m in ate_008])
+        self.assertEqual(report['versao_estrutural'], 8)
+        self.assertEqual({m['versao']: m['situacao'] for m in report['migrations']}[9], 'ausente')
 
     def test_008_skips_incomplete_structure_and_keeps_existing_rows(self):
         self.apply(until=7)

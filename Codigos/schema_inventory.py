@@ -4,7 +4,8 @@ Le os arquivos ``NNN_*.sql`` para descobrir o que cada proposta cria e compara
 com a estrutura real do banco. Nunca executa DDL, nunca altera dados e nunca usa
 o ``.env`` como destino: o banco precisa ser informado explicitamente.
 
-A deteccao e estrutural (tabelas, colunas, indices e nulabilidade). Alteracoes
+A deteccao e estrutural (tabelas, colunas, indices, nulabilidade e regras CHECK
+acrescentadas com ADD CONSTRAINT, como na 009). Alteracoes
 somente de dados, como a quarentena de professores da 002, nao sao detectaveis.
 """
 import json
@@ -25,6 +26,7 @@ _ALTER_TABLE = re.compile(r'\bALTER\s+TABLE\s+`?(\w+)`?(.*?);', re.I | re.S)
 _ADD_COLUMN = re.compile(r'\bADD\s+COLUMN\s+`?(\w+)`?', re.I)
 _MODIFY_COLUMN = re.compile(r'\bMODIFY\s+COLUMN\s+`?(\w+)`?([^,;]*)', re.I)
 _NULLABLE = re.compile(r'(?<!NOT\s)\bNULL\b', re.I)
+_ADD_CONSTRAINT = re.compile(r'\bADD\s+CONSTRAINT\s+`?(\w+)`?', re.I)
 _DROP_NOT_NULL = re.compile(r'\bALTER\s+COLUMN\s+`?(\w+)`?\s+DROP\s+NOT\s+NULL', re.I)
 
 APLICADA, PARCIAL, AUSENTE = 'aplicada', 'parcial', 'ausente'
@@ -35,14 +37,15 @@ def parse_migration(sql):
     sql = _COMENTARIO.sub('', sql)
     tables = _CREATE_TABLE.findall(sql)
     indexes = [(table, name) for name, table in _CREATE_INDEX.findall(sql)]
-    columns, nullable = [], []
+    columns, nullable, constraints = [], [], []
     for table, body in _ALTER_TABLE.findall(sql):
         columns += [(table, column) for column in _ADD_COLUMN.findall(body)]
+        constraints += [(table, name) for name in _ADD_CONSTRAINT.findall(body)]
         for column, definition in _MODIFY_COLUMN.findall(body):
             if _NULLABLE.search(definition):
                 nullable.append((table, column))
         nullable += [(table, column) for column in _DROP_NOT_NULL.findall(body)]
-    return {'tables': tables, 'columns': columns, 'indexes': indexes, 'nullable': nullable}
+    return {'tables': tables, 'columns': columns, 'indexes': indexes, 'nullable': nullable, 'constraints': constraints}
 
 
 def load_migrations(directory=ESCOLA_DIR):
@@ -70,6 +73,8 @@ def _checks(migration, snapshot):
     for table, column in migration['nullable']:
         yield (f'coluna {table}.{column} aceita nulo',
                tables.get(table, {}).get('columns', {}).get(column) is True)
+    for table, name in migration.get('constraints', []):
+        yield f'regra {table}.{name}', name in tables.get(table, {}).get('constraints', set())
 
 
 def classify(migrations, snapshot, registered=None):
@@ -142,7 +147,7 @@ def problemas_registro(linhas, migrations, directory=ESCOLA_DIR):
 
 
 def snapshot(engine):
-    """Retrato somente leitura de tabelas, colunas (nulabilidade) e indices."""
+    """Retrato somente leitura de tabelas, colunas (nulabilidade), indices e regras CHECK."""
     from sqlalchemy import inspect
     inspector = inspect(engine)
     tables = {}
@@ -150,6 +155,7 @@ def snapshot(engine):
         tables[name] = {
             'columns': {c['name']: bool(c.get('nullable')) for c in inspector.get_columns(name)},
             'indexes': {i['name'] for i in inspector.get_indexes(name) if i.get('name')},
+            'constraints': {c['name'] for c in inspector.get_check_constraints(name) if c.get('name')},
         }
     return {'tables': tables}
 

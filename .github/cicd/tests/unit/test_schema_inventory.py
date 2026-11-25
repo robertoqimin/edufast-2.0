@@ -39,11 +39,14 @@ class ParseMigrationTests(unittest.TestCase):
         self.assertGreaterEqual(len(found), 7)
         for item in found:
             with self.subTest(arquivo=item['arquivo']):
-                self.assertTrue(item['tables'] or item['columns'] or item['nullable'])
+                self.assertTrue(item['tables'] or item['columns'] or item['nullable'] or item['constraints'])
         by_version = {m['versao']: m for m in found}
         self.assertIn(('usuarios', 'auth_version'), by_version[2]['columns'])
         self.assertIn('frequencia_chamadas', by_version[4]['tables'])
         self.assertIn(('curso_aulas', 'video_id'), by_version[7]['nullable'])
+        # 009 (U2b) so troca regras CHECK: detectada pelos nomes novos.
+        self.assertEqual(by_version[9]['constraints'], [('estudo_conteudos', 'ck_estudo_recurso_video'),
+                                                        ('curso_aula_recursos', 'ck_curso_recurso_video')])
 
     def test_central_migration_is_read_separately(self):
         central = load_migrations(CENTRAL_DIR)

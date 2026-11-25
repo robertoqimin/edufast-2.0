@@ -11,6 +11,30 @@ registro: `Documentos/planejamento/REVISAO_MIGRACOES_A5_2026-11-23.md`. Os cabe�
 As seções abaixo descrevem cada proposta como foi escrita; onde dizem "pendente de revisão",
 vale o registro acima.
 
+## Vídeos enviados — 009 aprovada em 25/11/2026 (U2b)
+
+`009_videos_enviados.sql` foi escrita à mão, revisada e **aprovada pelo usuário** em 25/11/2026.
+
+- **O que muda:** só amplia duas regras CHECK. Em `estudo_conteudos` e `curso_aula_recursos`,
+  PDF, PNG e JPEG continuam limitados a 5 MiB, e `video/mp4` ou `video/webm` passam a aceitar
+  até 300 MiB. Nenhuma tabela, coluna ou dado muda.
+- **Detecção:** as regras ganharam nomes novos (`ck_estudo_recurso_video` e
+  `ck_curso_recurso_video`), e o inventário passou a reconhecer `ADD CONSTRAINT`.
+- **Base nova:** a base passou a ser `base/esquema_v9.sql`. A `esquema_v8.sql` continua no
+  repositório, porque bancos criados por ela a citam no registro.
+- **Gerador:** o `gerar_postgresql.py` inclui propostas manuais posteriores à 008 na base e no
+  manifesto, sem reescrevê-las.
+- **Ofertas extras:** a proposta B4 passou a ser `propostas/010_ofertas_extras.sql`.
+
+Validação:
+
+- PostgreSQL 17 descartável: a regra antiga de PDF foi preservada, vídeo de 300 MiB aceito e
+  300 MiB + 1 recusado.
+- `test_migrations_postgresql` compara o caminho legado + 001–009 com a base v9.
+- `test_aplicador_postgresql` aplica a 009 pelo aplicador e a registra como `aplicada`.
+
+Em banco real, aplicar só pelo `aplicar_migracoes.py`, com backup de banco, uploads e chave.
+
 ## PostgreSQL desde 22/11/2026
 
 As propostas 001–008 estão em SQL **PostgreSQL 17**, geradas a partir dos modelos por

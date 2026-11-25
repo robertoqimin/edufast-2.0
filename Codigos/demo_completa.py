@@ -241,6 +241,18 @@ def conteudos(app, turma_id):
                     criado = post(professor, f'/estudos/disciplinas/{par}/novo', dados)
                 pedido = post(professor, f'/estudos/conteudos/{criado["id"]}/publicar', {'versao': 1})
                 post(secretaria, f'/solicitacoes/alteracoes/{pedido["id"]}/decidir', {'decisao': 'aprovar'})
+    # U2b: a professora de Matemática envia uma videoaula (arquivo) para a Unidade 1.
+    from app.models import SecaoEstudoModel
+    from enem_demo_server import VIDEO_DEMO, enviar_video
+    professor = cliente(app, email('ana.ribeiro'))
+    with get_session() as db:
+        aba = db.query(SecaoEstudoModel.id).filter_by(turma_disciplina_id=pares['Matemática'], nome='Unidade 1 — Funções').one()[0]
+    criado = post(professor, f'/estudos/disciplinas/{pares["Matemática"]}/novo?formato=json', {
+        'tipo': 'arquivo', 'titulo': 'Videoaula — função afim', 'secao_id': aba,
+        'texto': 'Vídeo enviado pela professora: assista aqui mesmo, sem baixar.',
+        'envio_video': enviar_video(professor, VIDEO_DEMO.read_bytes(), 'demo')})
+    pedido = post(professor, f'/estudos/conteudos/{criado["id"]}/publicar', {'versao': 1})
+    post(secretaria, f'/solicitacoes/alteracoes/{pedido["id"]}/decidir', {'decisao': 'aprovar'})
     return pares
 
 
@@ -266,13 +278,14 @@ def main():
         regras(app, turma_id)
         academico(turma_id)
         pares = conteudos(app, turma_id)
-        from enem_demo_server import montar_curso_enem
+        from enem_demo_server import VIDEO_DEMO, montar_curso_enem
         from app.models import DisciplinaModel
         with get_session() as db:
             matematica = db.query(DisciplinaModel.id).filter_by(nome='Matemática').one()[0]
         montar_curso_enem(app, email('ana.ribeiro'), email('secretaria'), disciplina_id=matematica,
                           turma_disciplina_id=pares['Matemática'], laboratorio=False,
-                          video_exemplo='https://www.youtube.com/watch?v=aqz-KE-bpKQ')
+                          video_exemplo='https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+                          video_arquivo=VIDEO_DEMO.read_bytes())
     print(json.dumps({'escola': ESCOLA, 'senha': SENHA, 'contas': contas()}, ensure_ascii=False), flush=True)
 
 

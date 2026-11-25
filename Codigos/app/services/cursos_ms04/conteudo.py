@@ -66,7 +66,7 @@ def guardar(upload):
     return path,{'arquivo':path.name,'mime':mime,'tamanho':len(data)}
 
 
-def novo_recurso(db, *, ator_id, curso_id, aula_id, payload, upload=None):
+def novo_recurso(db, *, ator_id, curso_id, aula_id, payload, upload=None, envio=None):
     course = comum.autoria(db,ator_id,curso_id,editar=True)
     row = comum.aula(db,course.id,aula_id)
     revision = comum.revisao(db,course.id)
@@ -79,7 +79,15 @@ def novo_recurso(db, *, ator_id, curso_id, aula_id, payload, upload=None):
     values = fields({'tipo':kind,'titulo':payload.get('titulo'),'link':payload.get('link','')})
     values.pop('texto')
     path = None
-    if kind=='arquivo':
+    if envio:
+        # U2b: vídeo já enviado em partes e cifrado em blocos; só muda de pasta.
+        from app.services import video_envio
+        if kind!='arquivo' or upload:
+            raise MutationConflict('Envie o vídeo ou um arquivo, não os dois.',400)
+        uploads = caminho_uploads(current_app.config["UPLOAD_FOLDER"])
+        path,metadata = video_envio.consumir(uploads,envio,ator_id,Path(uploads)/'materiais_curso')
+        values.update(metadata)
+    elif kind=='arquivo':
         path,metadata = guardar(upload)
         values.update(metadata)
     elif upload:
@@ -96,14 +104,28 @@ def novo_recurso(db, *, ator_id, curso_id, aula_id, payload, upload=None):
     return resource,revision,path
 
 
-def ler_arquivo(resource):
-    from app.crypto import FILE_PREFIX,cipher
+def caminho_arquivo(resource):
     name = resource.arquivo or ''
     if len(name)!=36 or not name.endswith('.enc') or any(c not in '0123456789abcdef' for c in name[:-4]):
         raise MutationConflict('Arquivo não encontrado.',404)
     path = Path(caminho_uploads(current_app.config["UPLOAD_FOLDER"]))/'materiais_curso'/name
     if not path.is_file():
         raise MutationConflict('Arquivo não encontrado.',404)
+    return path
+
+
+def servir(resource, nome):
+    """U2b: vídeo cifrado em blocos é servido por partes; demais arquivos, inteiros (como antes)."""
+    from app.services import video_envio
+    if not video_envio.eh_video(resource.mime):
+        return None
+    return video_envio.responder(caminho_arquivo(resource),resource.mime,resource.tamanho,
+        (nome or 'video')+video_envio.MIMES[resource.mime])
+
+
+def ler_arquivo(resource):
+    from app.crypto import FILE_PREFIX,cipher
+    path = caminho_arquivo(resource)
     if path.stat().st_size>8*1024*1024:
         raise MutationConflict('Arquivo indisponível.')
     encoded = path.read_bytes()

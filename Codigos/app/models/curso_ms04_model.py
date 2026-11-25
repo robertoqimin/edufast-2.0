@@ -50,5 +50,6 @@ class RecursoAulaCursoModel(Base):
     estado: Mapped[str] = mapped_column(String(12), nullable=False, default='ativo')
     __table_args__ = (
         CheckConstraint("estado IN ('ativo','arquivado')", name='ck_curso_recurso_estado'),
-        CheckConstraint("(tipo = 'arquivo' AND arquivo IS NOT NULL AND mime IS NOT NULL AND tamanho BETWEEN 1 AND 5242880 AND tamanho IS NOT NULL AND link = '') OR (tipo = 'link' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link <> '')", name='ck_curso_recurso_tipo'),
+        # 009 (U2b): PDF/PNG/JPEG até 5 MiB; vídeo MP4/WebM até 300 MiB.
+        CheckConstraint("(tipo = 'arquivo' AND arquivo IS NOT NULL AND mime IS NOT NULL AND tamanho IS NOT NULL AND link = '' AND (tamanho BETWEEN 1 AND 5242880 OR (mime IN ('video/mp4', 'video/webm') AND tamanho BETWEEN 1 AND 314572800))) OR (tipo = 'link' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link <> '')", name='ck_curso_recurso_video'),
     )

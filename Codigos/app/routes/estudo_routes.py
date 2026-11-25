@@ -14,7 +14,7 @@ from app.models import (AuditoriaEstudoModel, ConteudoEstudoModel, SolicitacaoAl
     DisciplinaModel, SecaoEstudoModel, ConteudoSecaoEstudoModel)
 from app.services.identidade_service import require_role
 from app.services import estudo_service as service
-from app.services import leitor
+from app.services import leitor, video_envio
 from config import caminho_uploads
 
 estudo_bp = Blueprint('estudos', __name__)
@@ -170,7 +170,7 @@ def novo(pair_id):
     identity = g.estudo_identity
     if identity.papel not in {'professor','admin','super_admin'}:
         raise MutationConflict('Somente docentes e administração preparam conteúdo.',403)
-    target = None
+    target = envio = None
     try:
         with get_session() as db:
             pair, classroom, subject = service.pair_access(db,identity,pair_id)
@@ -185,7 +185,15 @@ def novo(pair_id):
                 return result(*replay,content_id=replay[0]['id'])
             values = service.fields(payload)
             upload = request.files.get('arquivo')
-            if values['tipo'] == 'arquivo':
+            envio = payload.get('envio_video') or None
+            if envio and (values['tipo'] != 'arquivo' or upload):
+                raise MutationConflict('Envie o vídeo ou um arquivo, não os dois.',400)
+            if envio:
+                # U2b: vídeo já enviado em partes e cifrado em blocos; só muda de pasta.
+                uploads = caminho_uploads(current_app.config["UPLOAD_FOLDER"])
+                target,metadata = video_envio.consumir(uploads,envio,identity.id,Path(uploads)/'materiais_estudo')
+                values.update(metadata)
+            elif values['tipo'] == 'arquivo':
                 from app.crypto import FILE_PREFIX, cipher
                 if not upload:
                     raise MutationConflict('Anexe PDF, PNG ou JPEG de até 5 MiB.',400)
@@ -216,10 +224,15 @@ def novo(pair_id):
             response = finish_submission(db,entry,{'id':row.id,'versao':row.versao,'estado':row.estado,
                 'mensagem':'Rascunho salvo. Confira o conteúdo antes de enviar para publicação.'},201)
             target = None
+            if envio:
+                video_envio.finalizar(caminho_uploads(current_app.config["UPLOAD_FOLDER"]),envio,identity.id)
             return result(*response,content_id=row.id)
     finally:
         if target and target.exists():
-            target.unlink()
+            if envio:
+                video_envio.devolver(caminho_uploads(current_app.config["UPLOAD_FOLDER"]),envio,identity.id,target)
+            else:
+                target.unlink()
 
 
 @estudo_bp.get('/estudos/conteudos/<int:content_id>')
@@ -320,6 +333,12 @@ def arquivo(content_id):
         source = Path(caminho_uploads(current_app.config["UPLOAD_FOLDER"]))/'materiais_estudo'/row.arquivo
         if not source.is_file():
             raise MutationConflict('Arquivo indisponível.',404)
+        if video_envio.eh_video(row.mime):
+            # U2b: vídeo cifrado em blocos, servido por partes (o player pede só o trecho assistido).
+            if video_envio.primeira_leitura():
+                service.audit(db,row,identity.id,'ler_arquivo' if leitor.modo_leitura() else 'baixar_arquivo')
+                db.commit()
+            return video_envio.responder(source,row.mime,row.tamanho,(secure_filename(row.titulo) or 'video')+video_envio.MIMES[row.mime])
         if source.stat().st_size>8*1024*1024:
             raise MutationConflict('Arquivo indisponível. Avise a administração.',409)
         encoded = source.read_bytes()

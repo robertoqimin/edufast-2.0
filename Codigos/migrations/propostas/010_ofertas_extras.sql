@@ -3,7 +3,8 @@
 -- Estudo: Documentos/planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md
 -- PostgreSQL 17, transacional: uma falha desfaz tudo. Só acrescenta colunas com padrão e
 -- tabelas novas; nenhum dado existente é alterado. Turmas existentes ficam 'regular'.
--- Depois de aprovada, será movida para Codigos/migrations/ como 009_*.sql, gerada a partir
+-- Renumerada de 009 para 010 em 25/11/2026 (a 009 passou a ser a de vídeos enviados, U2b).
+-- Depois de aprovada, será movida para Codigos/migrations/ como 010_*.sql, gerada a partir
 -- dos modelos e congelada em checksums.json, como as demais.
 BEGIN;
 

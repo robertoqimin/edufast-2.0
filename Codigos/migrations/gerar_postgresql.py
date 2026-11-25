@@ -1,4 +1,4 @@
-"""Gera as propostas 001-007 em SQL PostgreSQL, offline, a partir dos modelos.
+"""Gera as propostas 001-007 em SQL PostgreSQL, offline, a partir dos modelos (e a base nova).
 
 Nao conecta a nenhum banco e nao executa DDL. A lista e a ordem das tabelas de
 cada proposta vem dos arquivos MySQL preservados em ``legado-mysql/``; as
@@ -188,10 +188,20 @@ def gerar_base(conteudos=None):
     return arquivo_base(migrations), '\n'.join(corpo) + '\n'
 
 
+def manuais():
+    """Propostas posteriores a 008, escritas a mao e revisadas (ex.: 009 altera regras CHECK).
+
+    Nao sao geradas dos modelos: so entram na base nova, que continua gerada dos modelos.
+    """
+    return {caminho.name: caminho.read_text(encoding='utf-8') for caminho in sorted(HERE.glob('[0-9][0-9][0-9]_*.sql'))
+            if int(caminho.name[:3]) > int(REGISTRO[:3])}
+
+
 def gerados():
     """Conteudo esperado de cada arquivo gerado (caminho relativo a migrations/), numa passada."""
     propostas = {caminho.name: gerar(caminho) for caminho in sorted(LEGADO.glob('[0-9][0-9][0-9]_*.sql'))}
     propostas[REGISTRO] = gerar_registro(propostas)
+    propostas.update(manuais())
     nome_base, base = gerar_base(propostas)
     return {**propostas, nome_base: base}
 
@@ -216,7 +226,11 @@ def main():
     for nome, conteudo in gerados().items():
         caminho = HERE / nome
         if caminho.exists():
-            print('congelado (mantido)', nome)
+            if nome not in manifesto:  # proposta manual revisada entra no manifesto como esta
+                manifesto[nome] = checksum_arquivo(caminho)
+                print('registrado no manifesto', nome)
+            else:
+                print('congelado (mantido)', nome)
             continue
         caminho.parent.mkdir(exist_ok=True)
         caminho.write_text(conteudo, encoding='utf-8', newline='\n')

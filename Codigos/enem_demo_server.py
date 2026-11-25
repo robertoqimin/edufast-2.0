@@ -13,6 +13,24 @@ from config import Config
 from two_school_test_data import initialize
 
 
+VIDEO_DEMO = Path(__file__).parent / 'demo/aula_funcao_afim.webm'
+
+
+def enviar_video(cliente, dados, csrf):
+    """U2b: envia um vídeo em partes pelas rotas reais e devolve o identificador do envio."""
+    from app.services.video_envio import PARTE
+    r = cliente.post('/videos/envios', json={'tamanho': len(dados)}, headers={'X-CSRF-Token': csrf})
+    if r.status_code != 201:
+        raise RuntimeError(f'Falha ao iniciar envio de vídeo: {r.status_code} {r.text}')
+    token = r.json['id']
+    for inicio in range(0, len(dados), PARTE):
+        r = cliente.put(f'/videos/envios/{token}/partes?inicio={inicio}', data=dados[inicio:inicio + PARTE],
+                        headers={'X-CSRF-Token': csrf, 'Content-Type': 'application/octet-stream'})
+        if r.status_code != 200:
+            raise RuntimeError(f'Falha ao enviar parte do vídeo: {r.status_code} {r.text}')
+    return token
+
+
 def seed(app):
     with get_session() as db:
         db.get(TurmaModel,1).nome = 'Preparatório ENEM — 2026'
@@ -20,7 +38,8 @@ def seed(app):
     montar_curso_enem(app,'professor01@teste01.local','admin@teste01.local',disciplina_id=1,turma_disciplina_id=1)
 
 
-def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma_disciplina_id, laboratorio=True, video_exemplo=None):
+def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma_disciplina_id, laboratorio=True, video_exemplo=None,
+                      video_arquivo=None):
     """Monta e publica o curso de Matemática para o ENEM pelas rotas reais (também usado pela demo completa)."""
     accounts = {}
     with get_session() as db:
@@ -66,6 +85,14 @@ def montar_curso_enem(app, professor_email, admin_email, *, disciplina_id, turma
                     if r.status_code!=201:
                         raise RuntimeError(r.text)
                     version = r.json['versao']
+                    if video_arquivo:  # U2b: vídeo enviado pela professora, no topo da aula
+                        envio = enviar_video(teacher,video_arquivo,'demo-bootstrap')
+                        r = teacher.post(f'/api/cursos/{cid}/aulas/{aid}/recursos',json={'versao':version,'tipo':'arquivo',
+                            'titulo':'Videoaula: lendo o gráfico da função afim','envio_video':envio},
+                            headers={'X-CSRF-Token':'demo-bootstrap','Idempotency-Key':uuid4().hex})
+                        if r.status_code!=201:
+                            raise RuntimeError(r.text)
+                        version = r.json['versao']
     proposal = post(teacher,f'/api/cursos/{cid}/solicitar-publicacao',{'versao':version})
     post(admin,f'/solicitacoes/alteracoes/{proposal["id"]}/decidir',{'decisao':'aprovar'})
     version = teacher.get(f'/api/cursos/{cid}').json['curso']['versao']

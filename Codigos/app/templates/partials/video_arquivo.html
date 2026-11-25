@@ -1,0 +1,13 @@
+{# U2b: vídeo enviado pelo professor, servido cifrado por partes pela mesma rota protegida. #}
+{% macro player(src, titulo, preload='metadata') -%}
+<div class="leitor-video leitor-video-arquivo"><video controls playsinline preload="{{ preload }}" src="{{ src }}" aria-label="Vídeo: {{ titulo }}"><p>Seu navegador não toca este vídeo aqui. Use "Baixar uma cópia".</p></video></div>
+{%- endmacro %}
+
+{# Campo de envio em partes (precisa de JavaScript: o vídeo sobe em partes de 8 MiB antes do formulário). #}
+{% macro campo(rotulo='Vídeo (MP4 ou WebM, até 300 MB)') -%}
+<label>{{ rotulo }}<input type="file" accept="video/mp4,video/webm" required data-video-arquivo></label>
+<input type="hidden" name="envio_video" value="">
+<progress value="0" max="100" hidden data-video-progresso aria-label="Envio do vídeo"></progress>
+<p class="course-meta" role="status" data-video-status>O vídeo sobe em partes, com barra de progresso; se a conexão cair, o envio continua de onde parou. Use MP4 (H.264) ou WebM.</p>
+<noscript><p class="notice">Ative o JavaScript para enviar vídeos.</p></noscript>
+{%- endmacro %}

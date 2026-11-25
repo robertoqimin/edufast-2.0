@@ -221,7 +221,16 @@ async function jornadaAluno() {
   await page.frameLocator('.course-player iframe').locator('.ytp-large-play-button').click({timeout: 8000}).catch(() => {});
   await legenda('O vídeo toca dentro da plataforma.', 12000);
 
-  await tela('8. Aula em vídeo no curso', 'Nos cursos, a aula de vídeo também abre com o player pronto.');
+  await tela('8. Vídeo enviado pela professora', 'A professora subiu um arquivo de vídeo para o sistema: ele fica cifrado no servidor e toca aqui, sem baixar.');
+  await page.goto(B + '/estudos');
+  await abrirAbaMatematica();
+  await clicar(page.getByRole('link', {name: 'Videoaula — função afim'}), 1000);
+  await tocarVideo('Player da própria plataforma: o vídeo chega por partes, só o trecho assistido.');
+  await page.evaluate(() => { const v = document.querySelector('.leitor-video-arquivo video'); v.currentTime = 12; });
+  await legenda('Avançar no vídeo também funciona: o servidor decifra só o pedaço pedido.', 6000);
+  await page.evaluate(() => document.querySelector('.leitor-video-arquivo video').pause());
+
+  await tela('9. Aula em vídeo no curso', 'Nos cursos, a aula de vídeo também abre com o player pronto.');
   await page.goto(B + '/aprendizagem');
   await clicar(page.getByRole('button', {name: 'Continuar estudando'}).first(), 1500);
   const aulaVideo = page.locator('.course-index button').filter({hasText: 'Videoaula de exemplo'}).first();
@@ -231,12 +240,13 @@ async function jornadaAluno() {
     await destacar(page.locator('.leitor-video').first());
     await legenda('Aula de vídeo: o aluno entra e o vídeo já está lá para assistir.', 9000);
   }
-  await tela('9. Material de aula nos cursos', 'Nos cursos, os materiais de cada aula usam o mesmo leitor.');
+  await tela('10. Material de aula nos cursos', 'Nesta aula a professora enviou um vídeo (fica no topo) e um gráfico em "Para praticar".');
   await page.goto(B + '/aprendizagem');
   await clicar(page.getByRole('button', {name: 'Continuar estudando'}).first(), 1500);
   await clicar(page.getByRole('button', {name: /Leitura de gráficos e pontos/}).first(), 1500);
   if (await page.getByRole('button', {name: 'Abrir aula'}).count()) await clicar(page.getByRole('button', {name: 'Abrir aula'}), 1500);
   await esperarLeitor();
+  await tocarVideo('O vídeo enviado pela professora abre no topo da aula.');
   await destacar(page.locator('.leitor-recurso summary').first());
   await legenda('"Para praticar": o gráfico da aula aparece aqui, sem baixar.', 6000);
   await destacar(page.locator('.leitor-recurso .leitor').first());
@@ -245,12 +255,34 @@ async function jornadaAluno() {
   await legenda('Baixar continua como opção.', 4000);
 }
 
+async function tocarVideo(texto) {
+  const video = page.locator('.leitor-video-arquivo video').first();
+  await destacar(video);
+  await page.evaluate(() => { const v = document.querySelector('.leitor-video-arquivo video'); v.muted = true; v.play(); });
+  await legenda(texto, 8000);
+}
+
 async function jornadaProfessora() {
-  await tela('10. A professora vê o mesmo leitor', 'Quem publica confere o material como o aluno vai ver; para docentes não há marcação de visto.');
+  await tela('11. A professora vê o mesmo leitor', 'Quem publica confere o material como o aluno vai ver; para docentes não há marcação de visto.');
   await entrar(`ana.ribeiro@${D}`, 'professora Ana Ribeiro (Matemática)');
   await page.goto(B + '/estudos/conteudos/4');
   await esperarLeitor();
   await legenda('Mesmo leitor, sem o aviso de visto, porque não é aluno.', 6000);
+
+  await tela('12. A professora envia um vídeo', 'Novo tipo "Vídeo": MP4 ou WebM de até 300 MB, enviado em partes com barra de progresso.');
+  await page.goto(B + '/estudos/disciplinas/1/novo');
+  await destacar(page.locator('#conteudo-tipo'));
+  await page.selectOption('#conteudo-tipo', 'video');
+  await legenda('Tipo de conteúdo: "Vídeo (arquivo MP4 ou WebM)".', 4500);
+  await destacar(page.locator('input[name=titulo]'));
+  await page.locator('input[name=titulo]').pressSequentially('Videoaula — revisão para a prova', {delay: Math.round(45 * RITMO)});
+  await destacar(page.locator('[data-video-arquivo]'));
+  await page.setInputFiles('[data-video-arquivo]', path.join(ROOT, 'Codigos/demo/aula_funcao_afim.webm'));
+  await legenda('Escolhe o arquivo de vídeo no computador.', 4000);
+  await destacar(page.getByRole('button', {name: 'Salvar rascunho'}));
+  await Promise.all([page.waitForURL(/\/estudos\/conteudos\/\d+$/, {timeout: 60000}), page.getByRole('button', {name: 'Salvar rascunho'}).click()]);
+  await legenda('O vídeo subiu em partes e virou um rascunho: só chega aos alunos depois da aprovação da secretaria.', 7000);
+  await tocarVideo('A professora confere o vídeo antes de enviar para publicação.');
 }
 
 async function jornadaCelular(browser) {
@@ -258,7 +290,7 @@ async function jornadaCelular(browser) {
   const anterior = page;
   page = await ctx.newPage();
   await page.goto(B + '/');
-  await tela('11. No celular', 'Mesma jornada numa tela de 390 × 844: a barra do leitor quebra em duas linhas e nada sai da tela.');
+  await tela('13. No celular', 'Mesma jornada numa tela de 390 × 844: a barra do leitor quebra em duas linhas e nada sai da tela.');
   await entrar(`carla.souza@${D}`, 'aluna Carla Souza (celular)');
   await page.goto(B + '/estudos/conteudos/4');
   await esperarLeitor();
@@ -271,7 +303,12 @@ async function jornadaCelular(browser) {
   await clicar(page.getByRole('link', {name: /Próximo material/}), 1000);
   await esperarLeitor();
   await legenda('A imagem também cabe na tela do celular.', 5000);
-  await tela('Fim da U2', 'Estudar sem baixar: PDF, slides, imagens e vídeos dentro da plataforma, com progresso e navegação.');
+  await page.goto(B + '/estudos');
+  await page.getByRole('link', {name: /Matemática/}).first().click();
+  await page.getByRole('link', {name: 'Unidade 1 — Funções'}).click();
+  await clicar(page.getByRole('link', {name: 'Videoaula — função afim'}), 1000);
+  await tocarVideo('O vídeo enviado também toca no celular.');
+  await tela('Fim da U2', 'Estudar sem baixar: PDF, slides, imagens, vídeos do YouTube e vídeos enviados pela professora, dentro da plataforma.');
   await ctx.close();
   page = anterior;
 }

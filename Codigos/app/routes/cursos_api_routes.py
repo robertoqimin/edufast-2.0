@@ -12,7 +12,8 @@ from app.models import (CursoModel, CursoVersaoModel, ProfessorModel, ProfessorD
     DisciplinaModel, OfertaCursoModel, TurmaDisciplinaModel, RecursoAulaCursoModel,
     SolicitacaoAlteracaoModel, AlunoModel)
 from app.services import cursos as base
-from app.services import leitor
+from app.services import leitor, video_envio
+from config import caminho_uploads
 from app.services.identidade_service import require_role
 from app.services.cursos_ms04 import comum, autoria, publicacao, retomada, conteudo, leitura
 
@@ -276,10 +277,12 @@ def progresso(oferta_id,aula_id,action):
 @cursos_api_bp.post('/cursos/<int:curso_id>/aulas/<int:aula_id>/recursos')
 def adicionar_recurso(curso_id,aula_id):
     data = payload()
-    comum.campos(data,{'tipo','titulo','link','versao'})
+    comum.campos(data,{'tipo','titulo','link','versao','envio_video'})
     if set(request.files)-{'arquivo'} or len(request.files.getlist('arquivo'))>1:
         raise MutationConflict('Envie somente um arquivo por recurso.',400)
     path = None
+    envio = data.get('envio_video') or None
+    uploads = caminho_uploads(current_app.config['UPLOAD_FOLDER'])
     try:
         with get_session() as db:
             comum.autoria(db,g.curso_identity.id,curso_id)
@@ -287,13 +290,18 @@ def adicionar_recurso(curso_id,aula_id):
             if replay:
                 return result(replay[0],replay[1])
             row,revision,path = conteudo.novo_recurso(db,ator_id=g.curso_identity.id,curso_id=curso_id,aula_id=aula_id,
-                payload=data,upload=request.files.get('arquivo'))
+                payload=data,upload=request.files.get('arquivo'),envio=envio)
             saved = response(db,entry,{'recurso':leitura.recurso(row),'versao':revision.versao},201)
             path = None
+            if envio:
+                video_envio.finalizar(uploads,envio,g.curso_identity.id)
             return saved
     finally:
         if path:
-            path.unlink(missing_ok=True)
+            if envio:
+                video_envio.devolver(uploads,envio,g.curso_identity.id,path)
+            else:
+                path.unlink(missing_ok=True)
 
 
 @cursos_api_bp.post('/cursos/<int:curso_id>/aulas/<int:aula_id>/recursos/<int:recurso_id>/arquivar')
@@ -325,6 +333,11 @@ def arquivo(oferta_id,aula_id,recurso_id):
         row = db.query(RecursoAulaCursoModel).filter_by(id=recurso_id,aula_id=aula_id,tipo='arquivo',estado='ativo').first()
         if not row:
             raise MutationConflict('Recurso não encontrado.',404)
+        if video_envio.eh_video(row.mime):
+            if video_envio.primeira_leitura():
+                base.auditar(db,user.id,'ms04_ler_recurso' if leitor.modo_leitura() else 'ms04_baixar_recurso',f'{offer.id}:{row.id}')
+                db.commit()
+            return conteudo.servir(row,secure_filename(row.titulo))
         data = conteudo.ler_arquivo(row)
         base.auditar(db,user.id,'ms04_ler_recurso' if leitor.modo_leitura() else 'ms04_baixar_recurso',f'{offer.id}:{row.id}')
         db.commit()
@@ -340,6 +353,11 @@ def arquivo_autor(curso_id,aula_id,recurso_id):
         row = db.query(RecursoAulaCursoModel).filter_by(id=recurso_id,aula_id=aula_id,tipo='arquivo').first()
         if not row:
             raise MutationConflict('Recurso não encontrado.',404)
+        if video_envio.eh_video(row.mime):
+            if video_envio.primeira_leitura():
+                base.auditar(db,g.curso_identity.id,'ms04_conferir_recurso',row.id)
+                db.commit()
+            return conteudo.servir(row,secure_filename(row.titulo))
         data = conteudo.ler_arquivo(row)
         base.auditar(db,g.curso_identity.id,'ms04_conferir_recurso',row.id)
         db.commit()

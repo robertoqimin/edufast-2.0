@@ -23,7 +23,9 @@ const PERFIS = [
     '/estudos/conteudos/4']],
   ['aluno', `bruno.lima@${D}`, ['/aluno/dashboard', '/boletim', '/estudos', '/estudos/disciplinas/1', '/aprendizagem', '/frequencia', '/minha-privacidade',
     // U2: leitor de PDF (slides), imagem, vídeo e aula do curso com recurso
-    '/estudos/conteudos/4', '/estudos/conteudos/3', '/estudos/conteudos/9', '/aprendizagem/ofertas/1']],
+    '/estudos/conteudos/4', '/estudos/conteudos/3', '/estudos/conteudos/9', '/aprendizagem/ofertas/1',
+    // U2b: vídeo enviado pela professora
+    '/estudos/conteudos/10']],
 ];
 
 (async () => {

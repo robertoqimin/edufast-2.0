@@ -23,7 +23,8 @@ class ConteudoEstudoModel(Base):
         CheckConstraint("tipo IN ('aviso','link','arquivo')", name='ck_estudo_tipo'),
         CheckConstraint("estado IN ('rascunho','publicado','arquivado')", name='ck_estudo_estado'),
         CheckConstraint('versao >= 1', name='ck_estudo_versao'),
-        CheckConstraint("(tipo = 'arquivo' AND arquivo IS NOT NULL AND mime IS NOT NULL AND tamanho IS NOT NULL AND tamanho BETWEEN 1 AND 5242880 AND link = '') OR (tipo = 'link' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link <> '') OR (tipo = 'aviso' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link = '')", name='ck_estudo_recurso'),
+        # 009 (U2b): PDF/PNG/JPEG até 5 MiB; vídeo MP4/WebM até 300 MiB.
+        CheckConstraint("(tipo = 'arquivo' AND arquivo IS NOT NULL AND mime IS NOT NULL AND tamanho IS NOT NULL AND link = '' AND (tamanho BETWEEN 1 AND 5242880 OR (mime IN ('video/mp4', 'video/webm') AND tamanho BETWEEN 1 AND 314572800))) OR (tipo = 'link' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link <> '') OR (tipo = 'aviso' AND arquivo IS NULL AND mime IS NULL AND tamanho IS NULL AND link = '')", name='ck_estudo_recurso_video'),
         Index('ix_estudo_oferta_estado_id', 'turma_disciplina_id', 'estado', 'id'),
     )
 

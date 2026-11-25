@@ -1,0 +1,120 @@
+{
+  "base_commit": "feat: mostra o video do YouTube ja embutido no material e na aula (U2)",
+  "relatorio": "Documentos/testes/U2B_VIDEOS_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa (Colégio Horizonte), somente dados fictícios; vídeo de exemplo: Big Buck Bunny (Blender Foundation)",
+  "verificador": "node Codigos/tests/verificar_leitor_u2.cjs <pasta> e node Codigos/tests/verificar_video_u2b.cjs <pasta>",
+  "capturas": [
+    {
+      "arquivo": "aluno-curso-video-celular.png",
+      "sha256": "e3addd7cbd74744dd9ae5df3d4d229628f6e91b36b468feebe2ec52e1bd7980e",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "aluno-curso-video-desktop.png",
+      "sha256": "702dc3ccc5a4003a0e249577366bad3797b5df0cc5879f5c7cc5bbc0e2590300",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "aluno-material-video-celular.png",
+      "sha256": "c0cc5b482a70267ee8df77e1066cadbd56cb7ad425d1669157a4fad2c1c85487",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "aluno-material-video-desktop.png",
+      "sha256": "bbc9d61f6fbde27595baeb592b1cec1e8fbc414d2f0592722f629029a5ecc81c",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "curso-aula-video-celular.png",
+      "sha256": "d0b08d4e3dfa5b28c2f1f8b596873acc40b4e0361c71ac8fee742aabcaac7831",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "curso-aula-video-desktop.png",
+      "sha256": "95f1242215bbf385138f440f3b59567ac1350dbd425452785c15454c3ed37a6e",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "curso-recurso-imagem-celular.png",
+      "sha256": "6e75563acf6a9959e3e9742ac201cef8d38486b6727a67688e39e70ed08c1b86",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "curso-recurso-imagem-desktop.png",
+      "sha256": "cd29a3e6af0640c4cf28dfd5debdc97cf20de5c6734fbe8e915fb05c5fb148de",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "imagem-celular.png",
+      "sha256": "80d4f82ea075531eaff857acf5a23325d50483da7174cb658f4dc35b8f85436a",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "imagem-desktop.png",
+      "sha256": "6f5e1d047ce50cd8d15b079a0780b28a57092b3bbdcdd5f2ec9d83ad51abfd79",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "lista-antes-celular.png",
+      "sha256": "7f35d383edd514bce3b7b7b8b72f72f2f3222594a2271347713b4878329e017c",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "lista-antes-desktop.png",
+      "sha256": "48ef0c0d691fa2919ff5347dfa30059aa2faeaf3441cf190ec630d21b399eb2d",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "lista-depois-celular.png",
+      "sha256": "7f35d383edd514bce3b7b7b8b72f72f2f3222594a2271347713b4878329e017c",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "lista-depois-desktop.png",
+      "sha256": "d7aa1f33d88a767ee8889d1996d011805a190deecbfccc0f39491f1fbbbde724",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "pdf-pagina-1-celular.png",
+      "sha256": "cb85995a7a16e76a6314db2460f14bec6f56917d8ec1b948049825716da84500",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "pdf-pagina-1-desktop.png",
+      "sha256": "7e361e30aeeccfb2cc21abcaf80e07d1011c89e508232f2f881abc1c4e52fd14",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "pdf-pagina-3-zoom-celular.png",
+      "sha256": "bc461048d7960d00d144886b3f06c57505cecfb82be9ee0529b02fbfd69f7b2b",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "pdf-pagina-3-zoom-desktop.png",
+      "sha256": "c7db4a035b7e31c2a68cc1e830c61a6b50e0302efdc788513476f064ad3745d0",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "professora-formulario-video-desktop.png",
+      "sha256": "d7064829a82d7395811a0be3bd0d81c0f7c528c86e2f3dd0e8b219e84f6431a5",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "professora-rascunho-video-desktop.png",
+      "sha256": "e621e8b55dc85ed176e13d10b12b4c6c8e03c5e0340dfb57ac41432dc5f1466d",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "video-celular.png",
+      "sha256": "864842545d3c294c8930d27b2468ae7b8c7cdea73984a58e89568a14499d5e7a",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "video-desktop.png",
+      "sha256": "3470371780a58be1d3baa7e48696e90541d0caf4c1eedbce92ef891084a7f1a4",
+      "viewport": "1440x1000"
+    }
+  ]
+}

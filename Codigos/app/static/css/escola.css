@@ -73,3 +73,8 @@
 .leitor-video { aspect-ratio:16/9; padding:0; overflow:hidden; background:var(--surface); border:1px solid var(--line); border-radius:var(--school-radius); margin-block:1rem; }
 .leitor-video iframe { display:block; border:0; width:100%; height:100%; }
 .study-space progress { width:min(360px,100%); accent-color:var(--accent); }
+/* U2b: vídeo enviado pelo professor (player nativo). */
+.leitor-video-arquivo video { display:block; width:100%; height:100%; object-fit:contain; background:#000; }
+.course-form progress[data-video-progresso] { width:100%; height:14px; accent-color:var(--accent); }
+.course-form fieldset.campo-video { border:0; padding:0; margin:0; min-width:0; display:grid; gap:14px; }
+.course-form fieldset.campo-video[hidden] { display:none; }
