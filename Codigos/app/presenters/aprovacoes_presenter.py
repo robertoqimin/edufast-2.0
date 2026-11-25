@@ -2,6 +2,7 @@
 OPERATIONS = {'cursos.criar': 'Criar curso', 'cursos.editar_estrutura': 'Editar material do curso',
     'cursos.duplicar': 'Reutilizar curso', 'cursos.estado': 'Alterar publicacao do curso',
     'academico.criar_avaliacao': 'Criar avaliacao', 'academico.lancar': 'Alterar nota de avaliacao',
+    'academico.lancar_lote': 'Lançar notas da avaliação',
     'academico.publicar': 'Publicar avaliacao', 'academico.configurar_avaliacao': 'Configurar avaliacao'}
 
 

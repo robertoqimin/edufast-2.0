@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from app.concurrency import MutationConflict
 from app.database import get_session
 from app.models import AlunoModel, AlunoTurmaModel, ProfessorModel, ProfessorTurmaModel, SolicitacaoAlteracaoModel, UsuarioModel
@@ -40,6 +40,22 @@ def _items(identity):
             items[-1]['titulo'], items[-1]['campos'] = present(row.tipo, json.loads(row.payload))
             if row.tipo == 'publicar_material':
                 items[-1]['conteudo_url'] = url_for('estudos.conteudo',content_id=json.loads(row.payload)['conteudo_id'])
+            data = json.loads(row.payload)
+            if row.tipo == 'operacao_restaurada' and data.get('endpoint') == 'academico.lancar_lote':
+                from app.services.academico import resumo_lote
+                avaliacao_id = data.get('params', {}).get('avaliacao_id')
+                resumo = resumo_lote(db, avaliacao_id, data.get('payload', {}))
+                if resumo:
+                    items[-1]['titulo'] = 'Lançar notas da avaliação'
+                    items[-1]['campos'] = {'Avaliação': resumo['avaliacao'], 'Turma': resumo['turma'],
+                                           'Disciplina': resumo['disciplina']}
+                    items[-1]['diario_url'] = url_for('academico.diario', avaliacao_id=avaliacao_id)
+                    if row.estado == 'pendente':
+                        # A comparação "atual → enviada" só faz sentido antes da decisão.
+                        items[-1]['campos']['Notas no envio'] = f"{len(resumo['linhas'])} ({resumo['novas']} novas, {resumo['alteradas']} alteradas)"
+                        items[-1]['notas'] = resumo['linhas']
+                    else:
+                        items[-1]['campos']['Notas no envio'] = len(resumo['linhas'])
             if row.tipo == 'publicar_curso':
                 from app.models import CursoModel
                 data = json.loads(row.payload)
@@ -102,6 +118,41 @@ def decidir(proposal_id):
     body, status = decide_proposal(proposal_id, data.get("decisao"), data.get("justificativa", ""))
     if request.is_json or request.accept_mimetypes.best == "application/json":
         return jsonify(body), status
+    return redirect(url_for("aprovacoes.painel"))
+
+
+@aprovacoes_bp.post("/solicitacoes/alteracoes/lote")
+def decidir_lote():
+    """U3/O1: aprovar ou rejeitar várias solicitações de uma vez.
+
+    Cada uma é decidida na sua própria transação, com as mesmas regras da decisão individual
+    (permissão, versão, conteúdo inalterado desde o envio); uma falha não desfaz as outras.
+    """
+    data = _data() or {}
+    ids = data.get("ids", []) if request.is_json else request.form.getlist("ids")
+    if not isinstance(ids, list) or not ids or len(ids) > 100:
+        raise MutationConflict("Selecione de 1 a 100 solicitações.", 400)
+    try:
+        ids = sorted({int(i) for i in ids})
+    except (TypeError, ValueError):
+        raise MutationConflict("Solicitação inválida.", 400)
+    decisao, justificativa = data.get("decisao"), data.get("justificativa", "")
+    if decisao not in {"aprovar", "rejeitar"}:
+        raise MutationConflict("Decisão inválida.", 400)
+    decididas, falhas = [], []
+    for proposal_id in ids:
+        try:
+            decide_proposal(proposal_id, decisao, justificativa)
+            decididas.append(proposal_id)
+        except MutationConflict as error:
+            falhas.append({"id": proposal_id, "erro": error.message})
+    if request.is_json or request.accept_mimetypes.best == "application/json":
+        return jsonify(decididas=decididas, falhas=falhas), 200
+    verbo = "aprovadas" if decisao == "aprovar" else "rejeitadas"
+    if decididas:
+        flash(f"{len(decididas)} solicitações {verbo}.", "success")
+    for falha in falhas:
+        flash(f"Solicitação {falha['id']} não foi decidida: {falha['erro']}", "error")
     return redirect(url_for("aprovacoes.painel"))
 
 

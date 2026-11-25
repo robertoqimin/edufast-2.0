@@ -1,6 +1,6 @@
 """Integration boundary for recovered modules and their original design."""
 import hmac
-from flask import g, jsonify, redirect, request, session, url_for
+from flask import flash, g, jsonify, redirect, request, session, url_for
 from sqlalchemy import inspect
 from app.database import engine, get_session
 from app.concurrency import MutationConflict
@@ -43,7 +43,10 @@ def install(app):
                 payload = {k: v for k, v in payload.items() if k not in {'csrf_token', 'idempotency_key'}}
                 body, status = submit_proposal('operacao_restaurada', {
                     'endpoint': request.endpoint, 'params': dict(request.view_args or {}), 'payload': payload})
-                return (jsonify(body), status) if request.is_json else redirect(url_for('aprovacoes.painel'))
+                if request.is_json:
+                    return jsonify(body), status
+                flash(body.get('mensagem') or 'Solicitação enviada para aprovação.', 'success')  # U3/O6: confirma na tela
+                return redirect(url_for('aprovacoes.painel'))
 
     @app.before_request
     def load_workspace():

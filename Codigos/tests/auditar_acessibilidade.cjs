@@ -20,7 +20,9 @@ const PERFIS = [
     '/admin/alunos/1', '/academico', '/academico/alunos/1/boletim', '/frequencia', '/solicitacoes', '/aprendizagem', '/admin/gestao-turmas']],
   ['professora', `ana.ribeiro@${D}`, ['/professor/dashboard', '/academico', '/academico/avaliacoes/1', '/frequencia',
     '/frequencia/turmas/1/chamada', '/estudos/disciplinas/1', '/estudos/disciplinas/1/novo', '/aprendizagem', '/mensagens',
-    '/estudos/conteudos/4']],
+    '/estudos/conteudos/4',
+    // U3: diário da avaliação inteira (com envio aguardando aprovação durante a auditoria)
+    '/academico/avaliacoes/13']],
   ['aluno', `bruno.lima@${D}`, ['/aluno/dashboard', '/boletim', '/estudos', '/estudos/disciplinas/1', '/aprendizagem', '/frequencia', '/minha-privacidade',
     // U2: leitor de PDF (slides), imagem, vídeo e aula do curso com recurso
     '/estudos/conteudos/4', '/estudos/conteudos/3', '/estudos/conteudos/9', '/aprendizagem/ofertas/1',

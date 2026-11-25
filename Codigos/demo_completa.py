@@ -185,6 +185,12 @@ def academico(turma_id):
                 db.add_all([PresencaModel(chamada_id=chamada.id, aluno_id=a,
                                           situacao='falta' if rnd.random() < 0.07 else 'presente') for a in alunos])
         periodos[0].fechado = True
+        # U3: uma avaliação nova, ainda sem notas, para a professora lançar a turma inteira num envio.
+        from app.models import DisciplinaModel
+        matematica = db.query(TurmaDisciplinaModel).join(DisciplinaModel, DisciplinaModel.id == TurmaDisciplinaModel.disciplina_id).filter(
+            TurmaDisciplinaModel.turma_id == turma_id, DisciplinaModel.nome == 'Matemática').one()
+        db.add(AvaliacaoModel(turma_disciplina_id=matematica.id, periodo_id=periodos[1].id, peso=1, publicada=False,
+                              titulo=f'Simulado — {periodos[1].nome}'))
         db.commit()
 
 

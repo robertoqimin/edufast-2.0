@@ -163,9 +163,20 @@ def diario(avaliacao_id):
             return jsonify(avaliacao_id=avaliacao.id, publicada=avaliacao.publicada, periodo=periodo.nome,
                 alunos=[{'id': a.id, 'nome': a.nome, 'valor': str(notas[a.id].valor) if a.id in notas else None,
                          'versao': notas[a.id].versao if a.id in notas else 0} for a in alunos])
+        # U3/O6: o lançamento enviado e ainda não aprovado aparece no diário (e bloqueia outro envio).
+        from app.models import SolicitacaoAlteracaoModel
+        import json
+        pendente = db.query(SolicitacaoAlteracaoModel).filter_by(recurso_pendente=f'notas:{avaliacao_id}', estado='pendente').first()
+        enviadas = {}
+        if pendente:
+            try:
+                enviadas = {int(k[6:]): v for k, v in json.loads(pendente.payload)['payload'].items()
+                            if k.startswith('valor_') and str(v).strip()}
+            except (ValueError, KeyError, TypeError):
+                enviadas = {}
         return render_template('academico_diario.html', avaliacao=avaliacao, periodo=periodo,
             turma=cursos.obter(db, TurmaModel, vinculo.turma_id), disciplina=cursos.obter(db, DisciplinaModel, vinculo.disciplina_id),
-            alunos=alunos, notas=notas, ativa=cursos.turma_ativa(db, vinculo.turma_id))
+            alunos=alunos, notas=notas, ativa=cursos.turma_ativa(db, vinculo.turma_id), pendente=pendente, enviadas=enviadas)
 
 
 @academico_bp.post('/academico/avaliacoes/<int:avaliacao_id>/alunos/<int:aluno_id>')
@@ -176,6 +187,20 @@ def lancar(avaliacao_id, aluno_id):
         row = service.salvar_nota(db, avaliacao_id, aluno_id, data, user_id, role)
         db.commit()
         return resposta('academico.diario', avaliacao_id=avaliacao_id, versao=row.versao)
+
+
+@academico_bp.post('/academico/avaliacoes/<int:avaliacao_id>/lancamentos')
+def lancar_lote(avaliacao_id):
+    """U3/O1: a avaliação inteira num envio. Do professor, vira UMA solicitação para a secretaria."""
+    user_id, role = identidade()
+    data = dados()
+    with get_session() as db:
+        alteradas = service.salvar_lote(db, avaliacao_id, data, user_id, role)
+        db.commit()
+    if request.is_json:
+        return jsonify(avaliacao_id=avaliacao_id, alteradas=len(alteradas))
+    flash(f'{len(alteradas)} notas salvas.', 'success')
+    return redirect(url_for('academico.diario', avaliacao_id=avaliacao_id))
 
 
 @academico_bp.post('/academico/avaliacoes/<int:avaliacao_id>/publicar')

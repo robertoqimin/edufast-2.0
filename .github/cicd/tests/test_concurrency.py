@@ -302,7 +302,7 @@ class MutationApiTests(TestCase):
                 self.assertIn(b'name="idempotency_key"', response.data)
                 self.assertIn(b'submission.js', response.data)
                 if path not in {"/admin/comunicados", "/professor/dashboard"}:
-                    self.assertIn(b'name="versao"', response.data)
+                    self.assertIn(b'name="versao', response.data)  # U3: versao_<aluno> no diario
 
     def test_legacy_seed_cannot_delete_users(self):
         from app.seed import run_seed

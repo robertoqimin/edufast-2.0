@@ -193,6 +193,8 @@ def submit_proposal(kind, data, files=None):
             resource = f"estudo:{normalized['conteudo_id']}:{normalized['versao']}"
         if kind == "responder_documento":
             resource = f"documento:{normalized['solicitacao_id']}"
+        if kind == 'operacao_restaurada' and normalized.get('endpoint') == 'academico.lancar_lote':
+            resource = f"notas:{normalized['params']['avaliacao_id']}"
         proposal = SolicitacaoAlteracaoModel(solicitante_id=identity.id, tipo=kind,
             payload=json.dumps(normalized, ensure_ascii=False), estado="pendente", arquivo=filename, recurso_pendente=resource)
         db.add(proposal)

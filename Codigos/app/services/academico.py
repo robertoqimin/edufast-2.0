@@ -2,6 +2,7 @@
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import hashlib
 import json
+import re
 import secrets
 from flask import abort
 from app.models import (AlunoModel, AlunoTurmaModel, ProfessorModel, ProfessorDisciplinaModel,
@@ -139,6 +140,100 @@ def salvar_nota(db, avaliacao_id, aluno_id, data, user_id, role):
     db.flush()
     auditar(db, user_id, 'salvar_nota', row.id, {'anterior': anterior, 'novo': {'valor': str(valor), 'observacao': row.observacao, 'versao': row.versao}})
     return row
+
+
+LOTE_CAMPO = re.compile(r'^(valor|observacao|versao)_(\d{1,9})$')
+LOTE_MAX_ALUNOS = 200
+
+
+def ler_lote(data):
+    """U3/O1: campos valor_<aluno>, observacao_<aluno> e versao_<aluno> de um formulário único."""
+    if not isinstance(data, dict) and not hasattr(data, 'items'):
+        abort(400, 'Dados inválidos.')
+    notas = {}
+    for chave, valor in data.items():
+        achado = LOTE_CAMPO.match(str(chave))
+        if not achado:
+            abort(400, 'Campo não permitido no lançamento das notas.')
+        if valor is None:
+            valor = ''
+        if isinstance(valor, bool) or not isinstance(valor, (str, int, float)):
+            abort(400, 'Valor inválido no lançamento das notas.')
+        notas.setdefault(int(achado.group(2)), {})[achado.group(1)] = str(valor)
+    if len(notas) > LOTE_MAX_ALUNOS:
+        abort(400, f'Envie até {LOTE_MAX_ALUNOS} alunos por lançamento.')
+    return notas
+
+
+def salvar_lote(db, avaliacao_id, data, user_id, role):
+    """Lança a avaliação inteira numa transação: tudo entra, ou nada entra.
+
+    Campo de nota vazio é pendência (não apaga nota). Nota igual à atual não gera nova versão.
+    Cada aluno passa pelas mesmas regras do lançamento individual (vínculo, matrícula, versão).
+    """
+    notas = ler_lote(data)
+    avaliacao_autorizada(db, avaliacao_id, user_id, role, mutacao=True)
+    atuais = {n.aluno_id: n for n in db.query(LancamentoNotaModel).filter_by(avaliacao_id=avaliacao_id)}
+    alteradas = []
+    for aluno_id in sorted(notas):
+        item = notas[aluno_id]
+        valor = item.get('valor', '').strip()
+        if not valor:
+            continue
+        observacao = item.get('observacao', '').strip()
+        atual = atuais.get(aluno_id)
+        if atual and decimal_limitado(valor) == atual.valor and observacao == (atual.observacao or ''):
+            continue
+        salvar_nota(db, avaliacao_id, aluno_id, {'valor': valor, 'observacao': observacao,
+                                                 'versao': item.get('versao', '0')}, user_id, role)
+        alteradas.append(aluno_id)
+    if not alteradas:
+        abort(400, 'Nenhuma nota nova ou alterada para enviar.')
+    auditar(db, user_id, 'salvar_notas_lote', avaliacao_id, {'alunos': alteradas})
+    return alteradas
+
+
+def resumo_lote(db, avaliacao_id, payload):
+    """U3: o que a secretaria vê antes de aprovar: aluno, nota atual, nota enviada e situação."""
+    avaliacao = db.get(AvaliacaoModel, avaliacao_id)
+    if avaliacao is None:
+        return None
+    vinculo = db.get(TurmaDisciplinaModel, avaliacao.turma_disciplina_id)
+    turma = db.get(TurmaModel, vinculo.turma_id) if vinculo else None
+    disciplina = db.get(DisciplinaModel, vinculo.disciplina_id) if vinculo else None
+    try:
+        notas = ler_lote(payload)
+    except Exception:
+        notas = {}
+    alunos = {a.id: a.nome for a in db.query(AlunoModel).filter(AlunoModel.id.in_(list(notas) or [0]))}
+    atuais = {n.aluno_id: n for n in db.query(LancamentoNotaModel).filter_by(avaliacao_id=avaliacao_id)}
+    linhas = []
+    for aluno_id in sorted(notas, key=lambda i: alunos.get(i, '')):
+        nova = notas[aluno_id].get('valor', '').strip()
+        if not nova:
+            continue
+        atual = atuais.get(aluno_id)
+        observacao_nova = notas[aluno_id].get('observacao', '').strip()
+        if atual is None:
+            situacao = 'Nova'
+        elif not _mesmo_valor(atual.valor, nova):
+            situacao = 'Alterada'
+        elif observacao_nova != (atual.observacao or ''):
+            situacao = 'Alterada (observação)'
+        else:
+            situacao = 'Sem mudança'
+        linhas.append({'aluno': alunos.get(aluno_id, f'Aluno {aluno_id}'), 'atual': str(atual.valor) if atual else '—',
+                       'nova': nova.replace('.', ','), 'observacao': notas[aluno_id].get('observacao', '').strip(), 'situacao': situacao})
+    return {'avaliacao': avaliacao.titulo, 'turma': turma.nome if turma else '—', 'disciplina': disciplina.nome if disciplina else '—',
+            'linhas': linhas, 'novas': sum(l['situacao'] == 'Nova' for l in linhas),
+            'alteradas': sum(l['situacao'].startswith('Alterada') for l in linhas)}
+
+
+def _mesmo_valor(atual, texto):
+    try:
+        return Decimal(texto.strip().replace(',', '.')) == atual
+    except (InvalidOperation, ValueError):
+        return False
 
 
 def boletim(db, aluno_id):

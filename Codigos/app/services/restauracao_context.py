@@ -15,7 +15,7 @@ from app.concurrency import MutationConflict
 _transaction = ContextVar('restored_transaction', default=None)
 _principal = ContextVar('restored_principal', default=None)
 MATERIAL_ACTIONS = frozenset({'cursos.criar', 'cursos.editar_estrutura', 'cursos.duplicar', 'cursos.estado'})
-ALLOWED_ACTIONS = MATERIAL_ACTIONS | {'academico.criar_avaliacao', 'academico.lancar',
+ALLOWED_ACTIONS = MATERIAL_ACTIONS | {'academico.criar_avaliacao', 'academico.lancar', 'academico.lancar_lote',
                                      'academico.publicar', 'academico.configurar_avaliacao'}
 FIELDS = {
     'cursos.criar': {'disciplina_id', 'titulo', 'descricao'},
@@ -23,8 +23,18 @@ FIELDS = {
     'cursos.duplicar': set(), 'cursos.estado': {'estado'},
     'academico.criar_avaliacao': {'turma_disciplina_id', 'periodo_id', 'titulo', 'peso'},
     'academico.lancar': {'valor', 'observacao', 'versao'},
+    'academico.lancar_lote': set(),
     'academico.publicar': set(), 'academico.configurar_avaliacao': {'acao', 'titulo', 'peso'},
 }
+# U3: o lançamento da avaliação inteira usa campos por aluno (valor_<id>, observacao_<id>, versao_<id>).
+CAMPOS_POR_ALUNO = {'academico.lancar_lote'}
+
+
+def campos_permitidos(endpoint, payload):
+    if endpoint in CAMPOS_POR_ALUNO:
+        from app.services.academico import LOTE_CAMPO
+        return all(isinstance(k, str) and LOTE_CAMPO.match(k) for k in payload)
+    return not set(payload) - FIELDS[endpoint]
 
 
 class _SessionProxy:
@@ -75,7 +85,7 @@ def execute(db, user_id, operation, *, validate=False):
     endpoint, params, payload = operation.get('endpoint'), operation.get('params'), operation.get('payload')
     if not isinstance(endpoint, str) or endpoint not in ALLOWED_ACTIONS or not isinstance(params, dict) or not isinstance(payload, dict):
         raise MutationConflict('Operação não permitida', 400)
-    if set(payload) - FIELDS[endpoint] or len(json.dumps(payload, ensure_ascii=False).encode('utf-8')) > 50000:
+    if not campos_permitidos(endpoint, payload) or len(json.dumps(payload, ensure_ascii=False).encode('utf-8')) > 50000:
         raise MutationConflict('Campos não permitidos ou conteúdo muito grande', 400)
     rule = next((r for r in current_app.url_map.iter_rules(endpoint) if 'POST' in r.methods), None)
     if rule is None or set(params) != rule.arguments:

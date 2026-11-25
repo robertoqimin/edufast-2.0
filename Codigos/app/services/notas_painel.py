@@ -39,6 +39,9 @@ def _pendencias(db, usuario_id):
             continue
         if data.get('endpoint') == 'academico.lancar':
             lancamentos[avaliacao_id] = lancamentos.get(avaliacao_id, 0) + 1
+        elif data.get('endpoint') == 'academico.lancar_lote':  # U3: um envio com várias notas
+            enviadas = sum(1 for k, v in (data.get('payload') or {}).items() if k.startswith('valor_') and str(v).strip())
+            lancamentos[avaliacao_id] = lancamentos.get(avaliacao_id, 0) + enviadas
         elif data.get('endpoint') == 'academico.publicar':
             publicacoes.add(avaliacao_id)
     return lancamentos, publicacoes

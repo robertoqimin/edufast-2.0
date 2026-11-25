@@ -78,3 +78,14 @@
 .course-form progress[data-video-progresso] { width:100%; height:14px; accent-color:var(--accent); }
 .course-form fieldset.campo-video { border:0; padding:0; margin:0; min-width:0; display:grid; gap:14px; }
 .course-form fieldset.campo-video[hidden] { display:none; }
+/* U3: diário com a avaliação inteira num envio. */
+.diario-tabela th[scope=row] { font-weight:600; }
+.diario-tabela th[scope=row] .course-meta { display:block; font-weight:400; font-size:.85em; }
+.diario-tabela input { width:100%; min-width:5.5rem; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--page); color:var(--text); font:inherit; }
+.diario-tabela caption { text-align:left; color:var(--muted); padding-bottom:8px; }
+.aprovacao-lote { display:flex; flex-wrap:wrap; gap:10px; align-items:end; }
+.aprovacao-notas { width:100%; border-collapse:collapse; margin:10px 0; }
+.aprovacao-notas th, .aprovacao-notas td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+.aprovacao-notas tbody th { text-transform:none; letter-spacing:normal; font-size:inherit; font-weight:600; color:var(--text); }
+.diario-tabela tbody th { text-transform:none; letter-spacing:normal; font-size:inherit; color:var(--text); }
+.diario-lote > button { justify-self:start; }

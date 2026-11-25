@@ -4,6 +4,8 @@ if(permissionsForm){const refresh=()=>{permissionsForm.revisor.checked=permissio
 const studentForm=document.getElementById('aluno-proposta');
 if(studentForm){ studentForm.aluno_id.addEventListener('change',function(){ const option=this.selectedOptions[0],form=this.form;if(!option)return;form.nome.value=option.dataset.nome;form.curso_serie.value=option.dataset.curso;form.versao.value=option.dataset.versao;});}
 
+document.querySelector('[data-marcar-todas]')?.addEventListener('change',function(){document.querySelectorAll('input[name=ids][form=lote-form]').forEach((caixa)=>{caixa.checked=this.checked;});});
+
 document.getElementById('permissoes-form')?.addEventListener('submit',async function(e){e.preventDefault();const form=e.currentTarget;if(form.dataset.sending==='true')return;form.dataset.sending='true';const button=form.querySelector('button');button.disabled=true;try{const result=await fetch('/admin/usuarios/'+Number(form.usuario_id.value)+'/permissoes',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({revisor_materiais:form.revisor.checked})});const data=await result.json();document.getElementById('resultado').textContent=result.ok?'Permissão atualizada. O professor precisa entrar novamente.':data.erro;}catch(error){document.getElementById('resultado').textContent='Falha ao salvar; confira o estado antes de repetir.';}finally{delete form.dataset.sending;button.disabled=false;}});
 
 });

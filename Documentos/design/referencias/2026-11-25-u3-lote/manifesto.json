@@ -1,0 +1,40 @@
+{
+  "base_commit": "feat: permite ao professor enviar videos cifrados em blocos (U2b)",
+  "relatorio": "Documentos/testes/U3_LOTE_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa (Colégio Horizonte), somente dados fictícios",
+  "verificador": "node Codigos/tests/verificar_lote_u3.cjs <pasta>",
+  "capturas": [
+    {
+      "arquivo": "professora-diario-aguardando-desktop.png",
+      "sha256": "a1c8ce666b79fd35f4e55c8c34bcc67b83d79c6e8216a7fe4f66d5d4d5e24244",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "professora-diario-aplicado-desktop.png",
+      "sha256": "03028250c115f440a0453dd662999458be3c13e68c009179ba6f3e6e8aa43e56",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "professora-diario-preenchido-desktop.png",
+      "sha256": "e039a9366b47c05726367177558e0aacd32e765e13b1c8800da196fb946519cd",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-aprovadas-desktop.png",
+      "sha256": "349c21860839e1579926d67e462bd04b5b68bb4a7230d6e16091ad7772d7b03c",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-resumo-celular.png",
+      "sha256": "8ba5f9a245bbf201d9d058d6128f3a58d12616f1c3e6b5b412d15e9100e9475b",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-resumo-desktop.png",
+      "sha256": "7fa7ba56618e41639d0cfb6ddf8032fa48204b3a1bd7e40c228af1cb18ac1984",
+      "viewport": "1440x1000"
+    }
+  ]
+}

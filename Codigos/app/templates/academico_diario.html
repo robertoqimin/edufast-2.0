@@ -6,9 +6,24 @@
 {% if not periodo.fechado and ativa and not avaliacao.publicada %}<details class="course-outline"><summary>Editar avaliação em rascunho</summary><form class="course-form" method="post" action="{{ url_for('academico.configurar_avaliacao',avaliacao_id=avaliacao.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="acao" value="salvar"><label>Título<input name="titulo" value="{{ avaliacao.titulo }}" maxlength="150" required></label><label>Peso<input type="number" name="peso" value="{{ avaliacao.peso }}" min="0.01" max="100" step="0.01" required></label><button class="button">Salvar avaliação</button></form><form method="post" action="{{ url_for('academico.configurar_avaliacao',avaliacao_id=avaliacao.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="acao" value="remover"><button class="button">Remover avaliação vazia</button></form></details>{% endif %}
-{% for aluno in alunos %}{% set nota = notas.get(aluno.id) %}<details class="course-outline" open><summary>{{ aluno.nome }} · {{ aluno.matricula }} · {{ nota.valor if nota else 'Pendente' }}</summary>
-{% if session.user_role == 'professor' and not periodo.fechado and ativa %}<form class="course-form" method="post" action="{{ url_for('academico.lancar',avaliacao_id=avaliacao.id,aluno_id=aluno.id) }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="versao" value="{{ nota.versao if nota else 0 }}"><label>Nota de {{ aluno.nome }}<input type="number" name="valor" min="0" max="10" step="0.01" value="{{ nota.valor if nota else '' }}" required></label><label>Observação<textarea name="observacao" maxlength="255">{{ nota.observacao if nota else '' }}</textarea></label><button class="button button-primary">Salvar nota</button></form>{% else %}<p>{{ nota.observacao if nota else 'Sem lançamento.' }}</p>{% endif %}</details>{% else %}<p>Nenhum aluno matriculado nesta turma.</p>{% endfor %}
+{% set pode_lancar = session.user_role == 'professor' and not periodo.fechado and ativa %}
+{% if pendente %}<p class="notice notice-success" role="status">Notas enviadas{% if pendente.created_at %} em {{ pendente.created_at.strftime('%d/%m/%Y às %H:%M') }}{% endif %} aguardam aprovação da secretaria ({{ enviadas|length }} {{ 'nota' if enviadas|length == 1 else 'notas' }}). Um novo envio fica disponível depois da decisão.</p>{% endif %}
+{% if not alunos %}<p>Nenhum aluno matriculado nesta turma.</p>
+{% elif pode_lancar and not pendente %}<form class="course-form diario-lote" method="post" action="{{ url_for('academico.lancar_lote',avaliacao_id=avaliacao.id) }}">
+<input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<div class="course-scroll"><table class="course-table diario-tabela"><caption>Notas de {{ alunos|length }} {{ 'aluno' if alunos|length == 1 else 'alunos' }} (0 a 10, até duas casas decimais)</caption>
+<thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Observação (opcional)</th></tr></thead><tbody>
+{% for aluno in alunos %}{% set nota = notas.get(aluno.id) %}<tr><th scope="row">{{ aluno.nome }}<span class="course-meta">{{ aluno.matricula }}</span></th>
+<td><input type="hidden" name="versao_{{ aluno.id }}" value="{{ nota.versao if nota else 0 }}"><input type="number" name="valor_{{ aluno.id }}" min="0" max="10" step="0.01" inputmode="decimal" value="{{ nota.valor if nota else '' }}" aria-label="Nota de {{ aluno.nome }}"></td>
+<td><input name="observacao_{{ aluno.id }}" maxlength="255" value="{{ nota.observacao if nota and nota.observacao else '' }}" aria-label="Observação para {{ aluno.nome }}"></td></tr>{% endfor %}
+</tbody></table></div>
+<p class="course-meta">Deixe em branco quem ainda não tem nota: fica como pendência. Só as notas novas ou alteradas entram no envio, que vira <strong>uma</strong> solicitação para a secretaria.</p>
+<button class="button button-primary">Enviar notas para aprovação</button></form>
+{% else %}<div class="course-scroll"><table class="course-table diario-tabela"><caption>Notas de {{ alunos|length }} {{ 'aluno' if alunos|length == 1 else 'alunos' }}</caption>
+<thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Situação</th></tr></thead><tbody>
+{% for aluno in alunos %}{% set nota = notas.get(aluno.id) %}<tr><th scope="row">{{ aluno.nome }}<span class="course-meta">{{ aluno.matricula }}</span></th>
+<td>{{ nota.valor if nota else '—' }}</td><td>{% if aluno.id in enviadas %}Aguardando aprovação: {{ enviadas[aluno.id]|replace('.', ',') }}{% elif nota %}Lançada{% if nota.observacao %} · {{ nota.observacao }}{% endif %}{% else %}Pendente{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
 {% if not periodo.fechado and ativa and not avaliacao.publicada %}<form method="post" action="{{ url_for('academico.publicar',avaliacao_id=avaliacao.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-primary">Publicar notas para os alunos</button></form>{% endif %}</section>
 {% endblock %}
