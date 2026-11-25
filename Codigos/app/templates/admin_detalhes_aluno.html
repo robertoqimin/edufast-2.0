@@ -1,33 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Aluno | EduFast</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/painel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/detalhes.css') }}">
-    {% include "partials/react_runtime.html" %}
-</head>
-<body class="app-page"><a class="skip-link" href="#main-content">Pular para o conteudo</a>
-    <div id="admin-detalhes-aluno-root" class="flex w-full" data-react-shell data-react-template="admin-detalhes-aluno-template"></div>
-    <template id="admin-detalhes-aluno-template">
-
-    {% include 'partials/workspace_sidebar.html' %}
-
-    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-bold">Detalhes do Aluno</h1>
-                <p class="text-gray-400">Acompanhe documentos, histórico e evolução acadêmica.</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-sm font-bold">Admin Secretaria</p>
-                    <p class="text-[10px] text-cyan-400">Online agora</p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 border-2 border-white/20"></div>
-            </div>
-        </header>
+{% extends 'gestao_base.html' %}{% set page_title = 'Detalhes do aluno' %}
+{# U5/O3: tela migrada para o layout padrão; CSS próprio e utilitários mantêm o conteúdo antigo. #}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/detalhes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+{% endblock %}
+{% block page_class %}legado legado-detalhes{% endblock %}
+{% block content %}
+        <section class="page-heading"><div><span class="eyebrow">ALUNO</span><h1>Detalhes do aluno</h1><p>Acompanhe documentos, histórico e evolução acadêmica.</p></div></section>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <section class="glass-card detalhes-card p-8 rounded-[32px] text-center">
@@ -173,9 +151,5 @@
                 </div>
             </section>
         </div>
-    </main></div>
-</template>
-    <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
+{% endblock %}

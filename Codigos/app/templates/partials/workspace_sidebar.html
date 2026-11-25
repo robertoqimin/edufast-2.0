@@ -20,7 +20,7 @@
             {{ nav_link('home.admin_cadastro_professores', 'Professores', 'book', ['home.admin_detalhes_professor','home.admin_detalhes_professor_legacy']) }}
             {{ nav_link('home.admin_banco_dados', 'Registros acadêmicos', 'users') }}
             <span class="nav-section">ORGANIZAÇÃO DA ESCOLA</span>
-            {{ nav_link('home.admin_turmas', 'Turmas', 'grid') }}
+            {{ nav_link('cursos.gestao_turmas', 'Turmas', 'grid') }}
             {{ nav_link('home.admin_disciplinas', 'Disciplinas', 'book') }}
             {{ nav_link('home.admin_comunicados', 'Publicar comunicado', 'mail') }}
         {% elif role == 'aluno' %}
@@ -54,7 +54,7 @@
         {% else %}
         {{ nav_link('cursos.biblioteca', 'Meus cursos' if role == 'aluno' else 'Biblioteca de cursos', 'book', ['cursos.editor','cursos.aprender']) }}
         {% endif %}
-        {% if role in ['admin','super_admin'] %}{{ nav_link('cursos.gestao_turmas', 'Gestão acadêmica', 'grid') }}{% endif %}
+        {# U5: "Gestão acadêmica" virou "Turmas" (uma tela só), no grupo Organização da escola. #}
         <span class="nav-section">VIDA ACADÊMICA</span>
         {{ nav_link('frequencia.painel', 'Frequência e atestados', 'book', ['frequencia.formulario','frequencia.chamada','frequencia.relatorio']) }}
         {% if role == 'aluno' %}

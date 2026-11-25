@@ -1,0 +1,130 @@
+{
+  "base_commit": "feat: guia a implantacao com checklist e telas vazias com proximo passo (U4)",
+  "relatorio": "Documentos/testes/U5_LAYOUT_UNICO_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa (Colégio Horizonte), somente dados fictícios",
+  "verificador": "node Codigos/tests/capturar_telas_u5.cjs <pasta> (antes/depois) e node scripts/ver-u4-u5.cjs --capturas <pasta> (juntas)",
+  "capturas": [
+    {
+      "arquivo": "ana-ribeiro-professor-dashboard-celular.png",
+      "sha256": "3dfe3165fd2e662dfd1208de746ab944701d13590276d63fc7168c17ea87c71f",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "ana-ribeiro-professor-dashboard-desktop.png",
+      "sha256": "0a609606c9b7f22fd2d40ac6b4b9c5cbe599ac625b81f96eeac3cf5062647897",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "bruno-lima-aluno-dashboard-celular.png",
+      "sha256": "148d2f395654c0c6d8e9527543de8964dc75ebf92d7cef4f03909a3a9727a3f8",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "bruno-lima-aluno-dashboard-desktop.png",
+      "sha256": "c9211f8f90766d7fd5e2e201dc100244a191c8c61268af05cb2d48d586803e9e",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "bruno-lima-aluno-disciplinas-1-celular.png",
+      "sha256": "5a08e74a202c9ec2872dfee9d10893aae7df5e8c22f5088591688fc57752e7cb",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "bruno-lima-aluno-disciplinas-1-desktop.png",
+      "sha256": "9a7997ec57d424893f7b128b75e3a230f33cde323ea2706a8eeda1bfd9fe1240",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-alunos-1-celular.png",
+      "sha256": "2f023f29fb9c4592d2d55f27b2855996cb4338f007a5aee19aca15025362dda0",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-alunos-1-desktop.png",
+      "sha256": "a158733b2ae7fbcc53df1cd62aa4f2788e3c79555c0b305da3152056b53ec8fc",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-banco-de-dados-celular.png",
+      "sha256": "2cf89e387de1c4fada68ebd51f15f0442211ef2b1043d023a7719e798153f260",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-banco-de-dados-desktop.png",
+      "sha256": "a4df025e3a5857955ed75db8a0be13bd36204213b8909b8a5c4e9a492b99de70",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-cadastro-alunos-celular.png",
+      "sha256": "7d4bdb02d1892b998777654801613e5cd84a29b6099c988717aba0f00a7b3787",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-cadastro-alunos-desktop.png",
+      "sha256": "17999130c1f489491d428769e19441604d33563dd9b3ad2e51cae3abb332b85c",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-cadastro-professores-celular.png",
+      "sha256": "7be21fc059c3f71a055249f5e577e430585c7f486ba0ee0d1e9f17ed600e9653",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-cadastro-professores-desktop.png",
+      "sha256": "ae05199582d1876a841905cb1835181187c038fa25ad714c1bf28507aae16ca3",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-comunicados-celular.png",
+      "sha256": "ac353e2dc4a328b89eba171f73f5eb389a0b1801e982ca2f0a1b3c37407138de",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-comunicados-desktop.png",
+      "sha256": "e6dd166a27a646cf9421ac89c36d5d28eac8f4677858ca60ea28ec2f8a4ca3f2",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-disciplinas-celular.png",
+      "sha256": "7cc3dcc2ff039e64c637ac7dbfc798fd75efde6975a66d41e67f129158ee3f16",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-disciplinas-desktop.png",
+      "sha256": "54113fccf402a83d0f33f0b04dcc1d4a7e6087a88f03ce674289b5ab4e038dda",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-gestao-turmas-celular.png",
+      "sha256": "3abf31d400ecbc24050c0c251536469245bb256cf2cec17dce89e565d198003e",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-gestao-turmas-desktop.png",
+      "sha256": "7eb2e4cdf79469b1d607eb416c4b6edaa67c3a69ee4c9f9f0c57df2ea7cce2bc",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-admin-professores-1-celular.png",
+      "sha256": "7503855b859b2c21b9b394f01e0d67c412f346c03bbbf85b7edf3565f68969ed",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-admin-professores-1-desktop.png",
+      "sha256": "cca5f5743de3bb81d7a630b180946ab1dbc6fd3ed8e1bed919b59a539aa7fb30",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "secretaria-solicitacoes-celular.png",
+      "sha256": "c6e90dcd4c42b6be5af4fe67ef9818d040f9fe2fb78c3291c9e322728bac48be",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "secretaria-solicitacoes-desktop.png",
+      "sha256": "bcef82827c1b45e3bf35cb9c8517bd4884201598a226aa70ef2eb1ad9864dca4",
+      "viewport": "1440x1000"
+    }
+  ]
+}

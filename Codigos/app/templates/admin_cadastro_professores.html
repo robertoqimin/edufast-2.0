@@ -1,34 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Professores | EduFast</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/painel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
-    {% include "partials/react_runtime.html" %}
-</head>
-<body class="app-page"><a class="skip-link" href="#main-content">Pular para o conteudo</a>
-    <div id="admin-cadastro-professores-root" class="flex w-full" data-react-shell data-react-template="admin-cadastro-professores-template"></div>
-    <template id="admin-cadastro-professores-template">
-    {% include 'partials/workspace_sidebar.html' %}
-
-    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
-        <header class="mb-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-                <h1 class="text-3xl font-bold">Cadastro de Professores</h1>
-                <p class="text-gray-400">Insira as informações do novo docente no sistema.</p>
-            </div>
-
-            <div class="flex flex-wrap gap-4">
-                <button type="reset" form="professor-form" class="inline-flex h-12 items-center rounded-xl border border-white/10 bg-white/5 px-6 font-bold text-white transition hover:bg-white/10">
-                    Limpar
-                </button>
-                <button type="submit" form="professor-form" class="inline-flex h-12 items-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-7 font-bold text-white transition hover:brightness-110">
-                    Salvar Registro
-                </button>
-            </div>
-        </header>
+{% extends 'gestao_base.html' %}{% set page_title = 'Cadastro de professores' %}
+{# U5/O3: tela migrada para o layout padrão; CSS próprio e utilitários mantêm o conteúdo antigo. #}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+{% endblock %}
+{% block page_class %}legado legado-cadastro{% endblock %}
+{% block content %}
+        <section class="page-heading"><div><span class="eyebrow">PESSOAS &amp; ACESSOS</span><h1>Cadastro de professores</h1><p>Insira as informações do novo docente no sistema.</p></div><div class="course-actions"><button type="reset" form="professor-form" class="button button-secondary">Limpar</button><button type="submit" form="professor-form" class="button button-primary">Salvar registro</button></div></section>
 
             <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_368px]">
                 <form id="professor-form" class="glass-card cadastro-card rounded-[32px] px-6 py-8 md:px-10 lg:px-10" enctype="multipart/form-data">
@@ -133,9 +110,7 @@
                     </section>
                 </aside>
             </div>
-    </main></div>
-</template>
-    <script nonce="{{ csp_nonce }}">
+<script nonce="{{ csp_nonce }}">
         window.__REACT_PAGE__ = {
             routes: {
                 cadastroProfessor: {{ url_for('auth.cadastro_professor')|tojson }}
@@ -144,6 +119,4 @@
     </script>
     <script src="{{ url_for('static', filename='js/paginas/cadastro.js') }}"></script>
     <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
-</body>
-</html>
+{% endblock %}

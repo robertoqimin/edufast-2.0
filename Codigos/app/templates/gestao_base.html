@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page_title|default('Gestão') }} | {{ escola.nome|default('Educa Fast') }}</title>
+    <title>{{ page_title|default('Gestão') }} | {{ escola.nome|default('EduFast') }}</title>
+    {# CSS próprio de telas migradas vem antes do padrão: o design system tem a última palavra (U5). #}
+    {% block head %}{% endblock %}
     {% include 'partials/workspace_head.html' %}
 </head>
 <body class="app-page native-page {% block page_class %}{% endblock %}">

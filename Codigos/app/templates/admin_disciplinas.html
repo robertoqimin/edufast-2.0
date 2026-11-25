@@ -1,32 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disciplinas | EduFast</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/painel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_disciplinas.css') }}">
-    {% include "partials/react_runtime.html" %}
-</head>
-<body class="app-page"><a class="skip-link" href="#main-content">Pular para o conteudo</a>
-    <div id="admin-disciplinas-root" class="flex w-full" data-react-shell data-react-template="admin-disciplinas-template"></div>
-    <template id="admin-disciplinas-template">
-    {% include 'partials/workspace_sidebar.html' %}
-
-    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-bold">Disciplinas</h1>
-                <p class="text-gray-400">Cadastre e acompanhe as disciplinas usadas em notas e documentos.</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-sm font-bold">Admin Secretaria</p>
-                    <p class="text-[10px] text-cyan-400">Online agora</p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 border-2 border-white/20"></div>
-            </div>
-        </header>
+{% extends 'gestao_base.html' %}{% set page_title = 'Disciplinas' %}
+{# U5/O3: tela migrada para o layout padrão; CSS próprio e utilitários mantêm o conteúdo antigo. #}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_disciplinas.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+{% endblock %}
+{% block page_class %}legado legado-disciplinas{% endblock %}
+{% block content %}
+        <section class="page-heading"><div><span class="eyebrow">ORGANIZAÇÃO DA ESCOLA</span><h1>Disciplinas</h1><p>Cadastre as disciplinas da escola e indique o professor responsável por cada uma.</p></div></section>
 
         <div class="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-8">
             <form action="{{ url_for('home.admin_disciplinas') }}" method="post" class="glass-card discipline-card rounded-[32px] p-8">
@@ -144,10 +123,5 @@
                 </div>
             </div>
         </section>
-    </main></div>
-
-    </template>
-    <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
+{% endblock %}

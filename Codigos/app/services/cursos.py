@@ -157,22 +157,14 @@ def atribuir(db, professor_id, turma_id, disciplina_id):
         abort(409, 'Turma arquivada.')
     from app.models import DisciplinaModel
     obter(db, DisciplinaModel, disciplina_id)
-    vinculo = db.query(TurmaDisciplinaModel).filter_by(turma_id=turma_id, disciplina_id=disciplina_id).first()
-    if not vinculo:
-        vinculo = TurmaDisciplinaModel(turma_id=turma_id, disciplina_id=disciplina_id)
-        db.add(vinculo)
-        db.flush()
+    # U5: a restrição única arbitra atribuições simultâneas (dois professores na mesma matéria da turma).
+    from app.concurrency import insert_if_missing
+    vinculo = insert_if_missing(db, TurmaDisciplinaModel, turma_id=turma_id, disciplina_id=disciplina_id)
     # Pares legados continuam alimentando os painéis existentes; nunca concedem novas combinações.
-    for model, values in ((ProfessorTurmaModel, {'professor_id': professor_id, 'turma_id': turma_id}),
-                          (ProfessorDisciplinaModel, {'professor_id': professor_id, 'disciplina_id': disciplina_id})):
-        if not db.query(model).filter_by(**values).first():
-            db.add(model(**values))
-    row = db.query(AtribuicaoDocenteModel).filter_by(professor_id=professor_id, turma_disciplina_id=vinculo.id).first()
-    if row:
-        row.ativo = True
-    else:
-        row = AtribuicaoDocenteModel(professor_id=professor_id, turma_disciplina_id=vinculo.id)
-        db.add(row)
+    insert_if_missing(db, ProfessorTurmaModel, professor_id=professor_id, turma_id=turma_id)
+    insert_if_missing(db, ProfessorDisciplinaModel, professor_id=professor_id, disciplina_id=disciplina_id)
+    row = insert_if_missing(db, AtribuicaoDocenteModel, professor_id=professor_id, turma_disciplina_id=vinculo.id)
+    row.ativo = True
     return row
 
 

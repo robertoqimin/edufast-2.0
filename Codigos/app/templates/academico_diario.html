@@ -8,7 +8,7 @@
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="acao" value="remover"><button class="button">Remover avaliação vazia</button></form></details>{% endif %}
 {% set pode_lancar = session.user_role == 'professor' and not periodo.fechado and ativa %}
 {% if pendente %}<p class="notice notice-success" role="status">Notas enviadas{% if pendente.created_at %} em {{ pendente.created_at.strftime('%d/%m/%Y às %H:%M') }}{% endif %} aguardam aprovação da secretaria ({{ enviadas|length }} {{ 'nota' if enviadas|length == 1 else 'notas' }}). Um novo envio fica disponível depois da decisão.</p>{% endif %}
-{% if not alunos %}<p>Nenhum aluno matriculado nesta turma. Próximo passo: a secretaria matricula os alunos em Gestão acadêmica.</p>
+{% if not alunos %}<p>Nenhum aluno matriculado nesta turma. Próximo passo: a secretaria matricula os alunos em Turmas.</p>
 {% elif pode_lancar and not pendente %}<form class="course-form diario-lote" method="post" action="{{ url_for('academico.lancar_lote',avaliacao_id=avaliacao.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 <div class="course-scroll"><table class="course-table diario-tabela"><caption>Notas de {{ alunos|length }} {{ 'aluno' if alunos|length == 1 else 'alunos' }} (0 a 10, até duas casas decimais)</caption>

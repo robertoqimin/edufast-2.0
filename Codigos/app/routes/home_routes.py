@@ -3,21 +3,15 @@ from app.views.respostas import resposta_erro
 
 from app.auth import normalize_role
 from app.controllers.admin_controller import (
-    associar_aluno_turma,
     associar_professor_disciplina,
-    associar_professor_turma,
     criar_comunicado,
     criar_disciplina,
-    criar_turma,
     get_admin_data,
     get_aluno_detail,
     get_comunicados,
     get_disciplinas_page_data,
     get_professor_detail,
-    get_turmas_page_data,
-    registrar_turma_disciplina,
     request_professor_document,
-    retirar_turma_disciplina,
     request_student_document,
     update_professor_data,
     update_student_data,
@@ -145,32 +139,12 @@ def admin_disciplinas():
 @home_blueprint.route("/admin/turmas", methods=["GET", "POST"])
 @home_blueprint.route("/admin_turmas.html", methods=["GET", "POST"])
 def admin_turmas():
+    """U5/O3: uma tela de turma. A tela antiga foi unificada em "Turmas" (Gestão acadêmica)."""
     admin_required()
-    error = None
-
-    if request.method == "POST":
-        action = request.form.get("action")
-        if action == "associate_student":
-            response, status = associar_aluno_turma(request.form)
-        elif action == "associate_teacher":
-            response, status = associar_professor_turma(request.form)
-        elif action == "associate_subject":
-            response, status = registrar_turma_disciplina(request.form)
-        elif action == "remove_subject":
-            response, status = retirar_turma_disciplina(request.form)
-        else:
-            response, status = criar_turma(request.form)
-
-        if status == 201:
-            return redirect(url_for("home.admin_turmas"))
-
-        error = response.get("erro")
-
-    return render_template(
-        "admin_turmas.html",
-        **get_turmas_page_data(),
-        error=error,
-    )
+    if request.method == "GET":
+        return redirect(url_for("cursos.gestao_turmas"), code=301)
+    return resposta_erro({"erro": "Esta tela foi unificada em Turmas. Crie turmas, registre matérias, "
+                                  "atribua professores e matricule alunos por lá."}, 410)
 
 
 @home_blueprint.route("/alunos/<int:aluno_id>", methods=["GET"])

@@ -283,11 +283,14 @@ async function entrar(base, email, senha, quem) {
   await ir(ESCOLA + '/admin/disciplinas', 'Disciplinas da escola.');
   await enviar('disciplinas', {nome: 'Matemática', codigo: 'MAT1', carga_horaria: '120'}, {texto: 'Cadastrando a disciplina de Matemática.'});
   await enviar('disciplinas', {professor_id: CONTAS.professor.nome, disciplina_id: 'Matemática'}, {texto: 'A professora Ana fica responsável por Matemática.'});
-  await ir(ESCOLA + '/admin/turmas', 'Turmas da escola.');
-  await enviar('turmas', {nome: '1º ano A', codigo: '1A-2026', ano_letivo: '2026', turno: 'Matutino'}, {texto: 'Criando a turma 1º ano A, turno matutino.'});
-  await enviar('turmas', {professor_id: CONTAS.professor.nome, turma_id: '1º ano A'}, {texto: 'Colocando a professora na turma.'});
+  // U5: uma tela de turma ("Turmas"): criar, matéria com professor e matrículas.
+  await ir(ESCOLA + '/admin/gestao-turmas', 'Turmas da escola: tudo num só lugar.');
+  await enviar('', {acao: 'criar', nome: '1º ano A', codigo: '1A-2026', ano_letivo: '2026', turno: 'Matutino'},
+    {filtro: {acao: 'criar'}, texto: 'Criando a turma 1º ano A, turno matutino.'});
+  await enviar('', {acao: 'atribuir', turma_id: '1º ano A', disciplina_id: 'Matemática', professor_id: CONTAS.professor.nome},
+    {filtro: {acao: 'atribuir'}, texto: 'A professora Ana dá Matemática no 1º ano A.'});
   for (const c of [CONTAS.aluno1, CONTAS.aluno2]) {
-    await enviar('turmas', {aluno_id: c.nome, turma_id: '1º ano A'}, {texto: `Matriculando ${c.nome} no 1º ano A.`});
+    await enviar('', {turma_id: '1º ano A', aluno_id: c.nome}, {filtro: {acao: 'matricular'}, texto: `Matriculando ${c.nome} no 1º ano A.`});
   }
   await legenda('Turma pronta: professora e alunos vinculados.', 6000);
   await percorrer();

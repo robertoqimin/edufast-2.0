@@ -80,7 +80,10 @@ class ContratosOfertasExtras(TestCase):
             db.flush()
             db.add(AlunoModel(id=8, usuario_id=8, nome='Novo', matricula='M8'))
             db.commit()
-        response = self.fixture.client(1).post('/admin/turmas', data={'action': 'associate_student', 'aluno_id': 8, 'turma_id': 1})
+        client = self.fixture.client(1)  # U5: matrícula pela tela única "Turmas"
+        with client.session_transaction() as s:
+            s['csrf_token'] = 'b4'
+        response = client.post('/admin/gestao-turmas', data={'acao': 'matricular', 'aluno_id': 8, 'turma_id': 1, 'csrf_token': 'b4'})
         self.assertEqual(response.status_code, 302)
         self.assertIn(8, self.na_oferta(oid))
 

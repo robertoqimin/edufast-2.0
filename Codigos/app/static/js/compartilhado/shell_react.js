@@ -54,7 +54,17 @@
     }
 
     function montarTodos() {
-        document.querySelectorAll("[data-react-shell]").forEach(montar);
+        const raizes = document.querySelectorAll("[data-react-shell]");
+        if (!raizes.length) {
+            // U5: telas no layout padrão já vêm prontas do servidor; só liga as abas e avisa os
+            // scripts da página (mesmo evento de antes, com a página inteira como raiz).
+            window.setTimeout(function () {
+                inicializarComportamentosPagina(document);
+                dispararEventoMontado(document.body);
+            }, 0);
+            return;
+        }
+        raizes.forEach(montar);
     }
 
     function inicializarComportamentosPagina(scope) {

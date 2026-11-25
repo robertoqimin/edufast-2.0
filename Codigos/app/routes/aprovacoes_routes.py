@@ -17,15 +17,37 @@ def _data():
     return data
 
 
-def _items(identity):
+ESTADOS = {'pendentes': 'Pendentes', 'decididas': 'Decididas', 'todas': 'Todas'}
+
+
+def _nomes(db, ids):
+    """U5: nome legível (e perfil) de quem enviou ou decidiu, no lugar do número da conta."""
+    ids = {i for i in ids if i}
+    if not ids:
+        return {}
+    perfis = {'admin': 'secretaria', 'super_admin': 'direção', 'professor': 'professor', 'aluno': 'aluno'}
+    nomes = {u.id: (u.email, perfis.get(u.tipo, u.tipo)) for u in db.query(UsuarioModel).filter(UsuarioModel.id.in_(ids))}
+    for model in (ProfessorModel, AlunoModel):
+        for perfil in db.query(model).filter(model.usuario_id.in_(ids)):
+            if perfil.usuario_id in nomes:
+                nomes[perfil.usuario_id] = (perfil.nome, nomes[perfil.usuario_id][1])
+    return {i: f'{nome} ({papel})' for i, (nome, papel) in nomes.items()}
+
+
+def _items(identity, estado='todas'):
     with get_session() as db:
         query = db.query(SolicitacaoAlteracaoModel)
+        if estado == 'pendentes':
+            query = query.filter(SolicitacaoAlteracaoModel.estado == 'pendente')
+        elif estado == 'decididas':
+            query = query.filter(SolicitacaoAlteracaoModel.estado != 'pendente')
         if not identity.admin:
             if identity.revisor_materiais:
                 query = query.filter((SolicitacaoAlteracaoModel.solicitante_id == identity.id) | (SolicitacaoAlteracaoModel.tipo == "lancar_atividade"))
             else:
                 query = query.filter_by(solicitante_id=identity.id)
         rows = query.order_by(SolicitacaoAlteracaoModel.id.desc()).limit(100).all()
+        nomes = _nomes(db, [r.solicitante_id for r in rows] + [r.decidido_por for r in rows])
         items = []
         for row in rows:
             own = row.solicitante_id == identity.id
@@ -35,7 +57,10 @@ def _items(identity):
             items.append({"id": row.id, "tipo": row.tipo, "estado": row.estado,
                 "solicitante_id": row.solicitante_id, "payload": json.loads(row.payload),
                 "decidido_por": row.decidido_por, "justificativa": row.justificativa,
-                "pode_decidir": reviewer and row.estado == "pendente", "tem_arquivo": bool(row.arquivo)})
+                "pode_decidir": reviewer and row.estado == "pendente", "tem_arquivo": bool(row.arquivo),
+                "solicitante": nomes.get(row.solicitante_id, f"Conta {row.solicitante_id}"),
+                "decisor": nomes.get(row.decidido_por) if row.decidido_por else None,
+                "decidida_em": row.decided_at.strftime('%d/%m/%Y às %H:%M') if hasattr(row.decided_at, 'strftime') else None})
             from app.presenters.aprovacoes_presenter import present
             items[-1]['titulo'], items[-1]['campos'] = present(row.tipo, json.loads(row.payload))
             if row.tipo == 'publicar_material':
@@ -91,7 +116,14 @@ def painel():
                     .join(ProfessorModel, ProfessorModel.id == ProfessorTurmaModel.professor_id)
                     .filter(ProfessorModel.usuario_id == identity.id).distinct().order_by(AlunoModel.nome).all())
             alunos = [{"id": r.id, "nome": r.nome, "matricula": r.matricula, "curso": r.curso_serie or "", "versao": r.versao} for r in rows]
-    return render_template("solicitacoes.html", identity=identity, solicitacoes=_items(identity), alunos=alunos, docentes=docentes)
+    estado = request.args.get("estado", "pendentes")
+    if estado not in ESTADOS:
+        estado = "pendentes"
+    visiveis = _items(identity)  # contagens do filtro, com a mesma visibilidade da lista
+    contagem = {'pendentes': sum(i['estado'] == 'pendente' for i in visiveis),
+                'decididas': sum(i['estado'] != 'pendente' for i in visiveis), 'todas': len(visiveis)}
+    return render_template("solicitacoes.html", identity=identity, solicitacoes=_items(identity, estado), alunos=alunos,
+                           docentes=docentes, estado=estado, estados=ESTADOS, contagem=contagem)
 
 
 @aprovacoes_bp.route("/solicitacoes/alteracoes", methods=["GET", "POST"])

@@ -9,6 +9,7 @@ from flask import Blueprint, abort, flash, jsonify, redirect, render_template, r
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import HTTPException
 from app.services.restauracao_context import get_session
+from app.concurrency import insert_if_missing
 from app.models import (DisciplinaModel, ProfessorModel, ProfessorDisciplinaModel, TurmaModel,
                         TurmaDisciplinaModel, AlunoModel, AlunoTurmaModel)
 from app.models.curso_model import (CursoModel, CapituloModel, TemaModel, AulaModel, OfertaCursoModel,
@@ -346,6 +347,13 @@ def concluir(oferta_id, aula_id):
     return sucesso('cursos.aprender', oferta_id=oferta_id)
 
 
+def turno(data):
+    valor = data.get('turno') or ''
+    if not isinstance(valor, str) or len(valor.strip()) > 30:
+        abort(400, 'Turno com até 30 caracteres.')
+    return valor.strip() or None
+
+
 @cursos_bp.route('/admin/gestao-turmas', methods=['GET', 'POST'])
 def gestao_turmas():
     user_id, _ = identidade(admin=True)
@@ -360,7 +368,10 @@ def gestao_turmas():
                 codigo = data.get('codigo', '')
                 if not isinstance(codigo, str) or not 1 <= len(codigo.strip()) <= 30:
                     abort(400, 'Código obrigatório com até 30 caracteres.')
-                turma = TurmaModel(nome=service.titulo(data.get('nome'))[:120], codigo=codigo.strip(), ano_letivo=ano)
+                if db.query(TurmaModel.id).filter_by(codigo=codigo.strip()).first():
+                    abort(409, 'Já existe uma turma com este código.')
+                turma = TurmaModel(nome=service.titulo(data.get('nome'))[:120], codigo=codigo.strip(), ano_letivo=ano,
+                                   turno=turno(data))
                 db.add(turma)
                 db.flush()
                 db.add(EstadoTurmaModel(turma_id=turma.id))
@@ -374,8 +385,7 @@ def gestao_turmas():
                         db.add(state)
                     state.arquivada = True
                 elif acao == 'adotar':
-                    if not db.get(EstadoTurmaModel, turma_id):
-                        db.add(EstadoTurmaModel(turma_id=turma_id))
+                    insert_if_missing(db, EstadoTurmaModel, turma_id=turma_id)
                 elif not service.turma_ativa(db, turma_id):
                     abort(409, 'Turma arquivada.')
                 elif acao == 'editar':
@@ -391,10 +401,30 @@ def gestao_turmas():
                             TurmaDisciplinaModel.turma_id == turma_id).first():
                         abort(409, 'A turma já possui cursos. Crie outra turma para o novo ano.')
                     turma.ano_letivo = ano
+                    turma.turno = turno(data)
+                elif acao == 'atribuir' and not data.get('professor_id'):
+                    # U5: matéria registrada na turma ainda sem professor (todos os alunos passam a cursá-la).
+                    disciplina_id = service.inteiro(data, 'disciplina_id')
+                    service.obter(db, DisciplinaModel, disciplina_id)
+                    if db.query(TurmaDisciplinaModel.id).filter_by(turma_id=turma_id, disciplina_id=disciplina_id).first():
+                        abort(409, 'Esta turma já está registrada nesta matéria.')
+                    from app.services.matriculas import registrar_disciplina
+                    registrar_disciplina(db, turma_id, disciplina_id)
+                elif acao == 'retirar_materia':
+                    # U5: retira a matéria enquanto ela não tem histórico na turma (notas, chamadas, materiais...).
+                    from app.services.matriculas import historico_da_disciplina, retirar_disciplina
+                    vinculo = db.query(TurmaDisciplinaModel).filter_by(
+                        turma_id=turma_id, disciplina_id=service.inteiro(data, 'disciplina_id')).with_for_update().first()
+                    if not vinculo:
+                        abort(404, 'Esta turma não está registrada nesta matéria.')
+                    if historico_da_disciplina(db, vinculo.id):
+                        abort(409, 'A matéria já tem notas, chamadas, materiais, cursos ou professor atribuído nesta turma '
+                                   'e não pode ser retirada. O histórico fica preservado.')
+                    retirar_disciplina(db, vinculo)
                 elif acao == 'atribuir':
                     # Adoção é explícita: o formulário informa professor, turma e disciplina.
-                    if not db.get(EstadoTurmaModel, turma_id):
-                        db.add(EstadoTurmaModel(turma_id=turma_id))
+                    # U5: atribuições simultâneas na mesma turma não disputam o registro de adoção.
+                    insert_if_missing(db, EstadoTurmaModel, turma_id=turma_id)
                     service.atribuir(db, service.inteiro(data, 'professor_id'), turma_id, service.inteiro(data, 'disciplina_id'))
                     db.flush()
                     from app.services.matriculas import sincronizar_turma
@@ -409,7 +439,9 @@ def gestao_turmas():
                     service.obter(db, AlunoModel, aluno_id)
                     row = db.query(AlunoTurmaModel).filter_by(aluno_id=aluno_id, turma_id=turma_id).first()
                     from app.services.matriculas import remover_da_turma, sincronizar_turma
-                    if acao == 'matricular' and not row:
+                    if acao == 'matricular' and row:
+                        abort(409, 'Este aluno já está nesta turma.')
+                    if acao == 'matricular':
                         db.add(AlunoTurmaModel(aluno_id=aluno_id, turma_id=turma_id))
                         db.flush()
                         sincronizar_turma(db, turma_id)
@@ -426,6 +458,16 @@ def gestao_turmas():
             TurmaDisciplinaModel, AtribuicaoDocenteModel.turma_disciplina_id == TurmaDisciplinaModel.id).join(
             ProfessorModel, AtribuicaoDocenteModel.professor_id == ProfessorModel.id).join(
             DisciplinaModel, TurmaDisciplinaModel.disciplina_id == DisciplinaModel.id).all()
-        return render_template('curso_turmas.html', turmas=turmas, professores=db.query(ProfessorModel).all(),
-            disciplinas=db.query(DisciplinaModel).all(), alunos=db.query(AlunoModel).all(),
-            estados={s.turma_id: s for s in db.query(EstadoTurmaModel)}, atribuicoes=atribuicoes)
+        # U5: cada turma mostra matérias (com ou sem professor) e alunos matriculados.
+        materias = {}
+        for vinculo, disciplina in db.query(TurmaDisciplinaModel, DisciplinaModel).join(
+                DisciplinaModel, DisciplinaModel.id == TurmaDisciplinaModel.disciplina_id).order_by(DisciplinaModel.nome):
+            materias.setdefault(vinculo.turma_id, []).append((vinculo, disciplina))
+        matriculados = {}
+        for turma_id, aluno in db.query(AlunoTurmaModel.turma_id, AlunoModel).join(
+                AlunoModel, AlunoModel.id == AlunoTurmaModel.aluno_id).order_by(AlunoModel.nome):
+            matriculados.setdefault(turma_id, []).append(aluno)
+        return render_template('curso_turmas.html', turmas=turmas, professores=db.query(ProfessorModel).order_by(ProfessorModel.nome).all(),
+            disciplinas=db.query(DisciplinaModel).order_by(DisciplinaModel.nome).all(), alunos=db.query(AlunoModel).order_by(AlunoModel.nome).all(),
+            estados={s.turma_id: s for s in db.query(EstadoTurmaModel)}, atribuicoes=atribuicoes,
+            materias=materias, matriculados=matriculados)

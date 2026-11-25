@@ -17,7 +17,7 @@ const ROTEIRO = [
     ['/super/usuarios', ['ana.ribeiro@', 'secretaria@']], ['/super/escola', ['Calendário 2026', 'Boletim 2026']],
     ['/calendario-escolar', ['2026']]]],
   ['secretaria', `secretaria@${D}`, SENHA, ESCOLA, [
-    ['/admin/dashboard', ['Colégio Horizonte']], ['/admin/turmas', ['1º ano A']], ['/academico', ['Matemática', '1º bimestre']],
+    ['/admin/dashboard', ['Colégio Horizonte']], ['/admin/gestao-turmas', ['1º ano A']], ['/academico', ['Matemática', '1º bimestre']],
     ['/academico/alunos/1/boletim', ['Média ponderada']], ['/frequencia', ['1º ano A']], ['/solicitacoes', ['Solicitações']],
     ['/aprendizagem', ['Matemática para o ENEM']]]],
   ['professora', `ana.ribeiro@${D}`, SENHA, ESCOLA, [

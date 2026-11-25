@@ -113,3 +113,13 @@
  .passo { grid-template-columns:32px minmax(0,1fr); }
  .passo-acao { grid-column:2; justify-self:start; }
 }
+/* U5/O3: Turmas unificadas (matérias, professores e alunos por turma). */
+.turma-cartao h3 { font-size:14px; margin:16px 0 8px; color:var(--muted); text-transform:none; }
+.turma-materia { display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; padding:10px 0; border-bottom:1px solid var(--line); }
+.turma-materia > strong { min-width:160px; }
+.turma-docentes { list-style:none; margin:0; padding:0; display:grid; gap:6px; flex:1; min-width:0; }
+.turma-docentes li { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.turma-acao { display:inline-flex; margin:0; }
+.turma-alunos { line-height:1.8; }
+.turma-dados { max-width:640px; }
+.perfil-foto { width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--line); }

@@ -16,7 +16,7 @@ const SAIDA = process.argv[2] || path.join(ROOT, '.ci-results/ux/acessibilidade.
 const PERFIS = [
   ['login', null, ['/']],
   ['super-admin', `diretoria@${D}`, ['/admin/dashboard', '/super/usuarios', '/super/escola', '/super/layout', '/calendario-escolar']],
-  ['secretaria', `secretaria@${D}`, ['/admin/dashboard', '/admin/cadastro-alunos', '/admin/turmas', '/admin/disciplinas',
+  ['secretaria', `secretaria@${D}`, ['/admin/dashboard', '/admin/cadastro-alunos', '/admin/cadastro-professores', '/admin/comunicados', '/admin/professores/1', '/admin/disciplinas',
     '/admin/alunos/1', '/academico', '/academico/alunos/1/boletim', '/frequencia', '/solicitacoes', '/aprendizagem', '/admin/gestao-turmas']],
   ['professora', `ana.ribeiro@${D}`, ['/professor/dashboard', '/academico', '/academico/avaliacoes/1', '/frequencia',
     '/frequencia/turmas/1/chamada', '/estudos/disciplinas/1', '/estudos/disciplinas/1/novo', '/aprendizagem', '/mensagens',

@@ -19,6 +19,7 @@ const B = 'http://localhost:5070';
 const args = process.argv.slice(2);
 const PASSO = args.includes('--passo');
 const PREPARAR = !args.includes('--sem-preparar');
+const COM_U5 = args.includes('--com-u5');
 const CAPTURAS = args.includes('--capturas') ? path.resolve(args[args.indexOf('--capturas') + 1]) : null;
 const RITMO = Math.min(4, Math.max(0.3, Number(args.find((a) => /^\d+(\.\d+)?$/.test(a)) || 1)));
 const HEADLESS = process.env.DEMO_HEADLESS === '1';
@@ -213,6 +214,79 @@ async function seguir(esperado, feitosAntes) {
   return true;
 }
 
+// ---------- U5 na mesma escola nova: uma tela de turma, telas migradas e Solicitações ----------
+async function percursoU5() {
+  await tela('U5 — Uma aparência e um caminho por tarefa', 'Na escola recém-configurada: Turmas numa tela só, telas antigas no layout padrão e Solicitações com filtro.');
+  await entrar(CONTAS.secretaria, 'secretaria');
+
+  await tela('4. Uma tela de turma', 'Turma, matérias, professores e alunos no mesmo lugar. A tela antiga "Turmas" foi aposentada.');
+  await clicar(page.getByRole('link', {name: 'Disciplinas'}).first(), 1500);
+  ok(await page.locator('.page-heading h1').innerText() === 'Disciplinas', 'Disciplinas no layout padrão (page-heading)');
+  await enviar('disciplinas', {nome: 'Ciências', codigo: 'CIE1', carga_horaria: '80'}, {texto: 'Nova disciplina: Ciências.'});
+  await clicar(page.getByRole('link', {name: 'Turmas'}).first(), 1500);
+  ok(new URL(page.url()).pathname === '/admin/gestao-turmas', 'menu "Turmas" leva à tela única');
+  await enviar('', {acao: 'atribuir', turma_id: '1º ano A', disciplina_id: 'Ciências', professor_id: ''},
+    {filtro: {acao: 'atribuir'}, texto: 'Matéria registrada ainda sem professor: todos os alunos passam a cursá-la.'});
+  const cartao = page.locator('details.turma-cartao').first();
+  await clicar(cartao.locator('summary'), 1200);
+  const texto = await cartao.innerText();
+  ok(/Ciências[\s\S]*Ainda sem professor/.test(texto), 'turma mostra Ciências "Ainda sem professor"');
+  ok(/Matemática[\s\S]*Marina Costa · Ativo/.test(texto), 'turma mostra Matemática com a professora Marina');
+  ok(/Lucas Prado/.test(texto) && /Sofia Mendes/.test(texto), 'turma lista os alunos matriculados');
+  await legenda('Cada turma mostra matérias, professores e alunos.', 5000);
+  await clicar(cartao.getByRole('button', {name: /Retirar Ciências/}), 1500);
+  await clicar(page.locator('details.turma-cartao summary').first(), 1000);
+  ok(!/Ciências/.test(await page.locator('details.turma-cartao').first().innerText()), 'matéria sem histórico retirada da turma');
+  await page.goto(B + '/admin/turmas');
+  ok(new URL(page.url()).pathname === '/admin/gestao-turmas', 'endereço antigo /admin/turmas redireciona para a tela única');
+  await legenda('O endereço antigo leva à tela única: nenhuma tarefa com dois caminhos.', 4500);
+
+  await tela('5. Telas antigas no layout padrão', 'Alunos, Professores, Registros e Comunicados agora usam o mesmo cabeçalho, menu e componentes.');
+  for (const [menu, titulo] of [['Alunos', 'Cadastro de alunos'], ['Professores', 'Cadastro de professores'],
+    ['Registros acadêmicos', 'Registros acadêmicos'], ['Publicar comunicado', 'Comunicados']]) {
+    await clicar(page.getByRole('link', {name: menu}).first(), 1200);
+    ok(await page.locator('.page-heading h1').innerText() === titulo, `${menu}: cabeçalho padrão "${titulo}"`);
+    ok(await page.getByText('Online agora').count() === 0, `${menu}: sem o selo falso "Online agora"`);
+  }
+  await clicar(page.getByRole('link', {name: 'Registros acadêmicos'}).first(), 1000);
+  await page.locator('#banco-search-input').pressSequentially('Lucas', {delay: Math.round(60 * RITMO)});
+  await espera(1200);
+  const visiveis = await page.locator('.banco-row:visible').count();
+  ok(visiveis === 1, `busca dos registros continua funcionando (${visiveis} linha visível para "Lucas")`);
+  await legenda('Os scripts das telas antigas continuam funcionando no layout novo.', 4500);
+  await capturar('05-registros-busca-desktop');
+
+  await tela('6. Solicitações com filtro e nomes', 'A professora envia um aviso; a secretaria vê quem enviou, aprova e consulta as decididas.');
+  await entrar(CONTAS.professora, 'professora Marina Costa');
+  ok(await page.locator('.page-heading h1').innerText() === 'Olá, Prof. Marina Costa!', 'painel da professora no layout padrão');
+  await page.locator('[data-professor-tab="notas"]').first().click();
+  await espera(800);
+  ok(await page.locator('[data-professor-tab="notas"].active').count() >= 1, 'abas do painel da professora continuam funcionando');
+  await page.goto(B + '/estudos');
+  await clicar(page.getByRole('link', {name: /Matemática/}).first(), 1000);
+  await clicar(page.getByRole('link', {name: 'Preparar conteúdo'}), 1000);
+  await page.fill('input[name=titulo]', 'Aviso: boas-vindas ao 1º ano A');
+  await page.fill('textarea[name=texto]', 'Bem-vindos! Os materiais da disciplina ficarão aqui.');
+  await Promise.all([page.waitForURL(/\/estudos\/conteudos\/\d+$/), page.getByRole('button', {name: 'Salvar rascunho'}).click()]);
+  await clicar(page.getByRole('button', {name: 'Enviar para publicação'}), 1500);
+  await entrar(CONTAS.secretaria, 'secretaria');
+  await clicar(page.getByRole('link', {name: 'Solicitações e aprovações'}).first(), 1200);
+  ok(/Pendentes \(1\)/.test(await page.locator('.filtro-solicitacoes').innerText()), 'filtro abre em "Pendentes (1)"');
+  ok(await page.getByText('Enviada por: Marina Costa (professor)').count() === 1, 'mostra o nome de quem enviou');
+  await destacar(page.getByText('Enviada por: Marina Costa (professor)'));
+  await clicar(page.getByRole('button', {name: 'Aprovar e aplicar'}).first(), 1500);
+  await clicar(page.getByRole('link', {name: /Decididas/}), 1200);
+  ok(await page.getByText(/Decidida por secretaria@escolanova\.test \(secretaria\)/).count() >= 1, 'decididas mostram quem decidiu e quando');
+  await capturar('06-solicitacoes-decididas-desktop');
+
+  await tela('7. O aluno', 'O painel do aluno também foi migrado: disciplinas e professores no layout padrão.');
+  await entrar(CONTAS.alunos[0], 'aluno Lucas Prado');
+  ok(await page.locator('.page-heading h1').innerText() === 'Olá, Lucas Prado!', 'painel do aluno no layout padrão');
+  ok(/Matemática[\s\S]*Marina Costa/.test(await page.locator('main').innerText()), 'aluno vê Matemática com a professora Marina');
+  await legenda('Escola configurada pelo checklist (U4) e usada nas telas unificadas (U5).', 5000);
+  await capturar('07-aluno-painel-desktop');
+}
+
 (async () => {
   if (PREPARAR) preparar();
   const browser = await playwright.chromium.launch({channel: 'msedge', headless: HEADLESS, slowMo: Math.round(60 * RITMO), args: ['--start-maximized']});
@@ -288,6 +362,7 @@ async function seguir(esperado, feitosAntes) {
   await destacar(concluido);
   await legenda('Escola configurada só seguindo o checklist. Ele fica recolhido, para consulta.', 6000);
   await capturar('03-implantacao-concluida-desktop');
+  if (COM_U5) await percursoU5();
 
   // Celular
   const ctx = await browser.newContext({viewport: {width: 390, height: 844}, deviceScaleFactor: 2});

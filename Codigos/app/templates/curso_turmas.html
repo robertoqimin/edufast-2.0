@@ -1,26 +1,38 @@
 {% extends 'gestao_base.html' %}
-{% set page_title = 'Gestão acadêmica' %}
-{% macro token() %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% endmacro %}
-{% macro turma_select() %}<label>Turma e ano<select name="turma_id" required><option value="">Selecione</option>{% for t in turmas %}<option value="{{ t.id }}">{{ t.nome }} · {{ t.ano_letivo }}</option>{% endfor %}</select></label>{% endmacro %}
+{% set page_title = 'Turmas' %}
+{% macro token() %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{% endmacro %}
+{% macro turma_select() %}<label>Turma e ano<select name="turma_id" required><option value="">Selecione</option>{% for t in turmas %}{% if not (estados.get(t.id) and estados[t.id].arquivada) %}<option value="{{ t.id }}">{{ t.nome }} · {{ t.ano_letivo }}</option>{% endif %}{% endfor %}</select></label>{% endmacro %}
+{% block page_class %}turmas-unificadas{% endblock %}
 {% block content %}
 {% include 'partials/curso_estilo.html' %}
-<section class="page-heading"><div><span class="eyebrow">ORGANIZAÇÃO ACADÊMICA</span><h1>Turmas, professores e matérias</h1><p>Defina exatamente quem leciona cada matéria, em cada turma e ano.</p></div></section>
-<div class="course-grid"><section class="panel course-panel"><h2>Criar turma</h2><form method="post" class="course-form">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<input type="hidden" name="acao" value="criar"><label>Nome<input name="nome" maxlength="120" required></label><label>Código<input name="codigo" maxlength="30" required></label><label>Ano letivo<input type="number" name="ano_letivo" min="1900" max="2200" required></label><button class="button button-primary">Criar turma</button></form></section>
-<section class="panel course-panel"><h2>Atribuir professor e matéria</h2><form method="post" class="course-form">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<input type="hidden" name="acao" value="atribuir">{{ turma_select() }}<label>Professor<select name="professor_id" required>{% for p in professores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}</select></label><label>Disciplina<select name="disciplina_id" required>{% for d in disciplinas %}<option value="{{ d.id }}">{{ d.nome }}</option>{% endfor %}</select></label><p>Ao atribuir, esta turma passa a usar permissões explícitas. Cadastre cada combinação autorizada.</p><button class="button button-primary">Salvar atribuição</button></form></section>
-<section class="panel course-panel"><h2>Matrículas</h2><form method="post" class="course-form">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}{{ turma_select() }}<label>Aluno<select name="aluno_id" required>{% for a in alunos %}<option value="{{ a.id }}">{{ a.nome }} · {{ a.matricula }}</option>{% endfor %}</select></label><label>Operação<select name="acao"><option value="matricular">Matricular</option><option value="desmatricular">Remover da turma e revogar cursos</option></select></label><button class="button button-primary">Atualizar matrícula</button></form></section></div>
-<section class="panel course-panel"><h2>Turmas cadastradas</h2>{% for turma in turmas %}<details class="course-outline"><summary>{{ turma.nome }} · {{ turma.ano_letivo }} · {{ turma.codigo }} · {{ 'Arquivada' if estados.get(turma.id) and estados[turma.id].arquivada else ('Gestão explícita' if estados.get(turma.id) else 'Legada: reconciliar atribuições') }}</summary>
-{% for atribuicao,vinculo,prof,disc in atribuicoes %}{% if vinculo.turma_id == turma.id %}<div class="course-actions"><span>{{ prof.nome }} — {{ disc.nome }} · {{ 'Ativo' if atribuicao.ativo else 'Revogado' }}</span>{% if atribuicao.ativo %}<form method="post">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<input type="hidden" name="acao" value="revogar"><input type="hidden" name="turma_id" value="{{ turma.id }}"><input type="hidden" name="atribuicao_id" value="{{ atribuicao.id }}"><button class="button">Revogar</button></form>{% endif %}</div>{% endif %}{% endfor %}
-{% if not estados.get(turma.id) or not estados[turma.id].arquivada %}<form method="post" class="course-form">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<input type="hidden" name="acao" value="editar"><input type="hidden" name="turma_id" value="{{ turma.id }}"><label>Nome<input name="nome" value="{{ turma.nome }}" maxlength="120" required></label><label>Ano letivo<input type="number" name="ano_letivo" value="{{ turma.ano_letivo }}" min="1900" max="2200" required></label><button class="button">Salvar dados</button></form><form method="post">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="hidden" name="idempotency_key" value="{{ submission_key() }}">{{ token() }}<input type="hidden" name="acao" value="arquivar"><input type="hidden" name="turma_id" value="{{ turma.id }}"><button class="button">Arquivar turma e suspender acessos</button></form>{% endif %}</details>{% else %}<p>Nenhuma turma cadastrada. Crie a primeira no formulário desta página.</p>{% endfor %}</section>
+<section class="page-heading"><div><span class="eyebrow">ORGANIZAÇÃO DA ESCOLA</span><h1>Turmas</h1><p>Crie turmas, registre as matérias, atribua professores e matricule alunos, tudo num só lugar.</p></div></section>
+<div class="course-grid"><section class="panel course-panel"><h2>Criar turma</h2><form method="post" class="course-form">{{ token() }}<input type="hidden" name="acao" value="criar">
+<label>Nome<input name="nome" maxlength="120" required placeholder="Ex.: 1º ano A"></label><label>Código<input name="codigo" maxlength="30" required placeholder="Ex.: 1A-2026"></label>
+<label>Ano letivo<input type="number" name="ano_letivo" min="1900" max="2200" required></label><label>Turno (opcional)<input name="turno" maxlength="30" placeholder="Ex.: Matutino"></label>
+<button class="button button-primary">Criar turma</button></form></section>
+<section class="panel course-panel"><h2>Matéria e professor</h2><form method="post" class="course-form">{{ token() }}<input type="hidden" name="acao" value="atribuir">{{ turma_select() }}
+<label>Disciplina<select name="disciplina_id" required>{% for d in disciplinas %}<option value="{{ d.id }}">{{ d.nome }}</option>{% endfor %}</select></label>
+<label>Professor<select name="professor_id"><option value="">Ainda sem professor</option>{% for p in professores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}</select></label>
+<p class="course-meta">A matéria passa a valer para todos os alunos da turma. Com professor, libera o diário e a chamada dele; cada combinação autorizada é cadastrada aqui.</p><button class="button button-primary">Salvar matéria</button></form></section>
+<section class="panel course-panel"><h2>Matrículas</h2><form method="post" class="course-form">{{ token() }}{{ turma_select() }}
+<label>Aluno<select name="aluno_id" required>{% for a in alunos %}<option value="{{ a.id }}">{{ a.nome }} · {{ a.matricula }}</option>{% endfor %}</select></label>
+<label>Operação<select name="acao"><option value="matricular">Matricular</option><option value="desmatricular">Remover da turma e revogar cursos</option></select></label>
+<button class="button button-primary">Atualizar matrícula</button></form></section></div>
+<section class="panel course-panel"><h2>Turmas cadastradas</h2>
+{% for turma in turmas %}{% set arquivada = estados.get(turma.id) and estados[turma.id].arquivada %}{% set alunos_turma = matriculados.get(turma.id, []) %}
+<details class="course-outline turma-cartao"><summary>{{ turma.nome }} · {{ turma.ano_letivo }} · {{ turma.codigo }}{% if turma.turno %} · {{ turma.turno }}{% endif %} · {{ alunos_turma|length }} {{ 'aluno' if alunos_turma|length == 1 else 'alunos' }} · {{ 'Arquivada' if arquivada else ('Gestão explícita' if estados.get(turma.id) else 'Legada: reconciliar atribuições') }}</summary>
+<h3>Matérias e professores</h3>
+{% for vinculo, disciplina in materias.get(turma.id, []) %}<div class="turma-materia"><strong>{{ disciplina.nome }}</strong>
+{% set docentes = [] %}{% for atribuicao, v, prof, disc in atribuicoes %}{% if v.id == vinculo.id %}{% set _ = docentes.append((atribuicao, prof)) %}{% endif %}{% endfor %}
+<ul class="turma-docentes">{% for atribuicao, prof in docentes %}<li>{{ prof.nome }} · {{ 'Ativo' if atribuicao.ativo else 'Revogado' }}{% if atribuicao.ativo and not arquivada %} <form method="post" class="turma-acao">{{ token() }}<input type="hidden" name="acao" value="revogar"><input type="hidden" name="turma_id" value="{{ turma.id }}"><input type="hidden" name="atribuicao_id" value="{{ atribuicao.id }}"><button class="button button-secondary" aria-label="Revogar {{ prof.nome }} em {{ disciplina.nome }}">Revogar</button></form>{% endif %}</li>{% else %}<li class="course-meta">Ainda sem professor. Atribua um em "Matéria e professor".</li>{% endfor %}</ul>
+{% if not arquivada and not docentes %}<form method="post" class="turma-acao">{{ token() }}<input type="hidden" name="acao" value="retirar_materia"><input type="hidden" name="turma_id" value="{{ turma.id }}"><input type="hidden" name="disciplina_id" value="{{ disciplina.id }}"><button class="button button-secondary" aria-label="Retirar {{ disciplina.nome }} da turma {{ turma.nome }}">Retirar matéria</button></form>{% endif %}</div>
+{% else %}<p>Nenhuma matéria registrada. Use "Matéria e professor" para registrar a primeira.</p>{% endfor %}
+<h3>Alunos matriculados</h3>
+{% if alunos_turma %}<p class="turma-alunos">{% for a in alunos_turma %}<a href="{{ url_for('home.admin_detalhes_aluno', aluno_id=a.id) }}">{{ a.nome }}</a>{{ ', ' if not loop.last }}{% endfor %}</p>
+{% else %}<p>Nenhum aluno matriculado. Use "Matrículas" para matricular os alunos.</p>{% endif %}
+{% if not arquivada %}<h3>Dados da turma</h3><form method="post" class="course-form turma-dados">{{ token() }}<input type="hidden" name="acao" value="editar"><input type="hidden" name="turma_id" value="{{ turma.id }}">
+<label>Nome<input name="nome" value="{{ turma.nome }}" maxlength="120" required></label><label>Ano letivo<input type="number" name="ano_letivo" value="{{ turma.ano_letivo }}" min="1900" max="2200" required></label>
+<label>Turno<input name="turno" value="{{ turma.turno or '' }}" maxlength="30"></label><button class="button button-secondary">Salvar dados</button></form>
+<form method="post" class="turma-acao">{{ token() }}<input type="hidden" name="acao" value="arquivar"><input type="hidden" name="turma_id" value="{{ turma.id }}"><button class="button button-secondary">Arquivar turma e suspender acessos</button></form>{% endif %}
+</details>{% else %}<p>Nenhuma turma cadastrada. Crie a primeira no formulário desta página.</p>{% endfor %}</section>
 {% endblock %}

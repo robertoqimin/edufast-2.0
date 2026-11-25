@@ -1,5 +1,5 @@
 {% extends 'gestao_base.html' %}
-{% set page_title = 'Solicitacoes e aprovacoes' %}
+{% set page_title = 'Solicitações e aprovações' %}
 {% block content %}
 <section class="page-heading"><div><span class="eyebrow">ACOMPANHAMENTO</span><h1>Solicitações e aprovações<span>.</span></h1><p>Envios pendentes aguardam a decisão do responsável autorizado.</p></div></section>
 <div class="restored-approvals">
@@ -23,13 +23,14 @@
 {% if identity.admin %}
 <fieldset class="panel"><legend>Nomear responsável por materiais</legend><form id="permissoes-form"><label>Professor <select name="usuario_id" required>{% for docente in docentes %}<option value="{{ docente.usuario_id }}" data-revisor="{{ 'true' if docente.revisor else 'false' }}">{{ docente.nome }} — {{ docente.email }}</option>{% else %}<option value="">Nenhum professor ativo disponível — crie as contas em Usuários e permissões</option>{% endfor %}</select></label><label><input type="checkbox" name="revisor">Permitir revisão de materiais</label><button>Salvar permissão</button><p id="resultado" role="status"></p></form></fieldset>
 {% endif %}
+<nav class="school-tabs filtro-solicitacoes" aria-label="Filtrar solicitações">{% for chave, rotulo in estados.items() %}<a class="button {{ 'button-primary' if estado == chave else 'button-secondary' }}" href="{{ url_for('aprovacoes.painel', estado=chave) }}"{% if estado == chave %} aria-current="page"{% endif %}>{{ rotulo }} ({{ contagem[chave] }})</a>{% endfor %}</nav>
 {% set decidiveis = solicitacoes|selectattr('pode_decidir')|list %}
 {% if decidiveis|length > 1 %}<form id="lote-form" class="panel aprovacao-lote" method="post" action="{{ url_for('aprovacoes.decidir_lote') }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><p><strong>{{ decidiveis|length }} solicitações aguardam sua decisão.</strong> Marque as que quer decidir de uma vez; cada uma é conferida e aplicada separadamente.</p>
 <label><input type="checkbox" data-marcar-todas> Marcar todas</label><label>Justificativa (opcional)<input name="justificativa" maxlength="500"></label>
 <button class="button button-primary" name="decisao" value="aprovar">Aprovar selecionadas</button><button class="button button-secondary" name="decisao" value="rejeitar">Rejeitar selecionadas</button></form>{% endif %}
 {% for item in solicitacoes %}
-<article class="panel"><h2>{% if item.pode_decidir and decidiveis|length > 1 %}<input type="checkbox" name="ids" value="{{ item.id }}" form="lote-form" aria-label="Selecionar solicitação {{ item.id }}"> {% endif %}Solicitação {{ item.id }} — {{ item.titulo }}</h2><p>Estado: <strong class="approval-status">{{ item.estado }}</strong> · Solicitante: {{ item.solicitante_id }}</p>
+<article class="panel"><h2>{% if item.pode_decidir and decidiveis|length > 1 %}<input type="checkbox" name="ids" value="{{ item.id }}" form="lote-form" aria-label="Selecionar solicitação {{ item.id }}"> {% endif %}Solicitação {{ item.id }} — {{ item.titulo }}</h2><p>Estado: <strong class="approval-status">{{ item.estado }}</strong> · Enviada por: {{ item.solicitante }}</p>
 {% if item.candidato is defined %}<p>Candidato: {{ item.candidato.nome }} — {{ item.candidato.email }} · CPF: {{ item.candidato.cpf or 'Não informado' }}</p>{% endif %}
 <dl>{% for campo, valor in item.campos.items() %}<dt>{{ campo|replace('_',' ') }}</dt><dd>{{ valor if valor is not none else 'Não informado' }}</dd>{% endfor %}</dl>
 {% if item.tem_arquivo %}<p><a href="{{ url_for('aprovacoes.arquivo', proposal_id=item.id) }}">Consultar arquivo da solicitação</a></p>{% endif %}
@@ -40,7 +41,7 @@
 </tbody></table></div><p><a class="button button-secondary" href="{{ item.diario_url }}">Abrir o diário da avaliação</a></p>{% endif %}
 {% if item.pode_decidir %}<form method="post" action="{{ url_for('aprovacoes.decidir', proposal_id=item.id) }}">
 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Justificativa <input name="justificativa" maxlength="500"></label><button name="decisao" value="aprovar">Aprovar e aplicar</button><button name="decisao" value="rejeitar">Rejeitar</button></form>{% else %}<p>Decisão: {{ item.decidido_por or 'Aguardando responsável autorizado' }}. {{ item.justificativa or '' }}</p>{% endif %}
-</article>{% else %}<p>Nenhuma solicitação disponível. Envios de notas, materiais e cursos que precisam de aprovação aparecem aqui.</p>{% endfor %}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Justificativa <input name="justificativa" maxlength="500"></label><button name="decisao" value="aprovar">Aprovar e aplicar</button><button name="decisao" value="rejeitar">Rejeitar</button></form>{% else %}<p>{% if item.decisor %}Decidida por {{ item.decisor }}{% if item.decidida_em %} em {{ item.decidida_em }}{% endif %}.{% else %}Aguardando o responsável autorizado.{% endif %} {{ item.justificativa or '' }}</p>{% endif %}
+</article>{% else %}<p>{{ 'Nenhuma solicitação pendente. Envios de notas, materiais e cursos que precisam de aprovação aparecem aqui.' if estado == 'pendentes' else 'Nenhuma solicitação neste filtro. Escolha outro filtro acima.' }}</p>{% endfor %}
 </div><script src="{{ url_for('static', filename='js/paginas/aprovacoes.js') }}" defer></script>
 {% endblock %}

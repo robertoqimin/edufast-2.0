@@ -1,36 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área do Professor | EduFast</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/painel.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/professor_painel.css') }}">
-    {% include "partials/react_runtime.html" %}
-</head>
-<body class="app-page"><a class="skip-link" href="#main-content">Pular para o conteudo</a>
-    <div id="professor-painel-root" class="flex w-full" data-react-shell data-react-template="professor-painel-template"></div>
-    <template id="professor-painel-template">
-    {% include 'partials/workspace_sidebar.html' %}
-
-    <div class="workspace-main">{% include 'partials/workspace_topbar.html' %}<main id="main-content" class="app-content flex-1 p-10 overflow-y-auto">{% include 'partials/avisos.html' %}
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-bold">Olá, Prof. {{ professor.nome }}!</h1>
-                <p class="text-gray-400">{{ professor.disciplina }} · {{ professor.regime }}</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-sm font-bold">{{ professor.email }}</p>
-                    <p class="text-[10px] text-cyan-400">PROF-{{ professor.id }}</p>
-                </div>
-                {% if professor.foto_perfil %}
-                <img src="{{ url_for('document.perfil_arquivo', filename=professor.foto_perfil) }}" alt="Foto de {{ professor.nome }}" class="w-12 h-12 rounded-full border-2 border-white/20 object-cover">
-                {% else %}
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 border-2 border-white/20"></div>
-                {% endif %}
-            </div>
-        </header>
+{% extends 'gestao_base.html' %}{% set page_title = 'Minhas turmas' %}
+{# U5/O3: tela migrada para o layout padrão; CSS próprio e utilitários mantêm o conteúdo antigo. #}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/professor_painel.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+{% endblock %}
+{% block page_class %}legado legado-professor{% endblock %}
+{% block content %}
+        <section class="page-heading"><div><span class="eyebrow">PROFESSOR</span><h1>Olá, Prof. {{ professor.nome }}!</h1><p>{{ professor.disciplina }} · {{ professor.regime }}</p></div>{% if professor.foto_perfil %}<img class="perfil-foto" src="{{ url_for('document.perfil_arquivo', filename=professor.foto_perfil) }}" alt="Foto de {{ professor.nome }}">{% endif %}</section>
 
         <section data-professor-panel="turmas" class="space-y-6">
             <div class="flex justify-between items-center">
@@ -291,9 +266,5 @@
                 </div>
             </div>
         </section>
-    </main></div>
-</template>
-    <script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/compartilhado/submission.js') }}"></script>
-</body>
-</html>
+<script src="{{ url_for('static', filename='js/compartilhado/shell_react.js') }}"></script>
+{% endblock %}

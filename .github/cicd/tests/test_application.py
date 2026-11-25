@@ -54,15 +54,15 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(self.client.get('/').status_code, 200)
 
     def test_admin_pages_require_authentication(self):
-        for path in ['/admin/dashboard', '/admin/turmas', '/admin/disciplinas', '/admin/banco-de-dados']:
+        for path in ['/admin/dashboard', '/admin/gestao-turmas', '/admin/disciplinas', '/admin/banco-de-dados']:
             with self.subTest(path=path):
-                self.assertEqual(self.client.get(path).status_code, 403)
+                self.assertIn(self.client.get(path).status_code, (401, 403))
 
     def test_login_and_admin_navigation(self):
         response = self.login()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json['token'])
-        for path in ['/admin/dashboard', '/admin/turmas', '/admin/disciplinas', '/admin/comunicados', '/admin/banco-de-dados', '/admin/cadastro-alunos', '/admin/cadastro-professores']:
+        for path in ['/admin/dashboard', '/admin/gestao-turmas', '/admin/disciplinas', '/admin/comunicados', '/admin/banco-de-dados', '/admin/cadastro-alunos', '/admin/cadastro-professores']:
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 200)
 
@@ -78,12 +78,16 @@ class ApplicationTests(unittest.TestCase):
 
     def test_create_turma_persists_and_duplicate_is_rejected(self):
         self.login()
-        form = {'nome': 'Turma CI', 'codigo': 'CI-A', 'ano_letivo': '2026', 'turno': 'Manhã'}
-        self.assertEqual(self.client.post('/admin/turmas', data=form).status_code, 302)
-        self.client.post('/admin/turmas', data=form)
+        # U5: a turma é criada na tela única "Turmas" (Gestão acadêmica).
+        with self.client.session_transaction() as session:
+            session['csrf_token'] = 'ci-turmas'
+        form = {'acao': 'criar', 'nome': 'Turma CI', 'codigo': 'CI-A', 'ano_letivo': '2026', 'turno': 'Manhã', 'csrf_token': 'ci-turmas'}
+        self.assertEqual(self.client.post('/admin/gestao-turmas', data=form).status_code, 302)
+        self.assertEqual(self.client.post('/admin/gestao-turmas', data=form).status_code, 409)
         db = get_session()
         try:
             self.assertEqual(db.query(TurmaModel).filter_by(codigo='CI-A').count(), 1)
+            self.assertEqual(db.query(TurmaModel).filter_by(codigo='CI-A').one().turno, 'Manhã')
         finally:
             db.close()
 

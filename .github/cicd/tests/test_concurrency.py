@@ -20,6 +20,7 @@ from app.models import (AlunoModel, ProfessorModel, UsuarioModel, TurmaModel,
                         ProfessorDisciplinaModel, TurmaDisciplinaModel, NotaModel,
                         DocumentoModel, SolicitacaoDocumentoModel, ComunicadoModel,
                         AtividadeModel, IdempotenciaModel, SolicitacaoAlteracaoModel)
+from app.models.curso_model import AtribuicaoDocenteModel
 
 
 REAL_DB = engine.dialect.name == "postgresql"
@@ -67,6 +68,12 @@ class MutationApiTests(TestCase):
             session["user_id"] = user
             session["user_role"] = {1: "admin", 2: "aluno", 3: "professor", 4: "professor"}[user]
             session["user_email"] = f"u{user}@example.test"
+        return client
+
+    def client_csrf(self, user=1):
+        client = self.client(user)
+        with client.session_transaction() as session:
+            session["csrf_token"] = "conc"
         return client
 
     def count(self, model):
@@ -412,30 +419,32 @@ class MutationApiTests(TestCase):
             db.add_all([ProfessorDisciplinaModel(professor_id=2, disciplina_id=2),
                         ProfessorDisciplinaModel(professor_id=1, disciplina_id=2)])
             db.commit()
-        responses = self.pair("/admin/turmas", lambda i: {"action": "associate_teacher", "professor_id": str(i + 1), "turma_id": "1"})
+        # U5: tela única "Turmas"; a restrição única arbitra a matéria da turma criada pelos dois.
+        responses = self.pair("/admin/gestao-turmas", lambda i: {"acao": "atribuir", "professor_id": str(i + 1), "turma_id": "1",
+                                                                 "disciplina_id": "2", "csrf_token": "conc"},
+                              client_factory=self.client_csrf)
         self.statuses(responses, [302, 302])
         self.assertEqual(self.count(ProfessorTurmaModel), 2)
-        self.assertEqual(self.count(TurmaDisciplinaModel), 2)
+        self.assertEqual(self.count(TurmaDisciplinaModel), 1)
+        self.assertEqual(self.count(AtribuicaoDocenteModel), 2)
 
     @skipUnless(REAL_DB, "Concurrency requires the PostgreSQL runner")
     def test_concurrent_unique_registrations_and_links(self):
         cases = [
             ("/cadastro/alunos", lambda _: {"nome": "Novo", "email": "new@example.test", "senha": "test-password-123", "matricula": "M2"}, UsuarioModel, 5),
             ("/cadastro/professores", lambda _: {"nome": "Novo", "email": "newteacher@example.test", "senha": "test-password-123", "cpf": "33333333333"}, UsuarioModel, 6),
-            ("/admin/turmas", lambda _: {"nome": "Nova", "codigo": "T2", "ano_letivo": "2026"}, TurmaModel, 2),
+            ("/admin/gestao-turmas", lambda _: {"acao": "criar", "nome": "Nova", "codigo": "T2", "ano_letivo": "2026", "csrf_token": "conc"}, TurmaModel, 2),
             ("/admin/disciplinas", lambda _: {"nome": "Nova", "codigo": "D2", "carga_horaria": "40"}, DisciplinaModel, 2),
             # IDs reais pelo codigo: na criacao concorrente, o perdedor consome um valor da
             # sequencia e o registro vencedor pode receber 2 ou 3.
             ("/admin/disciplinas", lambda _: {"action": "associate_teacher", "professor_id": "1",
                                               "disciplina_id": self.id_by_code(DisciplinaModel, "D2")}, ProfessorDisciplinaModel, 3),
-            ("/admin/turmas", lambda _: {"action": "associate_student", "aluno_id": "1",
-                                         "turma_id": self.id_by_code(TurmaModel, "T2")}, AlunoTurmaModel, 2),
-            ("/admin/turmas", lambda _: {"action": "associate_teacher", "professor_id": "2",
-                                         "turma_id": self.id_by_code(TurmaModel, "T2")}, ProfessorTurmaModel, 2),
+            ("/admin/gestao-turmas", lambda _: {"acao": "matricular", "aluno_id": "1", "csrf_token": "conc",
+                                                "turma_id": self.id_by_code(TurmaModel, "T2")}, AlunoTurmaModel, 2),
         ]
         for path, factory, model, expected in cases:
             with self.subTest(path=path, model=model.__tablename__):
-                responses = self.pair(path, factory)
+                responses = self.pair(path, factory, client_factory=self.client_csrf if 'gestao' in path else None)
                 self.assertTrue(all(r.status_code < 500 for r in responses))
                 self.assertEqual(sum(r.status_code in {201, 302} for r in responses), 1)
                 self.assertEqual(self.count(model), expected)

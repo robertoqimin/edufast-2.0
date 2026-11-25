@@ -112,7 +112,7 @@ class LoteTests(TestCase):
         self.assertEqual(r.json['decididas'], [a, b])
         self.assertEqual([f['id'] for f in r.json['falhas']], [9999])
         self.assertEqual((self.notas(1), self.notas(2)), ({1: '8.00'}, {1: '7.00'}))
-        decididas = self.html('/solicitacoes', SECRETARIA)
+        decididas = self.html('/solicitacoes?estado=decididas', SECRETARIA)
         self.assertIn('Lançar notas da avaliação', decididas)
         self.assertNotIn('Nota enviada', decididas)        # sem comparação enganosa depois da decisão
         self.assertNotIn('Aprovar selecionadas', decididas)

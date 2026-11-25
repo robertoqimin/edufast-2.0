@@ -1,0 +1,45 @@
+{
+  "base_commit": "feat: guia a implantacao com checklist e telas vazias com proximo passo (U4)",
+  "relatorio": "Documentos/testes/U5_LAYOUT_UNICO_2026-11-25.md",
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Escola nova vazia (ambiente de gravação, porta 5070) configurada pelo checklist; somente dados fictícios",
+  "verificador": "node scripts/ver-u4-u5.cjs --capturas <pasta>",
+  "capturas": [
+    {
+      "arquivo": "01-direcao-escola-vazia-desktop.png",
+      "sha256": "33c6b731a93f07515fb756fcf723e8709ed80287ba687f0c09427fcd660d901a",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "02-secretaria-continua-desktop.png",
+      "sha256": "6a14817e4187d01d742bf3514543ebe28a1bf30a432b92743d2be690d5d1df65",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "03-implantacao-concluida-desktop.png",
+      "sha256": "cba1549e2f0334298916978e3e5313695dff2a980ddfad6856291d86613c5a87",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "04-checklist-celular.png",
+      "sha256": "59e71daf4a1b5af263f56c37913643ab87ba25beb3ba2f8f4bf9c62a6c95e1e1",
+      "viewport": "390x844"
+    },
+    {
+      "arquivo": "05-registros-busca-desktop.png",
+      "sha256": "003014582b62256c7d4e0fa04092d6b82b638e4eb38875cea79ed8e1afb578e2",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "06-solicitacoes-decididas-desktop.png",
+      "sha256": "24390097448a160978aa07e3d226b20623ff61398cc2fc8d5c6f6adf09fd9eed",
+      "viewport": "1440x1000"
+    },
+    {
+      "arquivo": "07-aluno-painel-desktop.png",
+      "sha256": "e04d0ba1f0bdb3386113533ebb8885efdb31fa623503b3edb9f20feb13902acc",
+      "viewport": "1440x1000"
+    }
+  ]
+}
