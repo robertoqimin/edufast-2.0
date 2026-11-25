@@ -4,6 +4,12 @@ Data: 24/11/2026. Etapa B4 do [plano de melhoria](PLANO_MELHORIA_2026-11-22.md).
 decidido pelo usuário: **estudo, testes de contrato e proposta de esquema**. A implementação
 acontece só depois de o modelo ser aprovado. Nada aqui foi executado em banco.
 
+> **Atualização em 25/11/2026:** o usuário decidiu que o colégio e a faculdade serão
+> **unidades** da mesma instalação, com secretarias separadas
+> ([estudo das unidades](ESTUDO_UNIDADES_2026-11-25.md)). As ofertas desta B4 passam a viver
+> dentro da unidade de nível superior, a migration das unidades vira a 010 e esta proposta
+> será renumerada para 011. Os rótulos (`escola_termos`) passam para a tabela de unidades.
+
 ## O que o usuário pediu
 
 > Cada turma recebe da secretaria as disciplinas que vai cursar e os cursos. Também haverá
