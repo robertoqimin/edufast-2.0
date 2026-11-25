@@ -5,6 +5,7 @@
 | Documento | Conteúdo |
 | --- | --- |
 | [Plano de melhoria — dezembro/2026](planejamento/PLANO_MELHORIA_2026-11-22.md) | Ativação do banco, unificação de notas e cursos, MS05, ensino superior e demo única para venda |
+| [B4 — Ensino superior: ofertas extras — 24/11](planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md) · [registro](testes/B4_ESTUDO_SUPERIOR_2026-11-24.md) | Disciplinas e cursos extras pegos pela turma inteira ou por um aluno; proposta 009 e contratos RED, aguardando aprovação |
 | [Turma registrada na matéria — 24/11](testes/TURMA_MATERIA_2026-11-24.md) · [capturas](design/referencias/2026-11-24-turma-materia/COMPARACAO.md) | A secretaria registra a turma inteira na matéria e todos os alunos entram nela; quem entra depois herda as matérias; professor não traz matérias extras; retirada só sem histórico |
 | [Roteiro da gravação do vídeo — 25/11](produto/GRAVACAO_VIDEO_2026-11-25.md) · [ensaio](testes/ENSAIO_GRAVACAO_2026-11-24.md) | Ambiente de gravação (escola vazia, porta 5070), roteiro Supremo → super admin → admin → professor → aluno ensaiado em 37 passos; matrícula nas disciplinas da turma corrigida |
 | [B3 — Desempenho medido (MS05) — 23/11](testes/DESEMPENHO_B3_2026-11-23.md) · [capturas](design/referencias/2026-11-23-desempenho-b3/COMPARACAO.md) | Linha de base por perfil, N+1 corrigidos, diário da secretaria por turma, React removido; números antes/depois |
