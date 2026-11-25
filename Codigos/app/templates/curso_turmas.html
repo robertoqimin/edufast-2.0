@@ -28,7 +28,7 @@
 {% if not arquivada and not docentes %}<form method="post" class="turma-acao">{{ token() }}<input type="hidden" name="acao" value="retirar_materia"><input type="hidden" name="turma_id" value="{{ turma.id }}"><input type="hidden" name="disciplina_id" value="{{ disciplina.id }}"><button class="button button-secondary" aria-label="Retirar {{ disciplina.nome }} da turma {{ turma.nome }}">Retirar matéria</button></form>{% endif %}</div>
 {% else %}<p>Nenhuma matéria registrada. Use "Matéria e professor" para registrar a primeira.</p>{% endfor %}
 <h3>Alunos matriculados</h3>
-{% if alunos_turma %}<p class="turma-alunos">{% for a in alunos_turma %}<a href="{{ url_for('home.admin_detalhes_aluno', aluno_id=a.id) }}">{{ a.nome }}</a>{{ ', ' if not loop.last }}{% endfor %}</p>
+{% if alunos_turma %}<ul class="turma-alunos">{% for a in alunos_turma %}<li><a href="{{ url_for('home.admin_detalhes_aluno', aluno_id=a.id) }}">{{ a.nome }}</a></li>{% endfor %}</ul>
 {% else %}<p>Nenhum aluno matriculado. Use "Matrículas" para matricular os alunos.</p>{% endif %}
 {% if not arquivada %}<h3>Dados da turma</h3><form method="post" class="course-form turma-dados">{{ token() }}<input type="hidden" name="acao" value="editar"><input type="hidden" name="turma_id" value="{{ turma.id }}">
 <label>Nome<input name="nome" value="{{ turma.nome }}" maxlength="120" required></label><label>Ano letivo<input type="number" name="ano_letivo" value="{{ turma.ano_letivo }}" min="1900" max="2200" required></label>

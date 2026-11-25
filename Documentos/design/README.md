@@ -6,6 +6,7 @@ escuro/ciano. A paleta clara/verde usa a personalização do mesmo sistema de to
 
 Leia o [protocolo obrigatório](../PROTOCOLO_DESIGN.md) antes de alterar interfaces.
 
+Apresentação do README, 25/11: [14 telas atuais da demo completa — capturas e comparação](referencias/2026-11-25-apresentacao-readme/COMPARACAO.md).
 MS04, 20/11: [cursos e Matemática para o ENEM — comparação e capturas](referencias/2026-11-20-cursos-enem/COMPARACAO.md).
 Turmas, 24/11: [registrar a turma na matéria — comparação e capturas](referencias/2026-11-24-turma-materia/COMPARACAO.md).
 B3, 23/11: [seletor de turma e painéis sem React — comparação e capturas](referencias/2026-11-23-desempenho-b3/COMPARACAO.md).

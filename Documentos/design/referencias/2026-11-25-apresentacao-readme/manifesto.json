@@ -1,0 +1,107 @@
+{
+  "data": "2026-11-25",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Demo completa recriada (node infra/demo-completa.cjs reset): Colégio Horizonte e painel Supremo; somente dados fictícios",
+  "verificador": "node Codigos/tests/capturar_apresentacao_readme.cjs <pasta>",
+  "falhas": [],
+  "capturas": [
+    {
+      "arquivo": "01-login-desktop.png",
+      "tela": "Login da escola",
+      "endereco": "/",
+      "viewport": "1440x900",
+      "sha256": "b2d30c64a230476bfa86f2f9c87e27c4730f699f1a4cd74e207085707edab39f"
+    },
+    {
+      "arquivo": "02-direcao-visao-geral-desktop.png",
+      "tela": "Direção — Visão geral e Primeiros passos",
+      "endereco": "/admin/dashboard",
+      "viewport": "1440x900",
+      "sha256": "d9d899befa468b31112dcc9e12a5347a2b85519fe2242c81240961340e4a5de8"
+    },
+    {
+      "arquivo": "03-secretaria-turmas-desktop.png",
+      "tela": "Secretaria — Turmas: matérias, professores e alunos",
+      "endereco": "/admin/gestao-turmas",
+      "viewport": "1440x900",
+      "sha256": "c31e8f4a2cc1289dfa7a977052d8fe963d4fcbdc0e7b58a58850b81d45f25aa3"
+    },
+    {
+      "arquivo": "04-professora-chamada-desktop.png",
+      "tela": "Professora — chamada da turma",
+      "endereco": "/frequencia/turmas/1/chamada",
+      "viewport": "1440x900",
+      "sha256": "e3895271174190b41a4887258c617edd169090be0f7dbe15cd54f1be92fa46d6"
+    },
+    {
+      "arquivo": "04-professora-chamada-celular.png",
+      "tela": "Professora — chamada da turma",
+      "endereco": "/frequencia/turmas/1/chamada",
+      "viewport": "390x844",
+      "sha256": "60530b6a2fe7cd865da31eb28c0fc3f42a3240b3ab26488ac59cc075a249cf09"
+    },
+    {
+      "arquivo": "05-professora-diario-desktop.png",
+      "tela": "Professora — diário: a turma inteira numa solicitação",
+      "endereco": "/academico/avaliacoes/13",
+      "viewport": "1440x900",
+      "sha256": "16a78a6213ec9a4aebb83436578688ab98a31fdcf25b080378b091e66a89d3e6"
+    },
+    {
+      "arquivo": "06-secretaria-solicitacoes-desktop.png",
+      "tela": "Secretaria — Solicitações pendentes e aprovação em lote",
+      "endereco": "/solicitacoes",
+      "viewport": "1440x900",
+      "sha256": "b95193a80da51e8581f010a256930bf3e9ad649d5323fec543b89e63b75e9643"
+    },
+    {
+      "arquivo": "07-aluno-painel-desktop.png",
+      "tela": "Aluno — painel",
+      "endereco": "/aluno/dashboard",
+      "viewport": "1440x900",
+      "sha256": "6eb9f0414d3c8d04d0ad3f7853c3a5aa0454b7c1c58c04b37fa99780654f99fb"
+    },
+    {
+      "arquivo": "08-aluno-leitor-pdf-desktop.png",
+      "tela": "Aluno — material em PDF no leitor da plataforma",
+      "endereco": "/estudos/conteudos/4",
+      "viewport": "1440x900",
+      "sha256": "bae05e05f419c68578526dd3ec36784bdfce8ae12e27fae931098f25bfba2713"
+    },
+    {
+      "arquivo": "09-aluno-boletim-desktop.png",
+      "tela": "Aluno — boletim",
+      "endereco": "/boletim",
+      "viewport": "1440x900",
+      "sha256": "175d6663cb6fd9482221f3d26049e346386a0803b16b80ff2c2378ad16b5c8df"
+    },
+    {
+      "arquivo": "07-aluno-painel-celular.png",
+      "tela": "Aluno — painel",
+      "endereco": "/aluno/dashboard",
+      "viewport": "390x844",
+      "sha256": "be01fc5003d8cd3051ae118eefa2ca9382141237a5b5eb038217aa0e432b9c52"
+    },
+    {
+      "arquivo": "08-aluno-leitor-pdf-celular.png",
+      "tela": "Aluno — material em PDF no leitor da plataforma",
+      "endereco": "/estudos/conteudos/4",
+      "viewport": "390x844",
+      "sha256": "221997853a458517151dfe15f95e8dcda02f9faafbbfa34be498fd2dc49b5f3a"
+    },
+    {
+      "arquivo": "10-aluna-curso-video-desktop.png",
+      "tela": "Aluna — curso Matemática para o ENEM, videoaula enviada pela professora",
+      "endereco": "/aprendizagem/ofertas/1",
+      "viewport": "1440x900",
+      "sha256": "f023895508fae46049e4e57a91b4116f8ec2cd6886dacf6cf1b0aea7ddd9023a"
+    },
+    {
+      "arquivo": "11-supremo-escolas-desktop.png",
+      "tela": "Painel Supremo — escolas da plataforma",
+      "endereco": "/",
+      "viewport": "1440x900",
+      "sha256": "a759a2418862ee13654d03fac4bdf4197e823438b0bde646dfe1089143f4672e"
+    }
+  ]
+}

@@ -4,85 +4,219 @@
 
 [![CI - EduFast](https://github.com/Samucau1/edufast-2.0/actions/workflows/ci.yml/badge.svg)](https://github.com/Samucau1/edufast-2.0/actions/workflows/ci.yml)
 
-O **EduFast** (EducaFast) é um software de gestão escolar com foco em **agilidade,
-usabilidade e baixo consumo de hardware**. A primeira versão comercial mira o
-**ensino médio e o ensino superior**: turmas, chamada confirmada pelo professor,
-espaço da disciplina com avisos e materiais, abas docentes e cursos modulares,
-sobre uma base de secretaria, aprovações, documentos e comunicação.
+O **EduFast** é uma plataforma de gestão escolar para o **ensino médio** que reúne a
+secretaria, o professor e o aluno no mesmo lugar: turmas, chamada, notas, materiais de
+estudo, cursos e comunicação. Ela foi feita para ser **simples de usar, leve em
+computadores e celulares modestos, e segura**. Cada escola tem a própria instalação, os
+próprios dados e a própria identidade visual.
 
-**Estado atual (novembro de 2026):** produto em preparação para apresentação e
-venda, demonstrável localmente com dados fictícios. A implantação em servidor será
-feita quando houver cliente. Nenhuma instalação de produção foi homologada.
+<p align="center">
+  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/01-login-desktop.png" alt="Tela de login do Colégio Horizonte, escola de demonstração do EduFast" width="900">
+</p>
 
-[Arquitetura](Documentos/arquitetura/ARQUITETURA.md) ·
-[Preparação para entrega](Documentos/planejamento/PREPARACAO_ENTREGA_2026-11-16.md) ·
-[Plano ensino médio/superior](Documentos/planejamento/ENSINO_MEDIO_SUPERIOR_2026-11-16.md) ·
-[Execução](Documentos/operacao/EXECUCAO.md) ·
-[Protocolo de design](Documentos/PROTOCOLO_DESIGN.md) ·
+> Todas as telas desta página são capturas reais da versão atual, feitas em 25/11/2026 na
+> escola de demonstração **Colégio Horizonte**, com dados fictícios.
+
+[Experimente em um comando](#experimente) ·
+[Tour pelas telas](#tour-pelas-telas) ·
+[Funcionalidades](#funcionalidades) ·
+[Situação e próximos passos](#situação-e-próximos-passos) ·
+[Arquitetura](#arquitetura) ·
 [Toda a documentação](Documentos/README.md)
 
-## Para quem?
+## Por que EduFast
+
+| | |
+| --- | --- |
+| **Um caminho por tarefa** | Cada tarefa tem uma tela só. Turma, matérias, professores e alunos ficam juntos, e as telas vazias dizem qual é o próximo passo. |
+| **Implantação guiada** | A direção abre o sistema e encontra o checklist **Primeiros passos**: dos dados da escola até o primeiro acesso do aluno. |
+| **A escola no controle** | Notas e materiais enviados pelo professor passam pela aprovação da secretaria. A avaliação inteira chega como **uma solicitação**, e a secretaria aprova várias de uma vez. |
+| **Estudo dentro da plataforma** | PDF, slides, imagens e vídeos abrem num leitor próprio, sem baixar arquivos. O professor pode enviar vídeos de até 300 MB, guardados cifrados. |
+| **Leve** | Não usa framework no navegador. Com as otimizações medidas, a frequência caiu de 172 para 16 consultas ao banco e o diário, de 422 para 53 KiB. |
+| **Acessível** | 84 de 84 páginas aprovadas na auditoria automática de acessibilidade (axe-core), em desktop e celular. |
+| **Seguro por padrão** | A autorização é conferida no banco a cada requisição. Há proteção contra CSRF e arquivos privados cifrados, e as migrations só rodam com revisão. |
+
+## Experimente
+
+Requisitos: Git, Docker com Docker Compose (no Windows, Docker Desktop aberto) e Node 20+.
+
+```powershell
+git clone https://github.com/Samucau1/edufast-2.0.git
+cd edufast-2.0
+node infra/demo-completa.cjs start
+```
+
+O comando sobe a escola completa em http://localhost:5095 e o painel Supremo em
+http://127.0.0.1:5093/login. A escola vem com turma, três matérias, doze alunos, chamadas,
+notas, boletim, materiais e o curso **Matemática para o ENEM**. Use
+`node infra/demo-completa.cjs reset` para recomeçar do zero e `stop` para parar, mantendo os
+dados.
+
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Direção (super admin) | `diretoria@demo.edufast.test` | `Demo-EduFast-2026!` |
+| Secretaria | `secretaria@demo.edufast.test` | `Demo-EduFast-2026!` |
+| Professora de Matemática | `ana.ribeiro@demo.edufast.test` | `Demo-EduFast-2026!` |
+| Aluno / aluna | `bruno.lima@demo.edufast.test` · `carla.souza@demo.edufast.test` | `Demo-EduFast-2026!` |
+| Supremo (dono da plataforma) | `dono@plataforma.local` | `Plataforma-teste-2026!` |
+
+Essas credenciais são **públicas e fictícias** e funcionam apenas no seu computador.
+Nunca use essas credenciais em produção.
+
+## Tour pelas telas
+
+### Direção: implantação guiada
+
+A Visão geral mostra o checklist **Primeiros passos**, que é calculado a partir dos dados da
+própria escola. Na demonstração ele já está concluído: 8 de 8 passos.
+
+![Visão geral da direção com o checklist de implantação concluído e os números da escola](Documentos/design/referencias/2026-11-25-apresentacao-readme/02-direcao-visao-geral-desktop.png)
+
+### Secretaria: uma tela para cada turma
+
+Em **Turmas** a secretaria cria a turma com o turno, registra cada matéria com o professor
+(ou ainda sem professor) e matricula os alunos. Cada turma mostra as matérias, os
+professores e os alunos no mesmo cartão.
+
+![Tela Turmas com o 1º ano A aberto: matérias, professores e alunos matriculados](Documentos/design/referencias/2026-11-25-apresentacao-readme/03-secretaria-turmas-desktop.png)
+
+### Professor: chamada e diário
+
+A professora confirma a chamada da própria turma, e a frequência entra direto no
+relatório. No diário, ela lança as notas da turma inteira numa tela só.
+
+![Chamada de Matemática do 1º ano A](Documentos/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-desktop.png)
+
+![Diário do Simulado do 2º bimestre com a nota de cada aluno](Documentos/design/referencias/2026-11-25-apresentacao-readme/05-professora-diario-desktop.png)
+
+### Secretaria: aprovação em lote
+
+As notas da avaliação chegam como **uma solicitação**. A secretaria vê aluno, nota atual e
+nota enviada, e decide. Um filtro separa pendentes, decididas e todas, com o nome de quem
+enviou.
+
+![Solicitações pendentes: o lançamento do Simulado com as notas de cada aluno](Documentos/design/referencias/2026-11-25-apresentacao-readme/06-secretaria-solicitacoes-desktop.png)
+
+### Aluno: disciplinas, materiais e boletim
+
+O aluno vê as disciplinas com os professores e estuda os materiais no **leitor da
+plataforma**, que passa página por página, tem zoom, tela cheia e marca o material como
+visto. O boletim mostra a média ponderada de cada período.
+
+![Painel do aluno com as três disciplinas e seus professores](Documentos/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-desktop.png)
+
+![Slides em PDF abertos no leitor da plataforma, página 1 de 4](Documentos/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-desktop.png)
+
+![Boletim do aluno com notas, pesos e média ponderada](Documentos/design/referencias/2026-11-25-apresentacao-readme/09-aluno-boletim-desktop.png)
+
+### Cursos modulares
+
+O curso se organiza em biblioteca, curso, módulos, capítulos e aulas. O aluno retoma de
+onde parou. A aula pode trazer texto, materiais e a videoaula que a professora enviou, que
+é guardada cifrada e assistida sem baixar.
+
+![Curso Matemática para o ENEM: trilha de aulas e a videoaula enviada pela professora](Documentos/design/referencias/2026-11-25-apresentacao-readme/10-aluna-curso-video-desktop.png)
+
+### No celular
+
+<p align="center">
+  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-celular.png" alt="Painel do aluno no celular" width="260">
+  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-celular.png" alt="Leitor de PDF no celular" width="260">
+  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-celular.png" alt="Chamada no celular" width="260">
+</p>
+
+### Painel Supremo: a plataforma inteira
+
+O dono da plataforma acompanha as escolas, as pessoas sincronizadas e o resultado do mês
+num painel com login e banco próprios. Ele não acessa notas nem documentos das escolas.
+
+![Painel Supremo com o resultado do mês e as escolas da plataforma](Documentos/design/referencias/2026-11-25-apresentacao-readme/11-supremo-escolas-desktop.png)
+
+## Para quem
 
 | Perfil | O que faz no sistema |
 | --- | --- |
-| Supremo (proprietário da plataforma) | Cadastra escolas, consulta o diretório de pessoas e o financeiro da plataforma, em painel e banco próprios |
-| Superadmin da escola | Identidade visual, usuários, papéis, calendário e políticas da própria escola |
-| Admin / secretaria | Cadastros, turmas, disciplinas, vínculos, documentos e aprovação de propostas |
-| Professor | Turmas e disciplinas atribuídas: chamada, materiais, abas, cursos, atividades e notas no diário da avaliação (cada lançamento aprovado pela secretaria) |
-| Professor revisor | Além do acima, aprova materiais de outros professores nas disciplinas que lhe foram atribuídas |
-| Aluno | Disciplinas, materiais, cursos com retomada, presença, documentos e solicitações próprias |
+| Supremo (dono da plataforma) | Cadastra escolas e acompanha o diretório de pessoas e o financeiro da plataforma |
+| Direção (super admin da escola) | Implantação guiada, identidade visual, usuários, papéis, calendário e políticas |
+| Secretaria | Alunos, professores, turmas, matérias, matrículas, documentos e aprovação do que o professor envia |
+| Professor | Chamada, diário de notas, materiais, abas da disciplina e cursos das turmas atribuídas |
+| Professor revisor | Além do acima, aprova materiais de outros professores nas disciplinas atribuídas |
+| Aluno | Disciplinas, materiais, cursos com retomada, frequência, boletim, documentos e solicitações |
 
-A ordem indica responsabilidade e alcance. Ela não concede acesso automático a
-documentos restritos de outros perfis, e nenhum perfil escolar administra o Supremo.
+Nenhum perfil da escola administra o Supremo, e a ordem da tabela não dá acesso automático
+aos documentos restritos de outro perfil.
 
 ## Funcionalidades
 
-**Situação** distingue código presente, testes aprovados e ativação. Módulos marcados
-com migration dependem de SQL **ainda pendente de revisão**: sem as tabelas, o
-módulo responde 503 e o restante da aplicação continua funcionando.
-
-| Módulo | Escopo | Situação |
+| Módulo | O que inclui | Situação |
 | --- | --- | --- |
-| Acesso | Login, sessão, JWT, revogação, restrições por perfil, cadastro público pendente de aprovação | Presente |
-| Secretaria | Alunos, professores, turmas, disciplinas e vínculos | Presente |
-| Aprovações | Propostas docentes com idempotência, decisão transacional, conflito em segunda decisão | Presente (migration 002) |
-| Documentos e comunicação | Solicitações, envio/download autorizado, comunicados | Presente |
-| Identidade e gestão escolar | Nome, cores, tema, calendário, políticas, diário/boletim, privacidade | Presente (migration 003) |
-| Chamada — MS01 | Professor confirma a chamada da própria oferta; correção versionada; atestados com análise administrativa | CI SQLite/MySQL aprovado em 19/11; regressão em PostgreSQL em 22/11 (migration 004) |
-| Espaço da disciplina — MS02 | Avisos, links e arquivos de estudo cifrados por turma/disciplina | CI aprovado (migration 005) |
-| Abas docentes — MS03 | Criar, renomear, ordenar e arquivar seções, preservando histórico | CI aprovado (migration 006) |
-| Cursos modulares — MS04 | Biblioteca → curso → módulos → capítulos → aulas de texto ou vídeo, materiais, publicação revisada, retomada e progresso | Implementado; demo ENEM; aceite manual pendente (migration 007) |
-| Instalações por escola | Geração e operação de instâncias isoladas, backup por cliente | Testes de configuração e piloto sintético no CI |
-| Painel Supremo | Login exclusivo, escolas, diretório de pessoas, receitas/despesas manuais, auditoria | Implementado; banco central pendente de revisão |
-| Usabilidade e desempenho — MS05 | Jornadas completas, desktop/mobile, consultas e recursos | A fazer |
-| RH, ponto, folha, financeiro escolar | Colaboradores, jornadas, competências, mensalidades | Planejado (somente protótipos) |
+| Acesso | Login, sessão, revogação, perfis, cadastro público sujeito a aprovação | Pronto |
+| Secretaria | Alunos, professores, disciplinas e **tela única de Turmas** (turno, matéria com ou sem professor, matrículas, arquivamento) | Pronto |
+| Implantação guiada | Checklist **Primeiros passos** e telas vazias com o próximo passo | Pronto |
+| Aprovações | Solicitações com idempotência e decisão transacional; avaliação inteira numa solicitação; aprovação em lote; filtro e nomes | Pronto |
+| Chamada e atestados | Professor confirma a chamada; correção versionada; atestados analisados pela secretaria | Pronto |
+| Diário e boletim | Avaliações com peso, notas aprovadas, média ponderada por período | Pronto |
+| Espaço da disciplina | Avisos, links, arquivos cifrados, abas do professor, progresso "visto" | Pronto |
+| Leitor e vídeos | Leitor próprio de PDF e imagens, YouTube embutido sem cookies, envio de vídeo de até 300 MB cifrado em blocos | Pronto |
+| Cursos modulares | Biblioteca, módulos, capítulos, aulas, materiais, publicação revisada, retomada e progresso | Pronto |
+| Documentos e comunicação | Solicitações, envio e download autorizados, comunicados | Pronto |
+| Identidade da escola | Nome, cores, tema, calendário, políticas e privacidade | Pronto |
+| Instalações por escola | Geração e operação de instâncias isoladas, backup por escola | Testado em piloto sintético |
+| Painel Supremo | Escolas, diretório de pessoas, receitas e despesas, auditoria | Pronto |
+| Ensino superior | Ofertas de disciplina por período e inscrição individual | Modelo aprovado; implementação em seguida |
+| RH, ponto, folha, financeiro escolar | Colaboradores, jornadas, competências, mensalidades | Planejado (protótipos) |
 
-**Decisões de produto:** a chamada é confirmada diretamente pelo professor, sem
-aprovação; chamadas antigas pendentes não são convertidas. Atestado aceito justifica
-a falta, mas não vira presença. Materiais, notas e publicação de cursos continuam
-passando pelo fluxo de aprovação.
+**Decisões de produto:**
+- A chamada é confirmada direto pelo professor, sem aprovação.
+- Um atestado aceito justifica a falta, mas não vira presença.
+- Notas, materiais e a publicação de cursos passam pela aprovação da secretaria.
+
+## Situação e próximos passos
+
+**Novembro de 2026: beta funcional, pronto para um piloto controlado.**
+- Validação: 393 testes automatizados passam em SQLite e em PostgreSQL 17. Os percursos de
+  cada perfil foram verificados no navegador, em desktop e celular.
+- Instalações reais: nenhuma instalação de produção foi homologada ainda.
+- Banco de dados: as migrations 001 a 009 estão revisadas e aprovadas, mas só serão
+  aplicadas num banco real na primeira implantação, com backup e plano de volta atrás.
+
+| Próximo passo | Situação |
+| --- | --- |
+| Ensino superior: ofertas por período e inscrição do aluno | Modelo aprovado; a migration proposta 010 aguarda revisão |
+| Passar a turma para o ano seguinte | Em discussão |
+| Teste de usabilidade com pessoas reais (meta SUS ≥ 80) | Planejado |
+| Guia curto do usuário e descrição da oferta | Planejado |
+| RH, ponto, folha e financeiro escolar | Planejado; existem protótipos em [`Protótipo/`](Protótipo/) |
+
+Planos:
+- [plano de melhoria](Documentos/planejamento/PLANO_MELHORIA_2026-11-22.md);
+- [plano de UX](Documentos/planejamento/PLANO_UX_2026-11-24.md);
+- [estudo do ensino superior](Documentos/planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md);
+- [roadmap](Documentos/planejamento/ROADMAP.md).
 
 ## Arquitetura
 
-Monólito **Flask** em camadas, com frontend **Jinja + CSS + JavaScript simples** servido
-pela própria aplicação e persistência **SQLAlchemy/PostgreSQL 17**.
+É um monólito **Flask** em camadas. As telas usam **Jinja, CSS com tokens e JavaScript
+simples**, servidos pela própria aplicação, e os dados ficam em **PostgreSQL 17** via
+SQLAlchemy.
 
 ```mermaid
 flowchart LR
-    U[Admin · Professor · Aluno] --> UI[Jinja · CSS · JavaScript]
+    U[Direção · Secretaria · Professor · Aluno] --> UI[Jinja · CSS · JavaScript]
     UI --> R[Rotas e guards]
-    R --> S[Controllers e services]
+    R --> S[Services]
     S --> Rep[Repositories]
     Rep --> M[Models SQLAlchemy]
     M --> DB[(PostgreSQL da escola)]
-    S --> F[Uploads cifrados]
+    S --> F[Arquivos e vídeos cifrados]
 ```
 
-**Uma instalação por escola.** Cada cliente tem aplicação, PostgreSQL, uploads, contas,
-segredos e domínio próprios. Um gateway HTTPS encaminha cada domínio à instância
-correta. O **painel Supremo** (`Codigos/control_plane`) é outra aplicação Flask, com
-banco central próprio, e recebe das escolas apenas o diretório de pessoas
-(nome, e-mail, perfil e situação), sem senhas, notas ou documentos.
+**Uma instalação por escola.**
+- Cada escola tem aplicação, banco, arquivos, contas, segredos e domínio próprios.
+- Um gateway HTTPS encaminha cada domínio para a instalação certa.
+- O **painel Supremo** (`Codigos/control_plane`) é outra aplicação, com banco próprio. Das
+  escolas, ele recebe só o diretório de pessoas (nome, e-mail, perfil e situação), nunca
+  senhas, notas ou documentos.
 
 ```mermaid
 flowchart TB
@@ -96,132 +230,106 @@ flowchart TB
     AB -. diretório por HTTPS .-> AP
 ```
 
-Garantias preservadas em todas as entregas: autorização conferida no banco a cada
-requisição, CSRF, idempotência, controle de versão contra edição concorrente,
-arquivos privados e cifrados, e **nenhuma DDL executada ao iniciar**. Migrations
-são propostas versionadas em `Codigos/migrations/` e só são aplicadas após revisão.
+Toda entrega preserva estas garantias:
+- autorização conferida no banco a cada requisição;
+- proteção contra CSRF;
+- idempotência;
+- controle de versão contra edição simultânea;
+- arquivos privados e cifrados;
+- **nenhuma alteração de esquema ao iniciar**: as migrations ficam em `Codigos/migrations/`
+  e só são aplicadas depois de revisadas.
 
-Detalhes: [arquitetura](Documentos/arquitetura/ARQUITETURA.md),
-[instâncias por cliente](Documentos/planejamento/INSTANCIAS_POR_CLIENTE_2026-11-11.md),
-[painel Supremo](Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md) e
-[permissões e aprovações](Documentos/seguranca-aprovacoes.md).
+Mais detalhes:
+- [arquitetura](Documentos/arquitetura/ARQUITETURA.md);
+- [instalações por escola](Documentos/planejamento/INSTANCIAS_POR_CLIENTE_2026-11-11.md);
+- [painel Supremo](Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md);
+- [permissões e aprovações](Documentos/seguranca-aprovacoes.md);
+- [protocolo de design](Documentos/PROTOCOLO_DESIGN.md).
 
-## Estrutura do repositório
-
-```text
-Teste-de-software/
-├── .github/
-│   ├── workflows/            # ci, cloud-instances, deploy (manual), tdd
-│   └── cicd/                 # Executor do CI, imagem, produção, testes HTTP/Postman
-├── Codigos/                  # Aplicação
-│   ├── app/
-│   │   ├── routes/           # Rotas e guards
-│   │   ├── controllers/      # Operações legadas da aplicação
-│   │   ├── services/         # Regras de negócio (inclui cursos_ms04/)
-│   │   ├── repositories/     # Consultas
-│   │   ├── models/           # Entidades SQLAlchemy
-│   │   ├── templates/        # Jinja e parciais workspace_*
-│   │   └── static/           # design_system.css, app.css, escola.css, JS
-│   ├── control_plane/        # Painel Supremo (aplicação e banco central)
-│   ├── migrations/           # SQL 001–007 propostos, pendentes de revisão
-│   ├── tests/                # Verificadores de navegador e de protocolo de design
-│   └── demo/                 # Conteúdo fictício da demonstração ENEM
-├── infra/                    # Geração/operação de instâncias, demos e painel
-├── Documentos/               # Arquitetura, planejamento, testes, design
-├── Protótipo/                # SVGs conceituais (RH, ponto, pagamentos)
-├── scripts/
-├── iniciar-educafast.ps1     # Uma escola local (Windows)
-└── iniciar-duas-escolas.ps1  # Teste 01 e Teste 02 (Windows)
-```
-
-## Executar localmente
-
-Requisitos: Git e Docker com Docker Compose (no Windows, Docker Desktop aberto).
-As demos de várias escolas e do painel também exigem **Node 20+**.
-
-```powershell
-git clone https://github.com/Samucau1/edufast-2.0.git
-cd edufast-2.0
-```
-
-Todas as credenciais abaixo são **públicas, fictícias e restritas ao loopback**.
-Nunca as use em produção.
+## Outros ambientes locais
 
 | Ambiente | Comando | Endereço | Acesso |
 | --- | --- | --- | --- |
-| Uma escola | `.\iniciar-educafast.ps1` | http://localhost:5050 | `superadmin@`, `admin@`, `professor@`, `aluno@teste.local` · `Teste-local-2026!` |
-| Duas escolas (20 alunos, 5 professores, 3 matérias cada) | `.\iniciar-duas-escolas.ps1` ou `node infra/demo.cjs start` | http://127.0.0.1:5081 e :5082 | `admin@teste01.local`, `professor01@teste01.local`, `aluno01@teste01.local`… · `Teste-escolas-2026!` |
-| Cursos — demo Matemática ENEM | `node infra/enem-demo.cjs start` | http://127.0.0.1:5092 | `aluno02@`, `professor01@`, `admin@teste01.local` · `Teste-escolas-2026!` |
-| Painel Supremo | `node infra/platform-demo.cjs start` | http://127.0.0.1:5093/login | `dono@plataforma.local` · `Plataforma-teste-2026!` |
+| Demo completa (recomendada) | `node infra/demo-completa.cjs start` | http://localhost:5095 | veja [Experimente](#experimente) |
+| Uma escola vazia para testes | `.\iniciar-educafast.ps1` | http://localhost:5050 | `superadmin@`, `admin@`, `professor@`, `aluno@teste.local` · `Teste-local-2026!` |
+| Duas escolas (20 alunos, 5 professores cada) | `node infra/demo.cjs start` | http://127.0.0.1:5081 e :5082 | `admin@teste01.local`, `professor01@teste01.local`, `aluno01@teste01.local`… · `Teste-escolas-2026!` |
 
-- `iniciar-educafast.ps1` aceita `-Porta`, `-SemNavegador`, `-Acao Status|Logs|Parar|CriarAdmin`
-  e `-PrepararBancoNovo`. Ele cria o banco pelo esquema base (`migrations/base/`) apenas quando está vazio, e nunca
-  aplica migrations em banco existente.
-- As demos ENEM e Supremo usam bancos temporários: **parar descarta os dados**.
-- Roteiros: [duas escolas](Documentos/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md),
-  [cursos ENEM](Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md) e
-  [painel Supremo](Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md).
+Sobre o `iniciar-educafast.ps1`:
+- Ele aceita `-Porta`, `-SemNavegador`, `-Acao Status|Logs|Parar|CriarAdmin` e `-PrepararBancoNovo`.
+- Ele cria o banco pelo esquema base só quando o banco está vazio, e nunca aplica migrations
+  num banco existente.
 
-**Instalação própria:** copie `Codigos/.env.example` para `Codigos/.env`, defina
-`SECRET_KEY` (32+ caracteres), `DB_PASSWORD` e `POSTGRES_ADMIN_PASSWORD`, revise o
-[procedimento de banco](Codigos/migrations/README.md) e execute em `Codigos/`:
+**Instalação própria:**
+1. Copie `Codigos/.env.example` para `Codigos/.env`.
+2. Defina `SECRET_KEY` (32 ou mais caracteres), `DB_PASSWORD`, `POSTGRES_ADMIN_PASSWORD` e
+   `DATA_ENCRYPTION_KEY` (o arquivo traz o comando que gera a chave; guarde-a junto do
+   backup, porque sem ela os arquivos cifrados não podem ser lidos).
+3. Revise o [procedimento de banco](Codigos/migrations/README.md).
+4. Em `Codigos/`, execute:
 
-```bash
-docker compose up -d --build
-docker compose exec app flask --app 'app:create_app()' create-admin
-```
+   ```bash
+   docker compose up -d --build
+   docker compose exec app flask --app 'app:create_app()' create-admin
+   ```
 
-Hospedagem com várias escolas: [infra/README.md](infra/README.md),
-[operação em nuvem](infra/CLOUD.md) e [cadastro pelo operador](infra/PLATFORM.md).
-Mais comandos e solução de problemas: [guia de execução](Documentos/operacao/EXECUCAO.md).
+Para hospedar várias escolas:
+- [infra/README.md](infra/README.md);
+- [operação em nuvem](infra/CLOUD.md);
+- [cadastro pelo operador](infra/PLATFORM.md);
+- [guia de execução](Documentos/operacao/EXECUCAO.md).
 
 ## Testes e CI/CD
 
 ```bash
 python .github/cicd/ci.py                                   # SQLite + PostgreSQL + imagem + HTTPS, ambiente descartável
-python .github/cicd/run_cursos_backend.py --suite regressao # Regressão e MS04 em containers isolados
-node --test infra/test_*.cjs                                # Geração, operação e cadastro de instâncias
+python .github/cicd/run_cursos_backend.py --suite regressao # Regressão completa em PostgreSQL 17 descartável
+node Codigos/tests/auditar_acessibilidade.cjs               # Acessibilidade (axe-core), 84 páginas
+node Codigos/tests/verificar_demo_completa.cjs              # Demo completa pela interface, por perfil
 python Codigos/tests/verificar_protocolo_design.py          # Protocolo visual
 ```
 
-O workflow `ci.yml` executa a regressão, os fluxos HTTP por perfil, o painel
-Supremo em bancos descartáveis e o protocolo de design. Na `main` aprovada, publica
-a imagem testada por digest. `deploy.yml` é manual, via SSH, com backup prévio.
-`tdd.yml` roda contratos de versões futuras que permanecem falhando de propósito.
-Detalhes em [.github/cicd/README.md](.github/cicd/README.md); relatórios datados em
-[Documentos/testes](Documentos/testes/).
+O que o CI faz:
+- O workflow `ci.yml` roda a regressão, os fluxos HTTP por perfil, o painel Supremo em
+  bancos descartáveis, a acessibilidade e o protocolo de design.
+- Na `main` aprovada, ele publica a imagem testada.
+- O `deploy.yml` é manual, via SSH, com backup antes.
 
-Os testes criam esquemas novos e descartáveis. **Nenhuma migration foi executada
-em banco persistente.**
+Os relatórios de cada etapa ficam em [Documentos/testes](Documentos/testes/), e as capturas
+datadas, em [Documentos/design/referencias](Documentos/design/referencias/).
 
 ## Tecnologias
 
 | Camada | Tecnologias |
 | --- | --- |
-| Interface | HTML, Jinja, CSS com tokens, JavaScript simples (sem framework; React removido na B3), fonte DM Sans local |
+| Interface | HTML, Jinja, CSS com tokens, JavaScript simples, PDF.js local, fonte DM Sans local |
 | Aplicação | Python 3.12, Flask 3.1, Gunicorn |
-| Dados | SQLAlchemy 2.0, psycopg 3, PostgreSQL 17; `cryptography` para arquivos e textos cifrados |
-| Infraestrutura | Docker Compose, Nginx (instâncias) e Caddy (instalação única), scripts Node |
-| Testes | unittest, Node test runner, Playwright, Postman/Newman, GitHub Actions |
+| Dados | SQLAlchemy 2.0, psycopg 3, PostgreSQL 17; `cryptography` para arquivos, vídeos e textos cifrados |
+| Infraestrutura | Docker Compose, Nginx (instalações) e Caddy (instalação única), scripts Node |
+| Testes | unittest, Node test runner, Playwright (Edge), axe-core, Postman/Newman, GitHub Actions |
 
-## Próximos passos
+## Estrutura do repositório
 
-1. **MS04:** revisar a migration 007 e concluir o teste manual da demo de cursos.
-2. **MS05:** revisar usabilidade e desempenho das jornadas completas em desktop e celular.
-3. Revisar e ativar as migrations 002–007 e o banco central, com backup e ensaio.
-4. Ensaiar backup e restauração por escola e do painel central em ambiente isolado.
-5. Fechar a versão demonstrável: roteiro comercial, guia curto e limitações conhecidas.
-6. Evoluções futuras: matrícula por disciplina no superior, RH, ponto, folha e financeiro escolar.
-
-Backlog completo: [preparação para entrega](Documentos/planejamento/PREPARACAO_ENTREGA_2026-11-16.md)
-e [roadmap](Documentos/planejamento/ROADMAP.md).
+```text
+├── Codigos/                  # Aplicação
+│   ├── app/                  # routes, services, repositories, models, templates, static
+│   ├── control_plane/        # Painel Supremo
+│   ├── migrations/           # SQL 001–009 revisados, esquema base e propostas
+│   ├── tests/                # Testes, verificadores de navegador e de design
+│   └── demo/                 # Conteúdo fictício das demonstrações
+├── infra/                    # Instalações por escola, demos e painel
+├── Documentos/               # Arquitetura, planejamento, testes e design
+├── Protótipo/                # Conceitos de RH, ponto e pagamentos
+└── scripts/                  # Roteiros de demonstração e gravação
+```
 
 ## Contribuir
 
-Leia o [AGENTS.md](AGENTS.md) e o [protocolo de design](Documentos/PROTOCOLO_DESIGN.md)
-antes de alterar interfaces. Preserve a autenticação, as aprovações e as garantias do
-banco. Migrations podem ser propostas, mas não executadas sem revisão. Não versione
-`.env`, bancos, uploads, chaves, caches ou logs, nem dados reais de alunos e colaboradores.
+Antes de alterar as telas, leia o [AGENTS.md](AGENTS.md) e o
+[protocolo de design](Documentos/PROTOCOLO_DESIGN.md). Algumas regras:
+- Preserve a autenticação, as aprovações e as garantias do banco.
+- Migrations podem ser propostas, mas não executadas sem revisão.
+- Não versione `.env`, bancos, uploads, chaves, caches ou logs, nem dados reais de alunos e
+  colaboradores.
 
 ## Licença
 
