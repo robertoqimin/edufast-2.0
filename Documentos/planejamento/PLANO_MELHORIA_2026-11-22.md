@@ -27,6 +27,8 @@ propostas e só são executadas após revisão do usuário, conforme `AGENTS.md`
 | B3 | Concluída em 23/11: linha de base medida (30 páginas, 2 vCPU/2 GB); frequência 172→16 e boletim 96→20 consultas; `/academico` 422→53 KiB; React removido (−250 a 300 ms com CPU 4× lenta). Metas de consulta, peso e LCP cumpridas; gravações e carga ficam pendentes | [Desempenho B3](../testes/DESEMPENHO_B3_2026-11-23.md) |
 | B4 | Estudo entregue em 24/11: extras como **ofertas** (turma inteira ou aluno), proposta 009 não executada e 10 contratos RED. **Modelo aprovado**: inscrição do aluno em ofertas abertas, imediata; rótulos configuráveis; implementação no próximo ciclo | [Estudo B4](ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md) |
 | C1 | Concluída em 24/11: `node infra/demo-completa.cjs start|reset` sobe o Colégio Horizonte (5095) completo e o painel Supremo (5093); 44 páginas verificadas na interface. Oferta do superior entra com a implementação da B4 | [Demo única](../testes/DEMO_COMPLETA_C1_2026-11-24.md) |
+| C2 | Coberta pela gravação de 15 min feita pelo usuário (24/11) com `scripts/gravar-demo.ps1` | [Roteiro da gravação](../produto/GRAVACAO_VIDEO_2026-11-25.md) |
+| UX | Prioridade a partir de 24/11: objetivos O1–O7 e etapas U1–U5; C3–C5 adiadas | [Plano de UX](PLANO_UX_2026-11-24.md) |
 
 Decisões do usuário em 22/11: o módulo acadêmico (`academico_notas`) passa a ser a única
 fonte de notas (B1); a demo única inclui escola e painel Supremo (C1).
