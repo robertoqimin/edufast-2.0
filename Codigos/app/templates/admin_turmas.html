@@ -106,13 +106,76 @@
             </section>
         </div>
 
+        <section class="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-8 mt-8">
+            <form action="{{ url_for('home.admin_turmas') }}" method="post" class="glass-card turma-card rounded-[32px] p-8">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+                <input type="hidden" name="action" value="associate_subject">
+                <h2 class="text-xl font-bold">Registrar Turma na Matéria</h2>
+                <p class="mt-1 text-sm text-gray-400">Todos os alunos da turma entram na matéria de uma vez. Quem for associado à turma depois já entra em todas as matérias dela.</p>
+
+                <label class="turma-field">
+                    <span>Turma</span>
+                    <select name="turma_id" required>
+                        <option value="">Selecione uma turma</option>
+                        {% for turma in turmas %}
+                        <option value="{{ turma.id }}">{{ turma.nome }} - {{ turma.codigo }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="turma-field">
+                    <span>Matéria</span>
+                    <select name="disciplina_id" required>
+                        <option value="">Selecione uma matéria</option>
+                        {% for disciplina in disciplinas %}
+                        <option value="{{ disciplina.id }}">{{ disciplina.nome }} - {{ disciplina.codigo }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <button class="turma-submit">Registrar Turma</button>
+            </form>
+
+            <div class="glass-card turma-card rounded-[32px] p-8">
+                <h2 class="text-xl font-bold">Matérias por Turma</h2>
+                <p class="mt-1 text-sm text-gray-400">Uma matéria só pode ser retirada enquanto não tiver notas, chamadas, materiais, cursos ou professor atribuído na turma.</p>
+                <div class="turma-link-list">
+                    {% for vinculo in disciplina_vinculos %}
+                    <article class="turma-link-item">
+                        <div>
+                            <h3>{{ vinculo.disciplina }}</h3>
+                            <p>{{ vinculo.disciplina_codigo }} · {{ vinculo.alunos }} {{ 'aluno' if vinculo.alunos == 1 else 'alunos' }}</p>
+                        </div>
+                        <div class="turma-link-side">
+                            <div class="text-right">
+                                <strong>{{ vinculo.turma }}</strong>
+                                <span>{{ vinculo.codigo }}</span>
+                            </div>
+                            <form action="{{ url_for('home.admin_turmas') }}" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
+                                <input type="hidden" name="action" value="remove_subject">
+                                <input type="hidden" name="turma_id" value="{{ vinculo.turma_id }}">
+                                <input type="hidden" name="disciplina_id" value="{{ vinculo.disciplina_id }}">
+                                <button class="turma-remove" aria-label="Retirar {{ vinculo.disciplina }} da turma {{ vinculo.turma }}">Retirar</button>
+                            </form>
+                        </div>
+                    </article>
+                    {% else %}
+                    <div class="turma-empty">Nenhuma turma registrada em matérias ainda.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
         <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
             <form action="{{ url_for('home.admin_turmas') }}" method="post" class="glass-card turma-card rounded-[32px] p-8">
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                 <input type="hidden" name="action" value="associate_student">
                 <h2 class="text-xl font-bold">Associar Aluno</h2>
-                <p class="mt-1 text-sm text-gray-400">Vincule um aluno a uma turma cadastrada.</p>
+                <p class="mt-1 text-sm text-gray-400">O aluno entra na turma e em todas as matérias dela.</p>
 
                 <label class="turma-field">
                     <span>Aluno</span>
@@ -142,7 +205,7 @@
                 <input type="hidden" name="idempotency_key" value="{{ submission_key() }}">
                 <input type="hidden" name="action" value="associate_teacher">
                 <h2 class="text-xl font-bold">Associar Professor</h2>
-                <p class="mt-1 text-sm text-gray-400">As disciplinas do professor serão vinculadas à turma automaticamente.</p>
+                <p class="mt-1 text-sm text-gray-400">O professor leciona as matérias da turma que são dele. Se a turma ainda não tem matérias, as dele são registradas nela.</p>
 
                 <label class="turma-field">
                     <span>Professor</span>
@@ -210,27 +273,6 @@
             </div>
         </section>
 
-        <section class="mt-8">
-            <div class="glass-card turma-card rounded-[32px] p-8">
-                <h2 class="text-xl font-bold">Disciplinas puxadas dos Professores</h2>
-                <div class="turma-link-list">
-                    {% for vinculo in disciplina_vinculos %}
-                    <article class="turma-link-item">
-                        <div>
-                            <h3>{{ vinculo.disciplina }}</h3>
-                            <p>{{ vinculo.disciplina_codigo }}</p>
-                        </div>
-                        <div class="text-right">
-                            <strong>{{ vinculo.turma }}</strong>
-                            <span>{{ vinculo.codigo }}</span>
-                        </div>
-                    </article>
-                    {% else %}
-                    <div class="turma-empty">Nenhuma disciplina associada ainda.</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
     </main></div>
 
     </template>

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.services.arquivos_service import _remove_saved_file, _save_profile_photo
 from app.database import get_session
-from app.concurrency import check_version, insert_if_missing, begin_submission, finish_submission
+from app.concurrency import check_version, begin_submission, finish_submission
 from app.models import (
     AlunoModel,
     AlunoTurmaModel,
@@ -207,17 +207,79 @@ def associar_professor_turma(data, *, session_factory=get_session):
         if not disciplinas_professor:
             return {"erro": "Este professor nao possui disciplinas associadas"}, 400
 
+        # Turma com matérias registradas: o professor só leciona as que ela já tem, sem trazer
+        # outras matérias dele. Turma ainda sem matérias mantém o fluxo antigo e recebe as dele.
+        da_turma = {d for d, in db.query(TurmaDisciplinaModel.disciplina_id).filter_by(turma_id=turma_id)}
+        do_professor = {vinculo.disciplina_id for vinculo in disciplinas_professor}
+        if da_turma and not da_turma & do_professor:
+            return {"erro": "Este professor nao leciona nenhuma materia desta turma. "
+                            "Registre antes a turma na materia dele."}, 400
+
         db.add(ProfessorTurmaModel(professor_id=professor_id, turma_id=turma_id))
-        for vinculo in disciplinas_professor:
-            insert_if_missing(db, TurmaDisciplinaModel,
-                              turma_id=turma_id, disciplina_id=vinculo.disciplina_id)
-        from app.services.matriculas import sincronizar_turma
-        sincronizar_turma(db, turma_id)
+        if not da_turma:
+            from app.services.matriculas import registrar_disciplina
+            for disciplina_id in sorted(do_professor):
+                registrar_disciplina(db, turma_id, disciplina_id)
 
         db.commit()
         return {"mensagem": "Professor associado a turma"}, 201
     except IntegrityError:
         db.rollback()
         return {"erro": "Este professor ja esta associado a esta turma"}, 409
+    finally:
+        db.close()
+
+
+def registrar_turma_disciplina(data, *, session_factory=get_session):
+    """Registra a turma inteira na matéria: todos os alunos dela passam a cursá-la."""
+    turma_id = data.get("turma_id", type=int)
+    disciplina_id = data.get("disciplina_id", type=int)
+
+    if not turma_id or not disciplina_id:
+        return {"erro": "Turma e materia sao obrigatorias"}, 400
+
+    from app.services.cursos import turma_ativa
+    from app.services.matriculas import registrar_disciplina
+    db = session_factory()
+    try:
+        if not db.get(TurmaModel, turma_id):
+            return {"erro": "Turma nao encontrada"}, 404
+        if not db.get(DisciplinaModel, disciplina_id):
+            return {"erro": "Materia nao encontrada"}, 404
+        if not turma_ativa(db, turma_id):
+            return {"erro": "Turma arquivada: nao recebe novas materias"}, 409
+        if db.query(TurmaDisciplinaModel.id).filter_by(turma_id=turma_id, disciplina_id=disciplina_id).first():
+            return {"erro": "Esta turma ja esta registrada nesta materia"}, 409
+
+        registrar_disciplina(db, turma_id, disciplina_id)
+        db.commit()
+        return {"mensagem": "Turma registrada na materia"}, 201
+    finally:
+        db.close()
+
+
+def retirar_turma_disciplina(data, *, session_factory=get_session):
+    """Retira a matéria da turma enquanto ela ainda não tem histórico."""
+    turma_id = data.get("turma_id", type=int)
+    disciplina_id = data.get("disciplina_id", type=int)
+
+    if not turma_id or not disciplina_id:
+        return {"erro": "Turma e materia sao obrigatorias"}, 400
+
+    from app.services.matriculas import historico_da_disciplina, retirar_disciplina
+    db = session_factory()
+    try:
+        vinculo = (db.query(TurmaDisciplinaModel)
+                   .filter_by(turma_id=turma_id, disciplina_id=disciplina_id)
+                   .with_for_update().first())
+        if not vinculo:
+            return {"erro": "Esta turma nao esta registrada nesta materia"}, 404
+        if historico_da_disciplina(db, vinculo.id):
+            return {"erro": "A materia ja tem notas, chamadas, materiais, cursos ou professor atribuido "
+                            "nesta turma e nao pode ser retirada. O historico fica preservado."}, 409
+
+        retirar_disciplina(db, vinculo)
+        db.commit()
+        return {"mensagem": "Materia retirada da turma"}, 201
     finally:
         db.close()

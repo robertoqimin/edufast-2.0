@@ -47,7 +47,7 @@ class AdminCharacterization(TestCase):
         self.assertEqual(admin.get_disciplinas(), [{'id': 1, 'nome': 'Matematica', 'codigo': 'MAT', 'carga_horaria': 40}])
         self.assertEqual(set(admin.get_disciplinas_page_data()), {'disciplinas', 'professores', 'professor_vinculos'})
         turmas = admin.get_turmas_page_data()
-        self.assertEqual(set(turmas), {'turmas', 'alunos', 'professores', 'aluno_vinculos', 'professor_vinculos', 'disciplina_vinculos'})
+        self.assertEqual(set(turmas), {'turmas', 'alunos', 'professores', 'aluno_vinculos', 'professor_vinculos', 'disciplina_vinculos', 'disciplinas'})
         self.assertEqual(turmas['aluno_vinculos'][0]['matricula'], 'M1')
 
     def test_details_fallback_and_missing_records(self):

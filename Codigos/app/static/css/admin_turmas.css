@@ -98,6 +98,29 @@
     font-size: 12px;
 }
 
+.turma-link-side {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.turma-remove {
+    min-height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0 14px;
+    color: #e5e7eb;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.turma-remove:hover,
+.turma-remove:focus-visible {
+    border-color: rgba(248, 113, 113, 0.5);
+    color: #fca5a5;
+}
+
 .turma-empty {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
@@ -125,5 +148,14 @@
     .turma-link-item {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .turma-link-side {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .turma-link-side .text-right {
+        text-align: left;
     }
 }

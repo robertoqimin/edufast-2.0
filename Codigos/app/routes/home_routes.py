@@ -14,7 +14,9 @@ from app.controllers.admin_controller import (
     get_disciplinas_page_data,
     get_professor_detail,
     get_turmas_page_data,
+    registrar_turma_disciplina,
     request_professor_document,
+    retirar_turma_disciplina,
     request_student_document,
     update_professor_data,
     update_student_data,
@@ -144,6 +146,10 @@ def admin_turmas():
             response, status = associar_aluno_turma(request.form)
         elif action == "associate_teacher":
             response, status = associar_professor_turma(request.form)
+        elif action == "associate_subject":
+            response, status = registrar_turma_disciplina(request.form)
+        elif action == "remove_subject":
+            response, status = retirar_turma_disciplina(request.form)
         else:
             response, status = criar_turma(request.form)
 

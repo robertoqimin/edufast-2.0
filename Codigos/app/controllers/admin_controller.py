@@ -94,6 +94,16 @@ def associar_professor_turma(data):
     return implementation(data, session_factory=get_session)
 
 
+def registrar_turma_disciplina(data):
+    from app.services.academico_service import registrar_turma_disciplina as implementation
+    return implementation(data, session_factory=get_session)
+
+
+def retirar_turma_disciplina(data):
+    from app.services.academico_service import retirar_turma_disciplina as implementation
+    return implementation(data, session_factory=get_session)
+
+
 def request_student_document(aluno_id, data):
     from app.services.documentos_service import request_student_document as implementation
     return implementation(aluno_id, data, session_factory=get_session)

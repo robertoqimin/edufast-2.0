@@ -1,0 +1,27 @@
+{
+  "base_commit": "docs: registra validacao da demonstracao de gravacao (16,4 min)",
+  "relatorio": "Documentos/testes/TURMA_MATERIA_2026-11-24.md",
+  "data": "2026-11-24",
+  "navegador": "Microsoft Edge (Playwright, headless)",
+  "dados": "Fixture sintetica duas-escolas (teste01) em SQLite temporario; nenhuma conta real",
+  "capturas": [
+    {
+      "execucao": "2026-11-24-turma-materia",
+      "arquivo": "admin-turmas-materias-desktop.png",
+      "sha256": "1c7d1c057062c500293316799a85571f386f7fb5989c3a844c4e4ab72f0eb849",
+      "viewport": "1440x1000"
+    },
+    {
+      "execucao": "2026-11-24-turma-materia",
+      "arquivo": "admin-turmas-materias-celular.png",
+      "sha256": "336d26a363e07e96c8f714c71f303e4f88125283f1147dcf77753a258e80c35c",
+      "viewport": "390x844"
+    },
+    {
+      "execucao": "2026-11-24-turma-materia",
+      "arquivo": "admin-turmas-materia-registrada-desktop.png",
+      "sha256": "f787d1c9fef75f5a2d1cde9f9b84495c74e5d763615ae29fc2b80d4c2243ea2e",
+      "viewport": "1440x1000"
+    }
+  ]
+}
