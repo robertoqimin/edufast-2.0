@@ -245,7 +245,7 @@ def _apply(db, proposal):
         return
     if proposal.tipo == 'operacao_restaurada':
         from app.services.restauracao_context import execute
-        execute(db, proposal.solicitante_id, data)
+        execute(db, proposal.solicitante_id, data, unidade=proposal.unidade_id)
         return
     if proposal.tipo == "cadastro":
         user = db.get(UsuarioModel, data["usuario_id"])
@@ -261,10 +261,11 @@ def _apply(db, proposal):
         return
     data = validate_proposal(db, proposal.solicitante_id, proposal.tipo, data)
     professor = _teacher(db, proposal.solicitante_id)
+    # Unidades: o que o professor pediu nasce na unidade da solicitação, não na de quem aprova.
     if proposal.tipo == "criar_turma":
-        db.add(TurmaModel(**data))
+        db.add(TurmaModel(**{**data, "unidade_id": proposal.unidade_id}))
     elif proposal.tipo == "criar_disciplina":
-        db.add(DisciplinaModel(**data))
+        db.add(DisciplinaModel(**{**data, "unidade_id": proposal.unidade_id}))
     elif proposal.tipo == "editar_aluno":
         aluno = _student(db, professor, data["aluno_id"])
         check_version(aluno, data)

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 from app.views.respostas import resposta_erro
 
 from app.auth import normalize_role
@@ -154,6 +154,42 @@ def admin_turmas():
 def admin_detalhes_aluno(aluno_id):
     admin_required()
     return render_template("admin_detalhes_aluno.html", **get_aluno_detail(aluno_id))
+
+
+@home_blueprint.route("/admin/alunos/<int:aluno_id>/concluir", methods=["POST"])
+def admin_concluir_aluno(aluno_id):
+    """Unidades: o colégio marca que o aluno concluiu o 3º ano (habilita a subida pelo CPF)."""
+    from app.database import get_session
+    from app.models import AlunoModel
+    from app.services import unidades
+    admin_required()
+    with get_session() as db:
+        aluno = db.get(AlunoModel, aluno_id)
+        unidades.exigir(aluno is not None and isinstance(unidades.ativa(), int))
+        unidades.concluir_aluno(db, aluno, unidades.ativa())
+        db.commit()
+    flash("Conclusão registrada: o aluno pode subir para a faculdade pelo CPF.", "success")
+    return redirect(url_for("home.admin_detalhes_aluno", aluno_id=aluno_id))
+
+
+@home_blueprint.route("/admin/alunos/<int:aluno_id>/levar-para-unidade", methods=["POST"])
+def admin_levar_aluno_para_unidade(aluno_id):
+    """Unidades: subida manual para a faculdade (aluno sem CPF). Só a unidade de origem libera."""
+    from app.database import get_session
+    from app.models import AlunoModel
+    from app.services import unidades
+    identity = admin_required()
+    try:
+        destino_id = int(request.form.get("destino_id") or 0)
+    except ValueError:
+        destino_id = 0
+    with get_session() as db:
+        aluno = db.get(AlunoModel, aluno_id)
+        unidades.exigir(aluno is not None and isinstance(unidades.ativa(), int))
+        unidades.levar_para_unidade(db, aluno, unidades.ativa(), destino_id, identity.id)
+        db.commit()
+    flash("Aluno levado para a faculdade com o histórico e os documentos.", "success")
+    return redirect(url_for("home.admin_detalhes_aluno", aluno_id=aluno_id))
 
 
 @home_blueprint.route("/admin/alunos/<int:aluno_id>/documentos/solicitar", methods=["POST"])

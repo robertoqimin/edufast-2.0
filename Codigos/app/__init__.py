@@ -51,6 +51,15 @@ def create_app():
             return pagina_erro(error.message, error.status)
         return jsonify(erro=error.message), error.status
 
+    from sqlalchemy.exc import StatementError
+
+    @app.errorhandler(StatementError)
+    def statement_error(error):
+        # Regra levantada dentro de um valor padrão de coluna (ex.: unidade não escolhida) chega embrulhada.
+        if isinstance(getattr(error, 'orig', None), MutationConflict):
+            return mutation_conflict(error.orig)
+        raise error
+
     @app.errorhandler(StaleDataError)
     def stale_data(error):
         from app.views.respostas import resposta_erro
@@ -84,6 +93,8 @@ def create_app():
     from seguranca_http import instalar as instalar_seguranca_http
     instalar_seguranca_http(app)
     register_routes(app)
+    from app.services.unidades import instalar_escopo
+    instalar_escopo()  # unidades: toda consulta ORM de uma requisição fica na(s) unidade(s) visível(is)
     from .restauracao import install
     install(app)
 

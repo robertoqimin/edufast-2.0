@@ -262,7 +262,11 @@ def meu_boletim():
 def boletim_admin(aluno_id):
     identidade(admin=True)
     with get_session() as db:
-        return render_boletim(db, cursos.obter(db, AlunoModel, aluno_id))
+        aluno = cursos.obter(db, AlunoModel, aluno_id)
+        # Unidades: o aluno que subiu do colégio traz o histórico escolar (só leitura, só nesta tela).
+        from app.services.unidades import lendo_historico_de
+        with lendo_historico_de(db, aluno.id):
+            return render_boletim(db, aluno)
 
 
 @academico_bp.get('/academico/reconciliar')

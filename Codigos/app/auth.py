@@ -82,7 +82,8 @@ def decode_token_from_request():
     from app.services.identidade_service import load_identity
     from app.concurrency import MutationConflict
     try:
-        identity = load_identity(payload.get("sub"), payload.get("role") or payload.get("tipo"), payload.get("ver", 0))
+        identity = load_identity(payload.get("sub"), payload.get("role") or payload.get("tipo"), payload.get("ver", 0),
+                                 request.headers.get("X-Unidade"))
     except MutationConflict:
         return None, (jsonify({"erro": "Acesso revogado ou conta pendente"}), 401)
     payload["role"] = payload["tipo"] = identity.papel

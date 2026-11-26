@@ -53,7 +53,7 @@ def modelos():
 class ContratosUnidades(TestCase):
     """Colégio = unidade 1 (dados da fixture); Faculdade = unidade 2 (criada aqui).
 
-    Colégio: admin 1, aluno 1 (usuário 2) no "1º ano A" (turma 1), Matemática; professores 1 e 2.
+    Colégio: admin 1, aluno 1 (usuário 2) no "3º ano B" (turma 1), Matemática; professores 1 e 2.
     Faculdade: admin 10, aluna 11 em "Engenharia — 1º semestre" (turma 21), Cálculo I (disciplina 21),
     professora 12. O professor 1 (usuário 3) dá aula nas duas. Super admin 13, sem vínculo.
     """
@@ -72,7 +72,7 @@ class ContratosUnidades(TestCase):
             self.assertIsNotNone(db.get(Unidade, 1), 'a instalação atual é a unidade 1')
             faculdade = unidades().criar_unidade(db, nome='Faculdade Horizonte', nivel='superior')
             self.assertEqual(faculdade.id, 2)
-            db.get(TurmaModel, 1).nome = '1º ano A'
+            db.get(TurmaModel, 1).nome = '3º ano B'
             db.add_all([UsuarioModel(id=i, email=f'u{i}@example.test', senha=senha, tipo=PAPEIS[i]) for i in (10, 11, 12, 13)])
             db.flush()
             db.add_all([AlunoModel(id=11, usuario_id=11, nome='Aluna Faculdade', matricula='F11'),
@@ -80,14 +80,15 @@ class ContratosUnidades(TestCase):
                         TurmaModel(id=21, nome='Engenharia — 1º semestre', codigo='ENG1', ano_letivo=2026, unidade_id=2),
                         DisciplinaModel(id=21, nome='Cálculo I', codigo='CAL1', carga_horaria=80, unidade_id=2)])
             db.flush()
+            # Vínculos antes das matrículas: o banco recusa matricular quem não tem vínculo.
+            for usuario, unidade in [(1, 1), (2, 1), (3, 1), (4, 1), (3, 2), (10, 2), (11, 2), (12, 2)]:
+                unidades().vincular(db, usuario, unidade)
             db.add_all([TurmaDisciplinaModel(turma_id=21, disciplina_id=21, unidade_id=2),
                         AlunoTurmaModel(aluno_id=11, turma_id=21),
                         ProfessorTurmaModel(professor_id=12, turma_id=21),
                         ProfessorDisciplinaModel(professor_id=12, disciplina_id=21),
                         ProfessorTurmaModel(professor_id=1, turma_id=21),
                         ProfessorDisciplinaModel(professor_id=1, disciplina_id=21)])
-            for usuario, unidade in [(1, 1), (2, 1), (3, 1), (4, 1), (3, 2), (10, 2), (11, 2), (12, 2)]:
-                unidades().vincular(db, usuario, unidade)
             db.commit()
 
     # ---------- auxiliares ----------
@@ -121,7 +122,7 @@ class ContratosUnidades(TestCase):
             html = self.corpo(c, url)
             for nome in ('Engenharia', 'Cálculo I', 'Aluna Faculdade', 'Professora Faculdade'):
                 self.assertNotIn(nome, html, f'{url} mostra "{nome}" da faculdade ao admin do colégio')
-        self.assertIn('1º ano A', self.corpo(c, '/admin/gestao-turmas'))
+        self.assertIn('3º ano B', self.corpo(c, '/admin/gestao-turmas'))
         busca = c.get('/alunos/busca?termo=Faculdade').get_json()
         self.assertNotIn('Aluna Faculdade', str(busca), 'a busca de alunos não pode atravessar a unidade')
 
@@ -129,7 +130,7 @@ class ContratosUnidades(TestCase):
         c = self.cliente(10, unidade=2)
         html = self.corpo(c, '/admin/gestao-turmas')
         self.assertIn('Engenharia — 1º semestre', html)
-        for nome in ('1º ano A', 'Matematica'):
+        for nome in ('3º ano B', 'Matematica'):
             self.assertNotIn(nome, html)
         self.assertNotIn('Matematica', self.corpo(c, '/admin/disciplinas'))
         self.assertNotIn('M1', str(c.get('/alunos/busca?termo=Aluno').get_json()), 'a busca não traz o aluno do colégio')
@@ -165,7 +166,7 @@ class ContratosUnidades(TestCase):
     def test_05_super_admin_ve_todas_e_escolhe_a_unidade_para_criar(self):
         c = self.cliente(13, unidade='todas')
         html = self.corpo(c, '/admin/gestao-turmas')
-        self.assertIn('1º ano A', html)
+        self.assertIn('3º ano B', html)
         self.assertIn('Engenharia — 1º semestre', html)
         r = self.post(c, '/admin/gestao-turmas', acao='criar', nome='Sem unidade', codigo='SU1', ano_letivo=2026)
         self.assertGreaterEqual(r.status_code, 400, 'na visão "Todas" criar exige escolher a unidade')
@@ -178,11 +179,11 @@ class ContratosUnidades(TestCase):
     # ---------- 6–8: troca de unidade e vínculo ----------
     def test_06_professor_das_duas_unidades_troca_e_ve_so_a_ativa(self):
         c = self.cliente(3)  # sem unidade na sessão: vai para a primeira do vínculo
-        self.assertIn('1º ano A', self.corpo(c, '/professor/dashboard'))
+        self.assertIn('3º ano B', self.corpo(c, '/professor/dashboard'))
         self.assertEqual(self.post(c, '/unidade', unidade_id=2).status_code, 302)
         html = self.corpo(c, '/professor/dashboard')
         self.assertIn('Engenharia — 1º semestre', html)
-        self.assertNotIn('1º ano A', html)
+        self.assertNotIn('3º ano B', html)
         self.assertEqual(self.post(c, '/unidade', unidade_id=1).status_code, 302)
         self.assertNotIn('Engenharia', self.corpo(c, '/professor/dashboard'))
 
@@ -222,7 +223,7 @@ class ContratosUnidades(TestCase):
         with get_session() as db:
             with unidades().escopo_banco(db, [1]):
                 nomes = [n for n, in db.execute(text('SELECT nome FROM turmas'))]
-            self.assertIn('1º ano A', nomes)
+            self.assertIn('3º ano B', nomes)
             self.assertNotIn('Engenharia — 1º semestre', nomes)
             with unidades().escopo_banco(db, [1]):
                 self.assertEqual(db.execute(text('SELECT count(*) FROM disciplinas WHERE id = 21')).scalar(), 0)
@@ -235,7 +236,7 @@ class ContratosUnidades(TestCase):
                    headers={'X-CSRF-Token': CSRF})
         self.assertIn(r.status_code, (200, 201))
         texto = r.get_data(as_text=True)
-        for dado_do_colegio in ('u4@example.test', '1º ano A', 'Matematica'):
+        for dado_do_colegio in ('u4@example.test', '3º ano B', 'Matematica'):
             self.assertNotIn(dado_do_colegio, texto, 'a resposta não pode expor dados do colégio')
         _, Vinculo, _ = modelos()
         with get_session() as db:
@@ -281,8 +282,8 @@ class ContratosUnidades(TestCase):
         r = self.cadastrar_na_faculdade(self.CPF)
         self.assertEqual(r.status_code, 409)
         texto = r.get_data(as_text=True)
-        self.assertIn('ainda não concluiu', texto)
-        for dado_do_colegio in ('M1', '1º ano A', 'u2@example.test'):
+        self.assertIn('ainda não concluiu', r.get_json()['erro'])
+        for dado_do_colegio in ('M1', '3º ano B', 'u2@example.test'):
             self.assertNotIn(dado_do_colegio, texto)
         # Só o colégio marca "concluiu"; a faculdade e o professor não podem.
         self.assertEqual(self.post(self.cliente(10, unidade=2), '/admin/alunos/1/concluir').status_code, 404)
@@ -298,7 +299,7 @@ class ContratosUnidades(TestCase):
         self.assertIn(self.cadastrar_na_faculdade(self.CPF).status_code, (200, 201))
         r = self.cadastrar_na_faculdade(self.CPF)
         self.assertEqual(r.status_code, 409)
-        self.assertIn('já está na faculdade', r.get_data(as_text=True))
+        self.assertIn('já está na faculdade', r.get_json()['erro'])
         # Aluno sem CPF: a secretaria do colégio libera manualmente; a faculdade não puxa sozinha.
         with get_session() as db:
             db.add(UsuarioModel(id=15, email='u15@example.test', senha='-', tipo='aluno'))
@@ -311,3 +312,20 @@ class ContratosUnidades(TestCase):
         _, _, Transferencia = modelos()
         with get_session() as db:
             self.assertEqual(sorted((t.aluno_id, t.motivo) for t in db.query(Transferencia)), [(1, 'cpf_concluinte'), (15, 'manual')])
+
+    # ---------- 15: aprovações separadas por unidade ----------
+    def test_15_secretaria_so_ve_e_decide_solicitacoes_da_propria_unidade(self):
+        import json
+        from app.models import SolicitacaoAlteracaoModel
+        with get_session() as db:
+            db.add(SolicitacaoAlteracaoModel(id=50, solicitante_id=12, tipo='cadastro', estado='pendente', unidade_id=2,
+                                             payload=json.dumps({'usuario_id': 12, 'papel_solicitado': 'professor'}),
+                                             recurso_pendente='cadastro:12'))
+            db.commit()
+        colegio, faculdade = self.cliente(1, unidade=1), self.cliente(10, unidade=2)
+        self.assertNotIn('Solicitação 50', self.corpo(colegio, '/solicitacoes?estado=todas'))
+        self.assertIn('Solicitação 50', self.corpo(faculdade, '/solicitacoes?estado=todas'))
+        r = self.post(colegio, '/solicitacoes/alteracoes/50/decidir', decisao='rejeitar', justificativa='x')
+        self.assertEqual(r.status_code, 404)
+        with get_session() as db:
+            self.assertEqual(db.get(SolicitacaoAlteracaoModel, 50).estado, 'pendente')

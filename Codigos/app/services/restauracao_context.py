@@ -80,7 +80,7 @@ def _snapshot(db, operation):
     return hashlib.sha256(json.dumps(values, sort_keys=True, default=str).encode('utf-8')).hexdigest()
 
 
-def execute(db, user_id, operation, *, validate=False):
+def execute(db, user_id, operation, *, validate=False, unidade=None):
     from app.models import UsuarioModel
     endpoint, params, payload = operation.get('endpoint'), operation.get('params'), operation.get('payload')
     if not isinstance(endpoint, str) or endpoint not in ALLOWED_ACTIONS or not isinstance(params, dict) or not isinstance(payload, dict):
@@ -100,9 +100,18 @@ def execute(db, user_id, operation, *, validate=False):
         path = url_for(endpoint, **params)
     except Exception:
         raise MutationConflict('Parametros da operação inválidos', 400)
+    from flask import g
     from app.services.identidade_service import Identidade
+    # Unidades: a operação roda na unidade da solicitação (no envio, a unidade ativa do professor),
+    # e o contexto de quem aprova é devolvido intacto no fim.
+    if unidade is None and isinstance(g.get('unidade_ativa'), int):
+        unidade = g.unidade_ativa
+    contexto_anterior = (g.get('unidade_ativa'), g.get('unidades_permitidas'))
+    if unidade is not None:
+        g.unidade_ativa, g.unidades_permitidas = unidade, (unidade,)
     token = _transaction.set(db)
-    principal_token = _principal.set(Identidade(user.id, user.tipo, user.revisor_materiais, user.auth_version))
+    principal_token = _principal.set(Identidade(user.id, user.tipo, user.revisor_materiais, user.auth_version,
+                                                (unidade,) if unidade else (), unidade))
     nested = None
     try:
         if validate:
@@ -114,6 +123,8 @@ def execute(db, user_id, operation, *, validate=False):
             raise MutationConflict('O conteúdo mudou desde o envio; revise antes de aprovar')
         with current_app.test_request_context(path, method='POST', json=payload):
             session.update(user_id=user.id, user_role=user.tipo, user_email=user.email, auth_version=user.auth_version)
+            if unidade is not None:
+                session['unidade_id'] = unidade
             response = current_app.make_response(current_app.view_functions[endpoint](**params))
             if response.status_code >= 400:
                 raise MutationConflict('A operação não pode ser aplicada', response.status_code)
@@ -125,6 +136,7 @@ def execute(db, user_id, operation, *, validate=False):
             nested.rollback()
         _transaction.reset(token)
         _principal.reset(principal_token)
+        g.unidade_ativa, g.unidades_permitidas = contexto_anterior
 
 
 def material_discipline(db, operation):

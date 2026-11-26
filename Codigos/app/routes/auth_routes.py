@@ -30,6 +30,7 @@ def login():
         session["user_email"] = response["email"]
         session["user_role"] = response["role"]
         session["auth_version"] = response["auth_version"]
+        session.pop("unidade_id", None)  # outra conta neste navegador: a unidade é escolhida de novo
 
     return jsonify(response), status
 
@@ -48,13 +49,29 @@ def logout():
     return redirect(url_for("home.home"))
 
 
+@auth_bp.post('/unidade')
+def trocar_unidade():
+    """Troca a unidade ativa. Só aceita unidade do vínculo (ou "todas", para o super admin)."""
+    from app.services.identidade_service import current_identity
+    from app.services.unidades import resolver_ativa
+    identity = current_identity()
+    pedida = request.form.get('unidade_id') or (request.get_json(silent=True) or {}).get('unidade_id')
+    ativa = resolver_ativa(list(identity.unidades), pedida, identity.papel == 'super_admin')
+    session['unidade_id'] = ativa
+    destino = request.form.get('voltar') or ''
+    if not destino.startswith('/') or destino.startswith('//'):
+        destino = url_for('home.home')
+    return redirect(destino)
+
+
 @auth_bp.get('/auth/session')
 def browser_session():
     """Confirma a sessão do navegador, revalidando estado, papel e revogação."""
     from app.services.identidade_service import load_identity
     if not session.get('user_id'):
         return jsonify(authenticated=False), 401, {'Cache-Control': 'no-store'}
-    identity = load_identity(session.get('user_id'), session.get('user_role'), session.get('auth_version', 0))
+    identity = load_identity(session.get('user_id'), session.get('user_role'), session.get('auth_version', 0),
+                             session.get('unidade_id'))
     return jsonify(authenticated=True, role=identity.papel), 200, {'Cache-Control': 'no-store'}
 
 

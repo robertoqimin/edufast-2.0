@@ -100,9 +100,10 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
     if erro_senha:
         return {"erro": erro_senha}, 400
 
+    identidade = None
     if aprovado:
         from app.services.identidade_service import ADMIN_ROLES, require_role
-        require_role(*ADMIN_ROLES)
+        identidade = require_role(*ADMIN_ROLES)
 
     foto_perfil, upload_error = _save_profile_photo(files)
     if upload_error:
@@ -110,6 +111,19 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
 
     session = get_session()
     try:
+        unidade_cadastro = None
+        if aprovado:
+            # Unidades: quem a secretaria cadastra entra na unidade ativa (na visão "Todas", na escolhida).
+            from app.services.unidades import cadastro_de_quem_ja_existe, unidade_para_criar
+            unidade_cadastro = unidade_para_criar(data.get("unidade_id"))
+            if data.get("cpf"):
+                # CPF de quem já está na instituição: só vincula (professor) ou sobe para a faculdade
+                # (aluno que concluiu o ensino médio). Nunca cria conta nova nem expõe a outra unidade.
+                existente = cadastro_de_quem_ja_existe(session, identidade, tipo, data.get("cpf"), unidade_cadastro)
+                if existente:
+                    _remove_saved_file(foto_perfil)
+                    session.commit() if existente[1] < 400 else session.rollback()
+                    return existente
         if session.query(UsuarioModel).filter(UsuarioModel.email == normalizar_email(email)).first():
             _remove_saved_file(foto_perfil)
             return {"erro": "E-mail já cadastrado"}, 409
@@ -124,6 +138,9 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
         )
         session.add(usuario)
         session.flush()
+        if unidade_cadastro is not None:
+            from app.services.unidades import vincular
+            vincular(session, usuario.id, unidade_cadastro)
 
         if tipo == "professor":
             cpf = data.get("cpf")
@@ -169,7 +186,13 @@ def cadastrar_usuario(data, files=None, *, aprovado=False):
             )
 
         if not aprovado:
+            # Unidades: o cadastro público diz a unidade (com uma só, ela); a conta nasce vinculada
+            # e a solicitação vai para a secretaria daquela unidade.
+            from app.services.unidades import unidade_do_cadastro_publico, vincular
+            unidade_publica = unidade_do_cadastro_publico(session, data.get("unidade_id"))
+            vincular(session, usuario.id, unidade_publica)
             session.add(SolicitacaoAlteracaoModel(
+                unidade_id=unidade_publica,
                 solicitante_id=usuario.id, tipo="cadastro", estado="pendente",
                 payload=json.dumps({"usuario_id": usuario.id, "papel_solicitado": tipo}),
                 recurso_pendente=f"cadastro:{usuario.id}"))

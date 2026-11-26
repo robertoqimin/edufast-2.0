@@ -368,10 +368,13 @@ def gestao_turmas():
                 codigo = data.get('codigo', '')
                 if not isinstance(codigo, str) or not 1 <= len(codigo.strip()) <= 30:
                     abort(400, 'Código obrigatório com até 30 caracteres.')
-                if db.query(TurmaModel.id).filter_by(codigo=codigo.strip()).first():
+                # Unidades: a turma nasce na unidade ativa (na visão "Todas", na unidade escolhida).
+                from app.services.unidades import unidade_para_criar
+                unidade_id = unidade_para_criar(data.get('unidade_id'))
+                if db.query(TurmaModel.id).filter_by(codigo=codigo.strip(), unidade_id=unidade_id).first():
                     abort(409, 'Já existe uma turma com este código.')
                 turma = TurmaModel(nome=service.titulo(data.get('nome'))[:120], codigo=codigo.strip(), ano_letivo=ano,
-                                   turno=turno(data))
+                                   turno=turno(data), unidade_id=unidade_id)
                 db.add(turma)
                 db.flush()
                 db.add(EstadoTurmaModel(turma_id=turma.id))
@@ -442,6 +445,9 @@ def gestao_turmas():
                     if acao == 'matricular' and row:
                         abort(409, 'Este aluno já está nesta turma.')
                     if acao == 'matricular':
+                        from app.services.unidades import tem_vinculo
+                        if not tem_vinculo(db, db.get(AlunoModel, aluno_id).usuario_id, turma.unidade_id):
+                            abort(409, 'Este aluno não pertence à unidade desta turma.')
                         db.add(AlunoTurmaModel(aluno_id=aluno_id, turma_id=turma_id))
                         db.flush()
                         sincronizar_turma(db, turma_id)
