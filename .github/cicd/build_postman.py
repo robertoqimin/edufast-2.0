@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "Documentos/testes/postman"
+OUT = ROOT / "docs/testes/postman"
 
 
 def request(name, method, path, status, *, form=None, raw=None, file=False, script=None, pre=None, extra_headers=None):
@@ -15,7 +15,7 @@ def request(name, method, path, status, *, form=None, raw=None, file=False, scri
     if form is not None:
         if file:
             values = [{"key": k, "value": v, "type": "text"} for k, v in form.items()]
-            values.append({"key": "arquivo", "type": "file", "src": "Documentos/testes/postman/arquivo.txt"})
+            values.append({"key": "arquivo", "type": "file", "src": "docs/testes/postman/arquivo.txt"})
             body = {"mode": "formdata", "formdata": values}
         else:
             body = {"mode": "urlencoded", "urlencoded": [{"key": k, "value": v} for k, v in form.items()]}

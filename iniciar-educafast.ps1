@@ -12,7 +12,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$appDirectory = Join-Path $PSScriptRoot 'Codigos'
+$appDirectory = Join-Path $PSScriptRoot 'api'
 if ($Ambiente -eq 'Atual') {
     throw 'O ambiente anterior usa MySQL e foi preservado sem alteracoes (volumes intactos). O iniciador agora usa PostgreSQL: execute sem -Ambiente.'
 }

@@ -21,7 +21,7 @@ const compose = {services:{
     networks:['isolated'],tmpfs:['/var/lib/postgresql/data'],healthcheck:{test:['CMD-SHELL','PGPASSWORD="$$APP_DB_PASSWORD" psql -h 127.0.0.1 -U "$$APP_DB_USER" -d "$$POSTGRES_DB" -tAc "SELECT 1" >/dev/null'],interval:'2s',timeout:'3s',retries:60}},
   tests:{image, working_dir:'/repo', entrypoint:['python'], command:['-m','unittest','discover','-s','/repo/.github/cicd/tests','-p','test_control_plane.py','-v'],
     networks:['isolated'], volumes:[{type:'bind',source:root,target:'/repo',read_only:true}],
-    environment:{EDUFAST_TEST_DISPOSABLE:'1',PYTHONPATH:'/repo/Codigos',DB_URL:'sqlite:///:memory:',SECRET_KEY:'synthetic-school-import-only-test-2026',
+    environment:{EDUFAST_TEST_DISPOSABLE:'1',PYTHONPATH:'/repo/api',DB_URL:'sqlite:///:memory:',SECRET_KEY:'synthetic-school-import-only-test-2026',
       PLATFORM_TEST_DATABASE_URL:`postgresql+psycopg://disposable:${password}@db-platform-test:5432/edufast_platform_disposable`}},
 },networks:{isolated:{internal:true}},configs:{'postgres-app-role':{content:POSTGRES_APP_ROLE}}};
 const file = path.join(directory,'compose.json');

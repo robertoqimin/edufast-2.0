@@ -2,7 +2,7 @@
 from html import escape
 from pathlib import Path
 
-OUTPUT = Path(__file__).resolve().parents[1] / 'Protótipo' / 'edufast'
+OUTPUT = Path(__file__).resolve().parents[1] / 'docs' / 'prototipo' / 'edufast'
 INK = '#162f35'
 MUTED = '#526b72'
 

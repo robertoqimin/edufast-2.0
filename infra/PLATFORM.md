@@ -1,6 +1,6 @@
 # Cadastro de escolas pelo administrador da plataforma
 
-Atualização de 12/11/2026: o [painel do proprietário](../Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md)
+Atualização de 12/11/2026: o [painel do proprietário](../docs/planejamento/PAINEL_SUPREMO_2026-11-12.md)
 oferece login web, cadastro de escolas, diretório de pessoas e financeiro. O método
 por SSH abaixo continua como ferramenta operacional para preparar e ativar instalações.
 
@@ -54,7 +54,7 @@ node infra/platform.cjs run /srv/edufast/plataforma database teste01
 ```
 
 Isso inicia só o PostgreSQL. **Revisar com o usuário o esquema/migrations antes de
-executar qualquer SQL**, conforme [migrations](../Codigos/migrations/README.md).
+executar qualquer SQL**, conforme [migrations](../api/migrations/README.md).
 Não há execução de migrations neste comando. Depois do banco preparado e revisado:
 
 ```bash

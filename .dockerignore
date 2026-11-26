@@ -7,6 +7,5 @@
 **/*.db
 **/*.sqlite*
 .ci-results
-Documentos
-Protótipo
+docs
 scripts

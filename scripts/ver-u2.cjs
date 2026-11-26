@@ -277,7 +277,7 @@ async function jornadaProfessora() {
   await destacar(page.locator('input[name=titulo]'));
   await page.locator('input[name=titulo]').pressSequentially('Videoaula — revisão para a prova', {delay: Math.round(45 * RITMO)});
   await destacar(page.locator('[data-video-arquivo]'));
-  await page.setInputFiles('[data-video-arquivo]', path.join(ROOT, 'Codigos/demo/aula_funcao_afim.webm'));
+  await page.setInputFiles('[data-video-arquivo]', path.join(ROOT, 'api/demo/aula_funcao_afim.webm'));
   await legenda('Escolhe o arquivo de vídeo no computador.', 4000);
   await destacar(page.getByRole('button', {name: 'Salvar rascunho'}));
   await Promise.all([page.waitForURL(/\/estudos\/conteudos\/\d+$/, {timeout: 60000}), page.getByRole('button', {name: 'Salvar rascunho'}).click()]);

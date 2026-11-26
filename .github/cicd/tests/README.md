@@ -17,7 +17,7 @@
 | Transações e concorrência | `test_concurrency.py` | Idempotência, rollback, restrições e operações simultâneas; concorrência real exige PostgreSQL |
 | Restauração funcional | `test_restauracao.py` | Superperfil, identidade, calendário, regras escolares, privacidade e aprovações |
 | Massa de teste manual | `test_manual_fixtures.py` | Repetição, preservação de contas e bloqueio de preparação fora do ambiente autorizado |
-| Fluxos HTTP encadeados | `../run_postman.py`, `Documentos/testes/postman/` na raiz | Newman, servidor e SQLite temporários; logins por perfil, propostas/aprovações e efeitos finais |
+| Fluxos HTTP encadeados | `../run_postman.py`, `docs/testes/postman/` na raiz | Newman, servidor e SQLite temporários; logins por perfil, propostas/aprovações e efeitos finais |
 | JavaScript de submissão | `../test_submission.cjs` | Node; DOM simulado, sem inspeção visual |
 | Infraestrutura do CI/deploy | `../test_ci_characterization.py`, `../test_deploy.py` | Contratos do executor e deploy simulado; não são testes do produto |
 
@@ -28,11 +28,11 @@ Os arquivos existentes combinam camadas quando necessário para verificar um com
 Na raiz, unitários puros em PowerShell:
 
 ```powershell
-$env:PYTHONPATH = Join-Path (Get-Location) 'Codigos'
+$env:PYTHONPATH = Join-Path (Get-Location) 'api'
 python -m unittest discover -s .github/cicd/tests/unit -v
 ```
 
-Em Bash: `PYTHONPATH=Codigos python -m unittest discover -s .github/cicd/tests/unit -v`.
+Em Bash: `PYTHONPATH=api python -m unittest discover -s .github/cicd/tests/unit -v`.
 
 Regressão completa isolada em SQLite e PostgreSQL: `python .github/cicd/ci.py`.
 Aplicação real das migrations PostgreSQL sobre o esquema legado: `test_migrations_postgresql.py`.
@@ -40,7 +40,7 @@ Esse executor também valida imagem, HTTPS, restauração e persistência de upl
 O CI executa os unitários antes da construção e volta a descobri-los na regressão
 completa: a repetição é intencional para oferecer feedback rápido e validar o runtime.
 
-Fluxos por perfil: seguir `Documentos/testes/postman/README.md`. Já são obrigatórios
+Fluxos por perfil: seguir `docs/testes/postman/README.md`. Já são obrigatórios
 no workflow antes da publicação. Evidências ficam em `.ci-results/`, ignorado pelo Git.
 
 ## Descoberta e isolamento
@@ -67,8 +67,8 @@ A rodada MySQL da etapa anterior não foi repetida nesta movimentação dos test
 
 `test_cursos_frontend.py` verifica HTML e formulários pelos mesmos serviços/API.
 A regressão `python .github/cicd/run_cursos_backend.py --suite regressao` inclui
-esses casos em SQLite/PostgreSQL descartáveis. O navegador usa `Codigos/tests/verificar_cursos.cjs`
+esses casos em SQLite/PostgreSQL descartáveis. O navegador usa `api/tests/verificar_cursos.cjs`
 somente na fixture `enem_demo_server.py --local` (5093), com `EDUFAST_ENEM_DEMO=1`,
 SQLite em memória e chaves sintéticas. Não executar o navegador automatizado na
 demo manual 5092, pois ele altera progresso, rascunhos e publicação.
-[Resultados e roteiro](../../../Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).
+[Resultados e roteiro](../../../docs/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).

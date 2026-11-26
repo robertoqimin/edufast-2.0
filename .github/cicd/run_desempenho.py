@@ -49,7 +49,7 @@ def main():
                                     'EDUFAST_TEST_DISPOSABLE': '1', 'PYTHON_DOTENV_DISABLED': '1', 'APP_ENV': 'production',
                                     'PYTHONDONTWRITEBYTECODE': '1', 'SECRET_KEY': 'synthetic-performance-only-key-2026-32chars',
                                     'DATA_ENCRYPTION_KEY': base64.urlsafe_b64encode(os.urandom(32)).decode(),
-                                    'UPLOAD_FOLDER': '/tmp/uploads', 'TRUSTED_HOSTS': 'localhost', 'PYTHONPATH': '/repo/Codigos:/repo/.github/cicd/desempenho'},
+                                    'UPLOAD_FOLDER': '/tmp/uploads', 'TRUSTED_HOSTS': 'localhost', 'PYTHONPATH': '/repo/api:/repo/.github/cicd/desempenho'},
                     'entrypoint': ['python', '/repo/.github/cicd/desempenho/medir.py', '--saida', '/reports',
                                    '--amostras', str(args.amostras), '--escala', args.escala]}},
         'networks': {'isolated': {'internal': True}},
@@ -66,7 +66,7 @@ def main():
                 result = subprocess.run(base + ['run', '--rm', '--no-deps', 'medicao'], cwd=ROOT, stdout=log,
                                         stderr=subprocess.STDOUT, timeout=3600)
             git = lambda *a: subprocess.run(['git', *a], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-            meta = {'commit': git('log', '-1', '--format=%s'), 'arvore_alterada': bool(git('status', '--porcelain', '--', 'Codigos')),
+            meta = {'commit': git('log', '-1', '--format=%s'), 'arvore_alterada': bool(git('status', '--porcelain', '--', 'api')),
                     'imagem': args.image, 'limites': {'db': '0.5 vCPU / 512 MiB', 'app': '1.5 vCPU / 1536 MiB'},
                     'duracao_s': round(time.time() - inicio), 'sucesso': result.returncode == 0}
             (report / 'execucao.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding='utf-8')

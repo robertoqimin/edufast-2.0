@@ -1,4 +1,4 @@
-// Gera Codigos/demo/aula_funcao_afim.webm: videoaula curta e original (animação em canvas gravada
+// Gera api/demo/aula_funcao_afim.webm: videoaula curta e original (animação em canvas gravada
 // pelo próprio Edge com MediaRecorder), usada pela demo completa para mostrar vídeo enviado (U2b).
 // Uso (raiz do projeto): node scripts/gerar-video-demo.cjs
 const path = require('path');
@@ -6,7 +6,7 @@ const fs = require('fs');
 const ROOT = path.resolve(__dirname, '..');
 let playwright;
 try { playwright = require('playwright'); } catch { playwright = require(path.join(ROOT, '.ci-results/demo-video/node_modules/playwright')); }
-const SAIDA = path.join(ROOT, 'Codigos/demo/aula_funcao_afim.webm');
+const SAIDA = path.join(ROOT, 'api/demo/aula_funcao_afim.webm');
 
 (async () => {
   const browser = await playwright.chromium.launch({channel: 'msedge'});

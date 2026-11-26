@@ -1,9 +1,9 @@
 """Unidades (colégio e faculdade na mesma instalação): contratos RED. Falham até a implementação.
 
 Pasta fora da regressão (não é pacote). Rodar à mão, com o executor isolado:
-    PYTHONPATH="Codigos:.github/cicd/tests" EDUFAST_TEST_DISPOSABLE=1 \
+    PYTHONPATH="api:.github/cicd/tests" EDUFAST_TEST_DISPOSABLE=1 \
         python -m unittest discover -s .github/cicd/tests/unidades -v
-Estudo: Documentos/planejamento/ESTUDO_UNIDADES_2026-11-25.md
+Estudo: docs/planejamento/ESTUDO_UNIDADES_2026-11-25.md
 
 API esperada:
     app.models: UnidadeModel (unidades), UsuarioUnidadeModel (usuario_unidades),
@@ -22,7 +22,7 @@ API esperada:
             (mesma conta, histórico e documentos), sem conta nova (regra do usuário, 25/11/2026).
         POST /admin/alunos/<id>/levar-para-unidade  (destino_id; CSRF): subida manual, para aluno
             sem CPF, liberada só pela unidade de origem.
-    Ficha da migration: Documentos/planejamento/PROPOSTA_010_UNIDADES_2026-11-25.md
+    Ficha da migration: docs/planejamento/PROPOSTA_010_UNIDADES_2026-11-25.md
     Recurso de outra unidade -> 404 (não confirma que existe).
 """
 from unittest import TestCase, skipUnless

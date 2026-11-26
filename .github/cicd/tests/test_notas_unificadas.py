@@ -17,7 +17,7 @@ from app.models import NotaModel, SolicitacaoAlteracaoModel
 from app.models.academico_model import AvaliacaoModel, LancamentoNotaModel, PeriodoLetivoModel
 from app.models.curso_model import AtribuicaoDocenteModel, EstadoTurmaModel
 
-# Localiza o pacote pelo import: no repositório é Codigos/app; na imagem de produção, /app/app.
+# Localiza o pacote pelo import: no repositório é api/app; na imagem de produção, /app/app.
 APP = Path(app_package.__file__).resolve().parent
 CSRF = 'csrf-b1'
 

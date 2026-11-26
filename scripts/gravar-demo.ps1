@@ -26,7 +26,7 @@ if (-not $SemConfirmar) {
 
 $envFile = Join-Path $root '.ci-results/gravacao/.env'
 if (Test-Path $envFile) {
-    & docker compose --project-name edufast-gravacao --env-file $envFile -f Codigos/docker-compose.yml -f scripts/compose.manual.yml down -v 2>&1 | Out-Null
+    & docker compose --project-name edufast-gravacao --env-file $envFile -f api/docker-compose.yml -f scripts/compose.manual.yml down -v 2>&1 | Out-Null
     Confirm-Exit 'apagar a escola de gravacao'
 }
 powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'iniciar-educafast.ps1') -Ambiente Gravacao -PrepararBancoNovo -SemNavegador 2>&1 | Select-String 'Aplicacao pronta'

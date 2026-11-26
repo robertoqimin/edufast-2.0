@@ -4,7 +4,7 @@ from pathlib import Path
 from catalog import API, UNIT
 
 ROOT = Path(__file__).resolve().parents[3]
-TARGET = ROOT/'Documentos/testes/proxima-versao'
+TARGET = ROOT/'docs/testes/proxima-versao'
 
 
 def generated():

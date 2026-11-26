@@ -1,6 +1,6 @@
 # Ambientes independentes no mesmo servidor
 
-O [painel do proprietário](../Documentos/planejamento/PAINEL_SUPREMO_2026-11-12.md)
+O [painel do proprietário](../docs/planejamento/PAINEL_SUPREMO_2026-11-12.md)
 reúne escolas, pessoas e financeiro em um login próprio. Demonstração local:
 `node infra/platform-demo.cjs start` (porta 5093, dados fictícios descartáveis).
 
@@ -14,7 +14,7 @@ O gerador original abaixo permanece compatível para configurações iniciais.
 
 Para testar localmente **Teste 01 e Teste 02**, com 20 alunos, 5 professores e
 3 matérias em cada banco, use `node infra/demo.cjs start` e o
-[guia das duas escolas](../Documentos/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md).
+[guia das duas escolas](../docs/testes/DUAS_ESCOLAS_TESTE_2026-11-11.md).
 No Windows, `./iniciar-duas-escolas.ps1` inicia e abre as escolas no navegador
 externo nas portas 5081/5082. Para escolas já iniciadas, usar `-SomenteAbrir`.
 
@@ -28,7 +28,7 @@ proxy que já ocupe a porta 443 sem planejar a entrada única.
 
 1. Copiar `environments.example.json` para um manifesto local em `.ci-results/`.
 2. Informar domínios reais e digest da imagem aprovada pelo CI **contendo**
-   `Codigos/gunicorn.conf.py` e estas alterações. O gerador valida formato e
+   `api/gunicorn.conf.py` e estas alterações. O gerador valida formato e
    repositório; não verifica a aprovação criptograficamente. Conferir release pelo
    procedimento de `.github/cicd/README.md`.
 3. Na raiz, executar:
@@ -52,7 +52,7 @@ Não copiar segredos de outra escola nem perder a chave de criptografia.
 5. Validar configurações com `bash infra/verify.sh` em ambiente de desenvolvimento.
    Essa verificação cria certificado fictício e valida apenas sintaxe, não o TLS real.
 6. Provisionar cada banco somente após revisão humana conforme
-   `Codigos/migrations/README.md`. O gerador não cria esquema e não aplica SQL.
+   `api/migrations/README.md`. O gerador não cria esquema e não aplica SQL.
    Em banco vazio o app pode reiniciar indicando esquema pendente; isso é esperado
    até concluir o provisionamento revisado. Iniciar banco isoladamente, usar processo
    explícito de provisionamento e só então iniciar app e gateway.
@@ -164,4 +164,4 @@ Referências: [Nginx proxy/buffering](https://nginx.org/en/docs/http/ngx_http_pr
 
 `node infra/enem-demo.cjs start` inicia uma demo nova na porta 5092 usando a
 imagem de testes local. Banco e arquivos são descartados ao parar/reiniciar.
-[Contas, roteiro e limites](../Documentos/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).
+[Contas, roteiro e limites](../docs/testes/FRONTEND_CURSOS_MS04_2026-11-20.md).

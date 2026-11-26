@@ -22,7 +22,7 @@ def main():
     baseline = REPORT / "baseline"
     baseline.mkdir(exist_ok=True)
     base_commit = subprocess.check_output(["git", "rev-parse", "--verify", "--end-of-options", args.base_ref + "^{commit}"], cwd=ROOT, text=True).strip()
-    archive = subprocess.check_output(["git", "archive", "--format=zip", base_commit, "Codigos", ".github/cicd"], cwd=ROOT)
+    archive = subprocess.check_output(["git", "archive", "--format=zip", base_commit, "api", ".github/cicd"], cwd=ROOT)
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         source.extractall(baseline)
     report = {"base_commit": base_commit,
@@ -42,7 +42,7 @@ def main():
                   ("new-api", ROOT, "test_concurrency.py"),
                   ("regression-existing", ROOT, "test_application.py")]
         for name, checkout, pattern in stages:
-            env["PYTHONPATH"] = str(checkout / "Codigos") + os.pathsep + os.environ.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = str(checkout / "api") + os.pathsep + os.environ.get("PYTHONPATH", "")
             result = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
                                      str(checkout / ".github/cicd/tests"), "-p", pattern, "-v"],
                                     env=env, cwd=folder, capture_output=True)

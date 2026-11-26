@@ -25,7 +25,7 @@ const CONTAS = {
   aluno2: {nome: 'Carla Souza', email: 'carla.souza@colegiohorizonte.test', senha: 'Aluna-Carla-2026!', matricula: '2026002'},
 };
 const COMPOSE = ['compose', '--project-name', 'edufast-gravacao', '--env-file', '.ci-results/gravacao/.env',
-  '-f', 'Codigos/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
+  '-f', 'api/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
 let page;
 const inicio = Date.now();
 const espera = (ms) => page.waitForTimeout(Math.round(ms * RITMO));

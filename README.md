@@ -1,4 +1,4 @@
-﻿# EduFast 2.0
+# EduFast 2.0
 
 ### Menos burocracia. Mais tempo para a educação.
 
@@ -13,7 +13,7 @@ identidade visual. Agora uma mesma instituição também pode ter **colégio e f
 com secretarias separadas.
 
 <p align="center">
-  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/01-login-desktop.png" alt="Tela de entrada do Colégio Horizonte, escola de demonstração do EduFast" width="900">
+  <img src="docs/design/referencias/2026-11-25-apresentacao-readme/01-login-desktop.png" alt="Tela de entrada do Colégio Horizonte, escola de demonstração do EduFast" width="900">
 </p>
 
 > As telas desta página são capturas reais da versão atual, feitas na escola de demonstração
@@ -43,52 +43,52 @@ com secretarias separadas.
 
 ### Direção: implantação guiada
 
-![Visão geral da direção com o checklist de implantação e os números da escola](Documentos/design/referencias/2026-11-25-apresentacao-readme/02-direcao-visao-geral-desktop.png)
+![Visão geral da direção com o checklist de implantação e os números da escola](docs/design/referencias/2026-11-25-apresentacao-readme/02-direcao-visao-geral-desktop.png)
 
 ### Secretaria: uma tela para cada turma
 
 Matérias, professores e alunos de cada turma no mesmo lugar.
 
-![Tela Turmas com o 1º ano A aberto: matérias, professores e alunos matriculados](Documentos/design/referencias/2026-11-25-apresentacao-readme/03-secretaria-turmas-desktop.png)
+![Tela Turmas com o 1º ano A aberto: matérias, professores e alunos matriculados](docs/design/referencias/2026-11-25-apresentacao-readme/03-secretaria-turmas-desktop.png)
 
 ### Professor: chamada e diário
 
-![Chamada de Matemática do 1º ano A](Documentos/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-desktop.png)
+![Chamada de Matemática do 1º ano A](docs/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-desktop.png)
 
-![Diário do Simulado com a nota de cada aluno](Documentos/design/referencias/2026-11-25-apresentacao-readme/05-professora-diario-desktop.png)
+![Diário do Simulado com a nota de cada aluno](docs/design/referencias/2026-11-25-apresentacao-readme/05-professora-diario-desktop.png)
 
 ### Secretaria: aprovação em lote
 
-![Solicitações pendentes: o lançamento do Simulado com as notas de cada aluno](Documentos/design/referencias/2026-11-25-apresentacao-readme/06-secretaria-solicitacoes-desktop.png)
+![Solicitações pendentes: o lançamento do Simulado com as notas de cada aluno](docs/design/referencias/2026-11-25-apresentacao-readme/06-secretaria-solicitacoes-desktop.png)
 
 ### Aluno: disciplinas, materiais e boletim
 
-![Painel do aluno com as disciplinas e seus professores](Documentos/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-desktop.png)
+![Painel do aluno com as disciplinas e seus professores](docs/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-desktop.png)
 
-![Slides em PDF abertos no leitor da plataforma](Documentos/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-desktop.png)
+![Slides em PDF abertos no leitor da plataforma](docs/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-desktop.png)
 
-![Boletim do aluno com notas, pesos e média ponderada](Documentos/design/referencias/2026-11-25-apresentacao-readme/09-aluno-boletim-desktop.png)
+![Boletim do aluno com notas, pesos e média ponderada](docs/design/referencias/2026-11-25-apresentacao-readme/09-aluno-boletim-desktop.png)
 
 ### Cursos modulares
 
 O curso é organizado em módulos, capítulos e aulas, e o aluno retoma de onde parou. A
 videoaula enviada pela professora é assistida dentro da plataforma.
 
-![Curso Matemática para o ENEM com a trilha de aulas e a videoaula](Documentos/design/referencias/2026-11-25-apresentacao-readme/10-aluna-curso-video-desktop.png)
+![Curso Matemática para o ENEM com a trilha de aulas e a videoaula](docs/design/referencias/2026-11-25-apresentacao-readme/10-aluna-curso-video-desktop.png)
 
 ### No celular
 
 <p align="center">
-  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-celular.png" alt="Painel do aluno no celular" width="260">
-  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-celular.png" alt="Leitor de PDF no celular" width="260">
-  <img src="Documentos/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-celular.png" alt="Chamada no celular" width="260">
+  <img src="docs/design/referencias/2026-11-25-apresentacao-readme/07-aluno-painel-celular.png" alt="Painel do aluno no celular" width="260">
+  <img src="docs/design/referencias/2026-11-25-apresentacao-readme/08-aluno-leitor-pdf-celular.png" alt="Leitor de PDF no celular" width="260">
+  <img src="docs/design/referencias/2026-11-25-apresentacao-readme/04-professora-chamada-celular.png" alt="Chamada no celular" width="260">
 </p>
 
 ### Painel da plataforma
 
 O dono da plataforma acompanha as escolas e o resultado do mês num painel próprio.
 
-![Painel da plataforma com o resultado do mês e as escolas](Documentos/design/referencias/2026-11-25-apresentacao-readme/11-supremo-escolas-desktop.png)
+![Painel da plataforma com o resultado do mês e as escolas](docs/design/referencias/2026-11-25-apresentacao-readme/11-supremo-escolas-desktop.png)
 
 ## Para quem
 
@@ -157,16 +157,34 @@ Princípios do projeto:
 
 ## Experimente
 
-Requisitos: Git, Docker (no Windows, o Docker Desktop aberto) e Node.
+Requisitos: Git, Docker (no Windows/macOS, o Docker Desktop aberto) e Node.js 20+.
+Instruções completas, com dependências e variáveis de ambiente:
+**[`api/README.md`](api/README.md)**.
 
-```powershell
+```bash
 git clone https://github.com/Samucau1/edufast-2.0.git
 cd edufast-2.0
 node infra/demo-completa.cjs start
 ```
 
-O comando sobe a escola de demonstração com dados fictícios e mostra na tela o endereço e as
-contas de teste de cada perfil. Ela funciona só no seu computador.
+O comando sobe a escola de demonstração com dados fictícios em **http://localhost:5095**
+e mostra na tela as contas de teste de cada perfil. Ela funciona só no seu computador.
+
+## Estrutura do repositório
+
+```text
+edufast-2.0/
+├── docs/         # Documentação: integrantes e vídeo (README.md), BMC.md, DADOS.pdf,
+│                 # prints/, índice completo (INDICE.md), arquitetura, testes e protótipos
+├── api/          # API e backend em Flask; também serve as telas da aplicação web
+├── web/          # README da aplicação web (servida pela API)
+├── infra/        # Iniciador da demonstração e ambientes por instituição
+├── scripts/      # Geradores (protótipos, modelo de dados) e utilitários
+└── .github/      # CI/CD e testes automatizados
+```
+
+A solução é **Web + API**. Não há aplicação mobile nem desktop: a interface web é
+responsiva e funciona no navegador do celular.
 
 ## Situação e próximos passos
 
@@ -183,7 +201,7 @@ Próximos passos:
 
 ## Contribuir
 
-Leia o [AGENTS.md](AGENTS.md) e o [protocolo de design](Documentos/PROTOCOLO_DESIGN.md) antes de
+Leia o [AGENTS.md](AGENTS.md) e o [protocolo de design](docs/PROTOCOLO_DESIGN.md) antes de
 alterar as telas. Não versione configurações locais, bancos, arquivos enviados, chaves, nem dados
 reais de alunos e colaboradores.
 

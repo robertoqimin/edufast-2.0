@@ -2,8 +2,8 @@
   "etapa": "MS04",
   "estado": "backend_api",
   "ativado": true,
-  "roteiro": "Documentos/planejamento/ESQUELETO_MS04_2026-11-20.md",
-  "modelo_proposto": "Codigos/migrations/propostas/ms04_modelo.json",
+  "roteiro": "docs/planejamento/ESQUELETO_MS04_2026-11-20.md",
+  "modelo_proposto": "api/migrations/propostas/ms04_modelo.json",
   "decisoes_confirmadas": [
     "Curso > modulo > capitulo > aula",
     "Retomar a ultima aula acessada"
@@ -17,22 +17,22 @@
   "servicos": [
     {
       "lote": "MS04-B",
-      "arquivo": "Codigos/app/services/cursos_ms04/autoria.py",
+      "arquivo": "api/app/services/cursos_ms04/autoria.py",
       "funcao": "salvar_rascunho"
     },
     {
       "lote": "MS04-B",
-      "arquivo": "Codigos/app/services/cursos_ms04/publicacao.py",
+      "arquivo": "api/app/services/cursos_ms04/publicacao.py",
       "funcao": "preparar_publicacao"
     },
     {
       "lote": "MS04-C",
-      "arquivo": "Codigos/app/services/cursos_ms04/retomada.py",
+      "arquivo": "api/app/services/cursos_ms04/retomada.py",
       "funcao": "registrar_abertura"
     },
     {
       "lote": "MS04-D",
-      "arquivo": "Codigos/app/services/cursos_ms04/conteudo.py",
+      "arquivo": "api/app/services/cursos_ms04/conteudo.py",
       "funcao": "validar_aula"
     }
   ],
@@ -335,7 +335,7 @@
   "ativacao_persistente": "pendente_revisao_SQL_007",
   "frontend": "implementado",
   "testes_frontend": ".github/cicd/tests/test_cursos_frontend.py",
-  "testes_navegador": "Codigos/tests/verificar_cursos.cjs",
-  "contrato": "Documentos/testes/API_CURSOS_MS04_2026-11-20.md",
+  "testes_navegador": "api/tests/verificar_cursos.cjs",
+  "contrato": "docs/testes/API_CURSOS_MS04_2026-11-20.md",
   "testes_backend": ".github/cicd/tests/test_cursos_ms04.py"
 }

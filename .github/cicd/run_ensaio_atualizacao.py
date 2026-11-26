@@ -37,7 +37,7 @@ class Ensaio:
         self.summary = {'passed': False, 'project': self.project, 'image': image, 'passos': [], 'verificacoes': {}}
         db_password = uuid4().hex
         url = f'postgresql+psycopg://{USUARIO}:{db_password}@db-ensaio:5432/{BANCO}'
-        common = {'image': image, 'working_dir': '/repo/Codigos',
+        common = {'image': image, 'working_dir': '/repo/api',
                   'volumes': [{'type': 'bind', 'source': str(ROOT), 'target': '/repo', 'read_only': True},
                               'uploads:/app/uploads'],
                   'environment': {'DB_URL': url, 'EDUFAST_APPLY_DB_URL': url, 'EDUFAST_ENSAIO': '1',
@@ -45,7 +45,7 @@ class Ensaio:
                                   'SECRET_KEY': 'synthetic-ensaio-only-secret-key-2026-32chars',
                                   'DATA_ENCRYPTION_KEY': base64.urlsafe_b64encode(os.urandom(32)).decode(),
                                   'UPLOAD_FOLDER': '/app/uploads',
-                                  'PYTHONPATH': '/repo/Codigos:/repo/.github/cicd/tests'}}
+                                  'PYTHONPATH': '/repo/api:/repo/.github/cicd/tests'}}
         self.key_sha = hashlib.sha256(common['environment']['DATA_ENCRYPTION_KEY'].encode()).hexdigest()
         compose = {'services': {
             'db-ensaio': {'image': 'postgres:17-alpine', 'networks': ['isolated'], 'tmpfs': ['/var/lib/postgresql/data'],

@@ -24,7 +24,7 @@ const CAPTURAS = args.includes('--capturas') ? path.resolve(args[args.indexOf('-
 const RITMO = Math.min(4, Math.max(0.3, Number(args.find((a) => /^\d+(\.\d+)?$/.test(a)) || 1)));
 const HEADLESS = process.env.DEMO_HEADLESS === '1';
 const COMPOSE = ['compose', '--project-name', 'edufast-gravacao', '--env-file', '.ci-results/gravacao/.env',
-  '-f', 'Codigos/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
+  '-f', 'api/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
 const DIRECAO = {email: 'direcao@escolanova.test', senha: 'Direcao-Escola-2026!'};
 const CONTAS = {
   secretaria: {nome: 'Secretaria Escolar', email: 'secretaria@escolanova.test', senha: 'Secretaria-2026!'},

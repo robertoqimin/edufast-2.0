@@ -13,7 +13,7 @@ const ENV = path.join(DIR, '.env');
 const PORTA = 5095;
 const URL = `http://localhost:${PORTA}`;
 const COMPOSE = ['compose', '--project-name', PROJECT, '--env-file', ENV,
-  '-f', 'Codigos/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
+  '-f', 'api/docker-compose.yml', '-f', 'scripts/compose.manual.yml'];
 
 function docker(args, {captura = false, permitirFalha = false, entrada} = {}) {
   const r = spawnSync('docker', args, {cwd: ROOT, encoding: 'utf8', input: entrada,

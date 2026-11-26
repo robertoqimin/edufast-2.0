@@ -39,7 +39,7 @@ def main():
         'results':[]}
     def source_hash():
         digest = hashlib.sha256()
-        for path in sorted([*(ROOT/'Codigos').rglob('*.py'),*(ROOT/'.github/cicd/tests').rglob('*.py'),
+        for path in sorted([*(ROOT/'api').rglob('*.py'),*(ROOT/'.github/cicd/tests').rglob('*.py'),
                             *(ROOT/'.github/cicd').glob('*.cjs'),Path(__file__).resolve()]):
             digest.update(path.relative_to(ROOT).as_posix().encode())
             digest.update(path.read_bytes())
@@ -59,14 +59,14 @@ def main():
                 'environment':{'DB_URL':'postgresql+psycopg://disposable:synthetic-ms04-only@db-ms04-test:5432/edufast_ms04_disposable',
                     'EDUFAST_TEST_DISPOSABLE':'1','PYTHON_DOTENV_DISABLED':'1','APP_ENV':'development',
                     'PYTHONDONTWRITEBYTECODE':'1','SECRET_KEY':'synthetic-ms04-backend-only-key-2026-32chars',
-                    'PYTHONPATH':'/repo/Codigos:/repo/.github/cicd/tests'},
+                    'PYTHONPATH':'/repo/api:/repo/.github/cicd/tests'},
                 'entrypoint':['python','-m','unittest','discover','-s','/repo/.github/cicd/tests','-p',pattern,'-v']},
             'http':{'image':args.image,'working_dir':'/repo','networks':['http'],
                 'volumes':[{'type':'bind','source':str(ROOT),'target':'/repo','read_only':True}],
                 'ports':['127.0.0.1::8000'],'tmpfs':['/tmp'],
                 'entrypoint':['python','/repo/.github/cicd/tests/frequencia_visual_fixture.py'],
                 'environment':{'DB_URL':'sqlite:////tmp/frequencia-visual.db','APP_ENV':'development',
-                    'PYTHONPATH':'/repo/Codigos:/repo/.github/cicd/tests','PYTHONDONTWRITEBYTECODE':'1',
+                    'PYTHONPATH':'/repo/api:/repo/.github/cicd/tests','PYTHONDONTWRITEBYTECODE':'1',
                     'EDUFAST_FREQUENCIA_VISUAL':'1','PYTHON_DOTENV_DISABLED':'1','UPLOAD_FOLDER':'/tmp/uploads',
                     'SECRET_KEY':'synthetic-ms04-http-only-secret-32characters',
                     'DATA_ENCRYPTION_KEY':base64.urlsafe_b64encode(os.urandom(32)).decode()}}

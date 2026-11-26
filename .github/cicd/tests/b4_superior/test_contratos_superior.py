@@ -1,8 +1,8 @@
 """B4 — contratos (RED) das ofertas extras. Falham até a implementação ser aprovada e feita.
 
 Pasta fora da regressão (não é pacote). Rodar à mão:
-    PYTHONPATH="Codigos:.github/cicd/tests" python -m unittest discover -s .github/cicd/tests/b4_superior -v
-Estudo: Documentos/planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md
+    PYTHONPATH="api:.github/cicd/tests" python -m unittest discover -s .github/cicd/tests/b4_superior -v
+Estudo: docs/planejamento/ESTUDO_ENSINO_SUPERIOR_B4_2026-11-24.md
 
 API esperada (app.services.ofertas):
     criar_oferta(db, *, nome, codigo, ano_letivo, periodo_letivo, disciplina_id, vagas=None, inscricao_aberta=False) -> TurmaModel

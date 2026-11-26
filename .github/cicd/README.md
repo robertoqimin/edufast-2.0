@@ -6,14 +6,14 @@ Esta é a fonte de verdade da automação. Os dois pontos de entrada em [workflo
 
 ## Concorrência, regressão e Postman
 
-O backend de cursos MS04 tem [contratos e evidências atuais](../../Documentos/testes/API_CURSOS_MS04_2026-11-20.md).
+O backend de cursos MS04 tem [contratos e evidências atuais](../../docs/testes/API_CURSOS_MS04_2026-11-20.md).
 Para repetir o checkout atual em SQLite/PostgreSQL descartáveis e HTTP Linux:
 `python .github/cicd/run_cursos_backend.py --suite regressao`. O código é montado
 somente para leitura; a imagem local `edufast-platform:test` fornece dependências.
 O runner não aceita banco externo, usa tmpfs/redes próprias e verifica hash de
 fonte/limpeza. `--suite ms04` limita a descoberta aos testes novos.
 
-As [correções e evidências](../../Documentos/testes/CONCORRENCIA.md) abrangem
+As [correções e evidências](../../docs/testes/CONCORRENCIA.md) abrangem
 solicitações de documentos, versões de cadastros/notas e idempotência dos envios.
 Os novos testes estão em `tests/test_concurrency.py`; a concorrência real exige PostgreSQL.
 O CI os executa junto à regressão existente em bancos Docker descartáveis.
@@ -23,13 +23,13 @@ de trabalho, executa a nova suíte e só então roda a regressão existente em S
 temporário. Para PostgreSQL, definir `RACE_TEST_DB_URL` apontando para um banco vazio e
 descartável cujo nome comece com `race_ci_`, e acrescentar `--postgresql`.
 
-A [coleção Postman](../../Documentos/testes/postman/README.md) tem executor HTTP
-isolado. A [migration](../../Codigos/migrations/README.md) continua sujeita à revisão
+A [coleção Postman](../../docs/testes/postman/README.md) tem executor HTTP
+isolado. A [migration](../../api/migrations/README.md) continua sujeita à revisão
 humana: o CI cria esquemas novos para teste, não aplica o SQL ao banco existente.
 
 ## Próxima etapa: testes antes da implementação
 
-O [pacote de revisão TDD](../../Documentos/testes/proxima-versao/README.md) define os contratos futuros de várias escolas e gestão acadêmica. Seu código fica em `next/`, o ambiente em `compose.next.yml` e o executor em `next_stage.py`. Não altera o código da aplicação.
+O [pacote de revisão TDD](../../docs/testes/proxima-versao/README.md) define os contratos futuros de várias escolas e gestão acadêmica. Seu código fica em `next/`, o ambiente em `compose.next.yml` e o executor em `next_stage.py`. Não altera o código da aplicação.
 
 O CI normal confere somente a infraestrutura e a sincronização dos documentos desse pacote. A suíte futura é estrita e tem workflow manual separado em `tdd.yml`: continua RED até a implementação cumprir os contratos. Essa falha não é convertida em aprovação nem usada para publicar uma imagem.
 

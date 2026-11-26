@@ -1,0 +1,48 @@
+{
+  "etapa": "MS04",
+  "estado": "SQL_aprovado_em_23_11_2026",
+  "sql_executavel": false,
+  "revisao_usuario": "aprovada_em_23_11_2026",
+  "numero_migration": 7,
+  "preservar": [
+    "IDs da hierarquia",
+    "ofertas existentes",
+    "conclusoes existentes",
+    "edicoes publicadas"
+  ],
+  "alteracoes": [
+    {
+      "tabela": "curso_versoes",
+      "proposta": "Versao positiva por curso em tabela separada; cursos legados sem registro leem versao 1 e sao adotados na primeira gravacao/duplicacao pela API."
+    },
+    {
+      "tabela": "curso_aulas",
+      "proposta": "video_id passa a aceitar NULL. Sem renomear IDs ou mover hierarquia; texto exige metadados na tabela de conteudos."
+    },
+    {
+      "tabela": "curso_aula_conteudos",
+      "proposta": "Tipo video/texto e corpo textual por aula; legadas sem registro continuam video. Publicacao/leitura validam coerencia entre video e tipo."
+    },
+    {
+      "tabela": "curso_retomadas",
+      "proposta": "Aluno, oferta, aula, versao e atualizado_em; unicidade aluno/oferta."
+    },
+    {
+      "tabela": "curso_aula_recursos",
+      "proposta": "Apoios privados arquivo/link; referencias de acesso independentes por aula; copias compartilham bytes cifrados imutaveis, sem exclusao fisica automatica."
+    }
+  ],
+  "decisoes_pendentes": [
+    "Revisao do SQL e preflight por destino",
+    "Frontend para os novos contratos",
+    "Medicoes de desempenho em ambiente dimensionado"
+  ],
+  "ativacao": [
+    "Revisar SQL futuro, destino e esquema anterior",
+    "Backup consistente de banco, uploads e chave",
+    "Ensaiar atualizacao e recuperacao em ambiente isolado",
+    "Executar migration somente depois da revisao do usuario",
+    "Conferir leitura legada, novos formatos e restricoes de retorno ao codigo anterior"
+  ],
+  "arquivo_sql": "api/migrations/007_cursos_backend_ms04.sql"
+}

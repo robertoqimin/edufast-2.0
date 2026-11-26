@@ -1,0 +1,2362 @@
+{
+  "info": {
+    "name": "EduFast - concorrencia e idempotencia",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Usar apenas em banco sintetico conforme README. Nao executa migrations. Concorrencia e verificada pela suite PostgreSQL; este fluxo verifica contratos HTTP e repeticao sequencial."
+  },
+  "variable": [
+    {
+      "key": "run_key",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Saude",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/healthz"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('run_key', pm.variables.replaceIn('{{$guid}}')); "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar comunicado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Mensagem sintetica"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir comunicado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Mensagem sintetica"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mesma chave com conteudo diferente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso de teste"
+            },
+            {
+              "key": "mensagem",
+              "value": "Outra"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-aviso"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sem chave",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/comunicados",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Aviso"
+            },
+            {
+              "key": "mensagem",
+              "value": "Texto"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 428', function () { pm.expect(pm.response.code).to.eql(428); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ler versao aluno",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const match = pm.response.text().match(/name=\"versao\" value=\"(\\d+)\"/);",
+              "pm.test('Versao no formulario', function () { pm.expect(match).not.to.eql(null); });",
+              "if (match) pm.collectionVariables.set('aluno_version', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{aluno_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{aluno_version}}"
+            },
+            {
+              "key": "matricula",
+              "value": "M1"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar versao antiga aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{aluno_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{aluno_version}}"
+            },
+            {
+              "key": "matricula",
+              "value": "M1"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitar documento aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-aluno"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir solicitacao aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/alunos/{{aluno_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-aluno"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ler versao professor",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const match = pm.response.text().match(/name=\"versao\" value=\"(\\d+)\"/);",
+              "pm.test('Versao no formulario', function () { pm.expect(match).not.to.eql(null); });",
+              "if (match) pm.collectionVariables.set('professor_version', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Editar professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{professor_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{professor_version}}"
+            },
+            {
+              "key": "cpf",
+              "value": "11111111111"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rejeitar versao antiga professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/editar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "nome",
+              "value": "Cadastro sintetico"
+            },
+            {
+              "key": "email",
+              "value": "{{professor_email}}"
+            },
+            {
+              "key": "versao",
+              "value": "{{professor_version}}"
+            },
+            {
+              "key": "cpf",
+              "value": "11111111111"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Solicitar documento professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-professor"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir solicitacao professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/admin/professores/{{professor_id}}/documentos/solicitar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "titulo",
+              "value": "Documento de teste"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-solic-professor"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login aluno",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{aluno_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('aluno_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responder solicitacao aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/aluno/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{aluno_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/aluno/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{aluno_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('professor_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Formulario antigo de nota aposentado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/notas/salvar",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}"
+            },
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}"
+            },
+            {
+              "key": "nota",
+              "value": "8"
+            },
+            {
+              "key": "versao",
+              "value": "0"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-nota0"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 410', function () { pm.expect(pm.response.code).to.eql(410); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Propor nota no diario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{professor_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{run_key}}-diario0"
+          }
+        ],
+        "url": "{{base_url}}/academico/avaliacoes/{{avaliacao_id}}/alunos/{{aluno_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"valor\": \"8\", \"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 202', function () { pm.expect(pm.response.code).to.eql(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir proposta no diario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{professor_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{run_key}}-diario0"
+          }
+        ],
+        "url": "{{base_url}}/academico/avaliacoes/{{avaliacao_id}}/alunos/{{aluno_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"valor\": \"8\", \"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 202', function () { pm.expect(pm.response.code).to.eql(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta operacao_restaurada",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'operacao_restaurada' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar operacao_restaurada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('professor_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versao antiga no diario rejeitada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{professor_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{run_key}}-diario-antiga"
+          }
+        ],
+        "url": "{{base_url}}/academico/avaliacoes/{{avaliacao_id}}/alunos/{{aluno_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"valor\": \"4\", \"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Propor correcao versao 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{professor_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{run_key}}-diario1"
+          }
+        ],
+        "url": "{{base_url}}/academico/avaliacoes/{{avaliacao_id}}/alunos/{{aluno_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"valor\": \"9\", \"versao\": 1}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 202', function () { pm.expect(pm.response.code).to.eql(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta operacao_restaurada",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'operacao_restaurada' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar operacao_restaurada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('professor_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Propor publicacao da avaliacao",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{professor_token}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{run_key}}-publicar"
+          }
+        ],
+        "url": "{{base_url}}/academico/avaliacoes/{{avaliacao_id}}/publicar",
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 202', function () { pm.expect(pm.response.code).to.eql(202); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta operacao_restaurada",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'operacao_restaurada' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar operacao_restaurada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login aluno",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{aluno_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('aluno_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Boletim do aluno mostra nota publicada",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/boletim?formato=json"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const notas = pm.response.json().periodos.flatMap(p => p.avaliacoes.map(a => a.nota));",
+              "pm.test('Nota aprovada e publicada', () => pm.expect(notas).to.eql(['9.00']));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('professor_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar atividade",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/atividades/lancar",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}",
+              "type": "text"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}",
+              "type": "text"
+            },
+            {
+              "key": "titulo",
+              "value": "Atividade sintetica",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-atividade",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir atividade",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/atividades/lancar",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "turma_id",
+              "value": "{{turma_id}}",
+              "type": "text"
+            },
+            {
+              "key": "disciplina_id",
+              "value": "{{disciplina_id}}",
+              "type": "text"
+            },
+            {
+              "key": "titulo",
+              "value": "Atividade sintetica",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-atividade",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responder solicitacao professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta lancar_atividade",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'lancar_atividade' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar lancar_atividade",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Localizar proposta responder_documento",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/solicitacoes/alteracoes"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "const rows = Array.isArray(body) ? body : body.solicitacoes;",
+              "const row = rows.find(r => r.tipo === 'responder_documento' && r.estado === 'pendente');",
+              "pm.test('Proposta pendente existe', () => pm.expect(row).to.be.ok);",
+              "if (row) pm.collectionVariables.set('proposal_id', String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autorizar responder_documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/solicitacoes/alteracoes/{{proposal_id}}/decidir",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"decisao\": \"aprovar\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login professor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{professor_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('professor_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir resposta ja autorizada",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nova tentativa de responder documento concluido",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professor/documentos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "solicitacao_id",
+              "value": "{{professor_request_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-outra-resposta-prof",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{admin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('admin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload avulso aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-aluno",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });",
+              "pm.collectionVariables.set('document_id', String(pm.response.json().documento.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir upload avulso aluno",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "aluno_id",
+              "value": "{{aluno_id}}",
+              "type": "text"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-aluno",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });",
+              "pm.test('Mesmo documento', function () { pm.expect(String(pm.response.json().documento.id)).to.eql(pm.collectionVariables.get('document_id')); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Upload avulso professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professores/{{professor_id}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-professor",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir upload avulso professor",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/professores/{{professor_id}}/arquivos/upload",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-upload-professor",
+              "type": "text"
+            },
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": "docs/testes/postman/arquivo.txt"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.expect(pm.response.code).to.eql(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin nao acessa gestao de usuarios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 403', function () { pm.expect(pm.response.code).to.eql(403); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login superadmin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"{{superadmin_email}}\", \"senha\": \"{{password}}\"}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const body = pm.response.json();",
+              "if (body.token) pm.collectionVariables.set('superadmin_token', body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Painel original de usuarios e CSRF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+              "const token = pm.response.text().match(/name=\"csrf_token\" value=\"([^\"]+)\"/);",
+              "pm.test('Formulario protegido', () => pm.expect(token).to.be.ok);",
+              "if (token) pm.collectionVariables.set('csrf', token[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar administrador pelo superperfil",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "tipo",
+              "value": "admin"
+            },
+            {
+              "key": "nome",
+              "value": "Admin sintetico"
+            },
+            {
+              "key": "email",
+              "value": "new-{{run_key}}@example.test"
+            },
+            {
+              "key": "senha",
+              "value": "{{password}}"
+            },
+            {
+              "key": "csrf_token",
+              "value": "{{csrf}}"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-admin"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Repetir criacao de administrador",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{base_url}}/super/usuarios",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "tipo",
+              "value": "admin"
+            },
+            {
+              "key": "nome",
+              "value": "Admin sintetico"
+            },
+            {
+              "key": "email",
+              "value": "new-{{run_key}}@example.test"
+            },
+            {
+              "key": "senha",
+              "value": "{{password}}"
+            },
+            {
+              "key": "csrf_token",
+              "value": "{{csrf}}"
+            },
+            {
+              "key": "idempotency_key",
+              "value": "{{run_key}}-admin"
+            }
+          ]
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 302', function () { pm.expect(pm.response.code).to.eql(302); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Configuracao institucional original",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/super/escola?formato=json"
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Salvar identidade validada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{base_url}}/super/escola/identidade",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nome\": \"Escola sintetica\", \"sigla\": \"ef\", \"subtitulo\": \"GESTAO ESCOLAR\", \"modo\": \"escuro\", \"fundo\": \"#06385d\", \"destaque\": \"#22d3ee\", \"superficie\": \"#111c2b\", \"texto\": \"#ecf1f8\", \"muted\": \"#a4bdce\", \"raio\": \"12\", \"densidade\": \"confortavel\", \"fonte\": \"dm-sans\", \"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.expect(pm.response.code).to.eql(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Versao anterior de identidade rejeitada",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-CSRF-Token",
+            "value": "{{csrf}}"
+          }
+        ],
+        "url": "{{base_url}}/super/escola/identidade",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"versao\": 0}"
+        }
+      },
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.expect(pm.response.code).to.eql(409); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -23,7 +23,7 @@ function browser() {
         document: { addEventListener: (name, fn) => { listeners[name] = fn; }, querySelectorAll: () => [], createElement: () => ({ dataset: {} }) },
         window: { addEventListener: (name, fn) => { windowListeners[name] = fn; } }
     };
-    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../../Codigos/app/static/js/compartilhado/submission.js"), "utf8"), context);
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../../api/app/static/js/compartilhado/submission.js"), "utf8"), context);
     return { ...context, listeners };
 }
 

@@ -52,7 +52,7 @@ def main():
         os.environ.update(DB_URL=url,
                           APP_ENV="testing", EDUFAST_TEST_DISPOSABLE="1",
                           PYTHON_DOTENV_DISABLED="1", SECRET_KEY="synthetic-postman-test-secret-only")
-        sys.path.insert(0, str(ROOT / "Codigos"))
+        sys.path.insert(0, str(ROOT / "api"))
         sys.path.insert(0, str(ROOT / ".github/cicd/tests"))
         from test_concurrency import MutationApiTests
         from app.database import engine
@@ -74,7 +74,7 @@ def main():
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
-            environment = json.loads((ROOT / "Documentos/testes/postman/EduFast.postman_environment.json").read_text(encoding="utf-8"))
+            environment = json.loads((ROOT / "docs/testes/postman/EduFast.postman_environment.json").read_text(encoding="utf-8"))
             for value in environment["values"]:
                 if value["key"] == "base_url":
                     value["value"] = f"http://127.0.0.1:{server.server_port}"
@@ -86,7 +86,7 @@ def main():
             report.mkdir(parents=True, exist_ok=True)
             (report / "database.txt").write_text(args.database, encoding="utf-8")
             result = subprocess.run(["node", str(Path(args.newman).resolve()), "run",
-                                     "Documentos/testes/postman/EduFast.postman_collection.json",
+                                     "docs/testes/postman/EduFast.postman_collection.json",
                                      "--environment", str(env_file), "--ignore-redirects", "--reporters", "cli,json",
                                      "--reporter-json-export", str(report / "postman.json")], cwd=ROOT)
             if result.returncode:
@@ -132,7 +132,7 @@ def run_reported():
             result = subprocess.run(['git', *args], cwd=ROOT, capture_output=True)
             return result.stdout.decode('utf-8', errors='replace').strip() if result.returncode == 0 else None
 
-        collection = ROOT / 'Documentos/testes/postman/EduFast.postman_collection.json'
+        collection = ROOT / 'docs/testes/postman/EduFast.postman_collection.json'
         summary = {
             'passed': exit_code == 0,
             'exit_code': exit_code,
