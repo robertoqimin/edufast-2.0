@@ -76,3 +76,24 @@ banco.
   lote. Depois dele, a demo foi recriada com `node infra/demo-completa.cjs reset`.
 - O README descreve o produto para o ensino médio. O ensino superior entra quando a B4 for
   implementada.
+
+## Revisão de 25/11/2026: vitrine sem detalhes internos (pedido do usuário)
+
+O usuário pediu para atualizar imagens, arquitetura e tecnologias **sem revelar detalhes que
+exponham a integridade do sistema**.
+
+- **Saiu:**
+  - senhas e e-mails de demonstração (o comando da demo os mostra na tela);
+  - os nomes dos mecanismos de segurança;
+  - endereços, portas, rotas e variáveis de ambiente;
+  - detalhes de pipeline, deploy, migrations e sincronização com o painel central;
+  - a árvore de pastas e as versões das tecnologias.
+- **Ficou:**
+  - as 14 capturas atuais;
+  - a arquitetura em blocos (aplicação por instituição, banco próprio, painel central);
+  - os princípios de projeto em linguagem geral;
+  - as tecnologias sem versão;
+  - as funcionalidades, com **colégio e faculdade** como "em desenvolvimento".
+- **Verificação:**
+  - os 17 caminhos de imagens e links existem;
+  - a busca por senhas, nomes de mecanismos, portas, rotas e variáveis não encontrou nada.
