@@ -25,7 +25,8 @@ document_bp = Blueprint("document", __name__)
 
 
 def _get_or_create_disciplina_geral(db):
-    disciplina = insert_if_missing(db, DisciplinaModel,
+    from app.models.unidade_model import unidade_do_contexto
+    disciplina = insert_if_missing(db, DisciplinaModel, unidade_id=unidade_do_contexto(db.connection()),
                                    codigo="GERAL", defaults={"nome": "Geral", "carga_horaria": 0})
     return disciplina
 

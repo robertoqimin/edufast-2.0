@@ -58,15 +58,9 @@ class PostgresMigrationTests(TestCase):
             for schema in (MODELO, BASE):
                 connection.execute(text(f'DROP SCHEMA IF EXISTS {schema} CASCADE'))
         self.addCleanup(self.cleanup)
-        created = {t for m in self.migrations for t in m['tables']}
-        legacy = [t for t in Base.metadata.sorted_tables if t.name not in created]
-        Base.metadata.create_all(engine, tables=legacy)
+        from legacy_fixture import criar_legado  # mesmo esquema legado do aplicador (A4)
+        criar_legado(engine)
         with engine.begin() as connection:
-            legacy_names = {table.name for table in legacy}
-            for migration in self.migrations:
-                for table, column in migration['columns']:
-                    if table in legacy_names:  # colunas de tabelas criadas por propostas vem com elas
-                        connection.execute(text(f'ALTER TABLE {table} DROP COLUMN {column}'))
             connection.execute(text("INSERT INTO usuarios (email, senha, tipo) VALUES "
                                     "('docente@example.test', 'hash', 'professor'), ('aluno@example.test', 'hash', 'aluno')"))
 

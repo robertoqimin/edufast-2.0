@@ -95,13 +95,14 @@ class AplicadorPostgresTests(TestCase):
         self.assertEqual(estado[5], 'ausente')  # nada parcial
         quebrada.write_text(original, encoding='utf-8')
         plano = planejar(engine, pasta)
-        self.assertEqual([p['versao'] for p in plano['pendentes']], [5, 6, 7, 8, 9])
+        self.assertEqual([p['versao'] for p in plano['pendentes']], [5, 6, 7, 8, 9, 10])
         aplicar(engine, plano, pasta)
         self.assertEqual(retrato(engine), antes)
         origens = {v: r.origem for v, r in self.registro().items()}
         # 1-4 entraram antes do registro existir na execucao interrompida: a 008 as detecta.
         self.assertEqual(origens, {1: 'detectada', 2: 'detectada', 3: 'detectada', 4: 'detectada',
-                                   5: 'aplicada', 6: 'aplicada', 7: 'aplicada', 8: 'aplicada', 9: 'aplicada'})
+                                   5: 'aplicada', 6: 'aplicada', 7: 'aplicada', 8: 'aplicada', 9: 'aplicada',
+                                   10: 'aplicada'})
         self.assertEqual(inventory(engine, pasta)['alertas'], [])
 
     def test_partial_structure_blocks_without_changing_anything(self):
@@ -145,7 +146,7 @@ class AplicadorPostgresTests(TestCase):
         aplicar(engine, planejar(engine, ate=3))
         self.assertEqual(inventory(engine)['versao_estrutural'], 3)
         resto = planejar(engine)
-        self.assertEqual([p['versao'] for p in resto['pendentes']], [4, 5, 6, 7, 8, 9])
+        self.assertEqual([p['versao'] for p in resto['pendentes']], [4, 5, 6, 7, 8, 9, 10])
         aplicar(engine, resto)
         self.assertEqual(inventory(engine)['alertas'], [])
         Base.metadata.drop_all(engine)

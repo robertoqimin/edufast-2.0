@@ -67,9 +67,10 @@ def initialize(target_engine, school):
             raise RuntimeError('Esquema existente diferente; revisão necessária, sem alteração.')
         with Session(target_engine) as db:
             # Um esquema vazio de uma tentativa interrompida pode receber a fixture.
-            # O registro de versoes nasce com o esquema base; nao e dado da escola.
+            # O registro de versoes e a unidade 1 nascem com o esquema base; nao sao dados da escola.
             has_rows = any(db.execute(select(table).limit(1)).first() is not None
-                           for table in Base.metadata.sorted_tables if table.name != 'educafast_migracoes')
+                           for table in Base.metadata.sorted_tables
+                           if table.name not in ('educafast_migracoes', 'unidades'))
             if has_rows:
                 return verify(db, school)
     else:

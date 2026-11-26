@@ -6,6 +6,7 @@ definicoes vem dos modelos SQLAlchemy atuais, compiladas para PostgreSQL.
 
 Uso, em ``Codigos/``: ``python migrations/gerar_postgresql.py`` (reescreve 001-007).
 """
+import re
 import sys
 from pathlib import Path
 
@@ -180,12 +181,28 @@ def gerar_base(conteudos=None):
              *CABECALHO, '', 'BEGIN;', '']
     for table in Base.metadata.sorted_tables:
         corpo += [_tabela(table.name, None), '']
+    corpo += blocos_base(conteudos)
     linhas = linhas_registro_base(migrations)
     valores = ',\n'.join(f"    ({l['versao']}, {_literal(l['descricao'])}, {_literal(l['arquivo'])}, {_literal(l['origem'])})"
                          for l in linhas)
     corpo += ['INSERT INTO educafast_migracoes (versao, descricao, arquivo, origem) VALUES', valores + ';', '',
               'COMMIT;']
     return arquivo_base(migrations), '\n'.join(corpo) + '\n'
+
+
+def blocos_base(conteudos):
+    """Trechos de propostas manuais que nao saem dos modelos (dados iniciais, funcoes, gatilhos).
+
+    Marcados na propria proposta com ``-- base:<nome>:inicio`` / ``-- base:<nome>:fim`` (ex.: 010 cria a
+    unidade 1 e o gatilho de vinculo). Entram na base depois das tabelas, na ordem das propostas.
+    """
+    corpo = []
+    for nome in sorted(conteudos):
+        texto = conteudos[nome]
+        for marca in re.findall(r'-- base:(\w+):inicio', texto):
+            trecho = texto.split(f'-- base:{marca}:inicio')[1].split(f'-- base:{marca}:fim')[0].strip('\n')
+            corpo += [f'-- {nome[:3]} ({marca})', trecho, '']
+    return corpo
 
 
 def manuais():

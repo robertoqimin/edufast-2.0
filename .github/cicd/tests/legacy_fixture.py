@@ -50,16 +50,35 @@ def tabelas_legadas():
     return [t for t in Base.metadata.sorted_tables if t.name not in criadas]
 
 
+# Restricoes do legado que uma proposta posterior troca (010: codigo unico passa a ser por unidade).
+RESTRICOES_ORIGINAIS = {
+    'turmas': 'ALTER TABLE turmas ADD CONSTRAINT turmas_codigo_key UNIQUE (codigo)',
+    'disciplinas': 'ALTER TABLE disciplinas ADD CONSTRAINT disciplinas_codigo_key UNIQUE (codigo)',
+}
+
+
 def criar_legado(engine):
-    """Esquema anterior a 001 em banco vazio (as colunas das propostas sao removidas)."""
+    """Esquema anterior a 001 em banco vazio (as colunas das propostas sao removidas).
+
+    Tabelas legadas ja apontam para tabelas criadas por propostas posteriores (010: unidade_id ->
+    unidades). Essas tabelas entram provisoriamente, para a criacao funcionar, e saem no fim.
+    """
+    with engine.begin() as connection:  # objetos fora de tabelas sobrevivem ao drop_all dos testes
+        connection.execute(text('DROP FUNCTION IF EXISTS edufast_exige_vinculo() CASCADE'))
     legado = tabelas_legadas()
     nomes = {t.name for t in legado}
-    Base.metadata.create_all(engine, tables=legado)
+    referidas = {fk.column.table for t in legado for fk in t.foreign_keys if fk.column.table.name not in nomes}
+    Base.metadata.create_all(engine, tables=[*legado, *sorted(referidas, key=lambda t: t.name)])
     with engine.begin() as connection:
         for migration in load_migrations():
             for table, column in migration['columns']:
                 if table in nomes:
-                    connection.execute(text(f'ALTER TABLE {table} DROP COLUMN {column}'))
+                    connection.execute(text(f'ALTER TABLE {table} DROP COLUMN {column} CASCADE'))
+        for tabela in referidas:
+            connection.execute(text(f'DROP TABLE {tabela.name} CASCADE'))
+        for tabela, comando in RESTRICOES_ORIGINAIS.items():
+            if tabela in nomes:
+                connection.execute(text(comando))
 
 
 def popular_legado(engine, senha_hash='hash-ficticio'):

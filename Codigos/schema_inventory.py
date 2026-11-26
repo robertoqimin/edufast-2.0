@@ -155,7 +155,8 @@ def snapshot(engine):
         tables[name] = {
             'columns': {c['name']: bool(c.get('nullable')) for c in inspector.get_columns(name)},
             'indexes': {i['name'] for i in inspector.get_indexes(name) if i.get('name')},
-            'constraints': {c['name'] for c in inspector.get_check_constraints(name) if c.get('name')},
+            'constraints': {c['name'] for c in [*inspector.get_check_constraints(name), *inspector.get_unique_constraints(name),
+                                                *inspector.get_foreign_keys(name)] if c.get('name')},
         }
     return {'tables': tables}
 

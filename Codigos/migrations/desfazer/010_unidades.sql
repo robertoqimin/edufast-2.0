@@ -1,4 +1,4 @@
--- DESFAZER A PROPOSTA 010 (unidades). Uso só em emergência, antes de existir uma 2ª unidade.
+-- DESFAZER A MIGRATION 010 (unidades), aprovada em 25/11/2026. Uso só em emergência, antes de existir uma 2ª unidade.
 -- Preferir sempre a restauração do backup feito antes de aplicar a 010.
 -- Recusa se já houver dados de outra unidade (eles se misturariam com a unidade 1).
 BEGIN;
@@ -29,4 +29,5 @@ ALTER TABLE turmas ADD CONSTRAINT turmas_codigo_key UNIQUE (codigo);
 
 DROP TABLE usuario_unidades;
 DROP TABLE unidades;
+DELETE FROM educafast_migracoes WHERE versao = 10;
 COMMIT;

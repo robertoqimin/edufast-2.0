@@ -2,6 +2,7 @@
 from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
+from app.models.unidade_model import padrao_unidade
 
 
 class IdentidadeEscolaModel(Base):
@@ -14,13 +15,15 @@ class IdentidadeEscolaModel(Base):
 class CalendarioEscolaModel(Base):
     __tablename__ = 'escola_calendarios'
     id: Mapped[int] = mapped_column(primary_key=True)
-    ano: Mapped[int] = mapped_column(Integer, unique=True)
+    ano: Mapped[int] = mapped_column(Integer)
     nome: Mapped[str] = mapped_column(String(120))
     inicio: Mapped[object] = mapped_column(Date)
     fim: Mapped[object] = mapped_column(Date)
     dias_semana: Mapped[str] = mapped_column(String(30), default='[0,1,2,3,4]')
     meta_letivos: Mapped[int] = mapped_column(Integer, default=200)
     versao: Mapped[int] = mapped_column(Integer, default=1)
+    unidade_id: Mapped[int] = mapped_column(ForeignKey('unidades.id'), nullable=False, default=padrao_unidade)
+    __table_args__ = (UniqueConstraint('unidade_id', 'ano', name='uq_calendario_unidade_ano'),)
 
 
 class EventoCalendarioModel(Base):

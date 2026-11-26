@@ -1,7 +1,10 @@
--- PROPOSTA 010 — UNIDADES (25/11/2026) — PENDENTE DE APROVAÇÃO DO USUÁRIO. NÃO EXECUTAR.
+-- PROPOSTA 010 — UNIDADES (25/11/2026) — APROVADA PELO USUÁRIO EM 25/11/2026.
 -- Colégio e faculdade na mesma instalação, com secretarias separadas.
 -- Estudo:  Documentos/planejamento/ESTUDO_UNIDADES_2026-11-25.md
 -- Ficha:   Documentos/planejamento/PROPOSTA_010_UNIDADES_2026-11-25.md (riscos e como desfazer)
+-- Desfazer: migrations/desfazer/010_unidades.sql (só antes de existir a 2ª unidade).
+-- Aplicar SOMENTE junto com o back-end das unidades: as colunas unidade_id não têm valor padrão.
+-- Blocos "base:" entram também no esquema base v10 (gerar_postgresql.py) e no create_all dos testes.
 -- PostgreSQL 17, transacional: uma falha desfaz tudo. Em banco real, só pelo aplicar_migracoes.py,
 -- depois de backup de banco, uploads e chave.
 -- O que faz com os dados de hoje: a instalação vira a UNIDADE 1 (nível básico); todas as linhas
@@ -27,8 +30,10 @@ CREATE TABLE unidades (
     CONSTRAINT ck_unidade_estado CHECK (estado IN ('ativa', 'arquivada'))
 );
 -- A instalação atual. O nome aparece no seletor e pode ser trocado pela direção depois.
+-- base:dados:inicio
 INSERT INTO unidades (id, nome, nivel) VALUES (1, 'Unidade principal', 'basico');
 SELECT setval(pg_get_serial_sequence('unidades', 'id'), 1);
+-- base:dados:fim
 
 -- 2. Vínculo da pessoa com a unidade --------------------------------------------------------
 -- situacao: ativo | concluido (concluiu o último ano da unidade: habilita a subida para a
@@ -103,6 +108,7 @@ ALTER TABLE turmas_disciplinas ADD CONSTRAINT fk_turma_disciplina_disciplina_uni
 
 -- 5. Matrícula e atribuição só com vínculo ativo na unidade da turma -------------------------
 -- Gatilho (não chave), porque o vínculo é da conta e a matrícula é do cadastro do aluno.
+-- base:gatilhos:inicio
 CREATE FUNCTION edufast_exige_vinculo() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
     conta INTEGER;
@@ -130,6 +136,7 @@ CREATE TRIGGER tg_professores_turmas_vinculo BEFORE INSERT OR UPDATE ON professo
     FOR EACH ROW EXECUTE FUNCTION edufast_exige_vinculo();
 CREATE TRIGGER tg_atribuicoes_docentes_vinculo BEFORE INSERT OR UPDATE ON atribuicoes_docentes
     FOR EACH ROW EXECUTE FUNCTION edufast_exige_vinculo();
+-- base:gatilhos:fim
 
 -- 6. Subida do aluno do colégio para a faculdade ---------------------------------------------
 -- motivo 'cpf_concluinte': a faculdade cadastrou o CPF de um aluno que concluiu o 3º ano;

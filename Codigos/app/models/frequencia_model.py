@@ -1,8 +1,9 @@
 """Importação explícita: o módulo não altera o esquema na inicialização do app."""
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, UniqueConstraint, CheckConstraint, func
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 from app.crypto import EncryptedLongText
+from app.models.unidade_model import padrao_unidade
 
 
 class ChamadaModel(Base):
@@ -49,7 +50,9 @@ class AtestadoModel(Base):
     decidido_por: Mapped[int | None] = mapped_column(ForeignKey('usuarios.id'))
     motivo: Mapped[str] = mapped_column(EncryptedLongText(), default='')
     criado_em: Mapped[object] = mapped_column(DateTime, server_default=func.current_timestamp())
+    unidade_id: Mapped[int] = mapped_column(ForeignKey('unidades.id'), nullable=False, default=padrao_unidade)
     __table_args__ = (CheckConstraint('fim >= inicio', name='ck_atestado_datas'),
+        Index('ix_frequencia_atestados_unidade', 'unidade_id'),
         CheckConstraint("estado IN ('pendente','aceito','rejeitado')", name='ck_atestado_estado'))
 
 

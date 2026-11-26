@@ -61,7 +61,7 @@ def render_editor(db,identity,curso_id):
     offers = db.query(OfertaCursoModel,TurmaModel).join(TurmaDisciplinaModel,
         TurmaDisciplinaModel.id==OfertaCursoModel.turma_disciplina_id).join(TurmaModel,
         TurmaModel.id==TurmaDisciplinaModel.turma_id).filter(OfertaCursoModel.curso_id==course.id).all()
-    pairs = db.query(TurmaDisciplinaModel,TurmaModel).join(TurmaModel).outerjoin(EstadoTurmaModel,
+    pairs = db.query(TurmaDisciplinaModel,TurmaModel).join(TurmaModel,TurmaModel.id==TurmaDisciplinaModel.turma_id).outerjoin(EstadoTurmaModel,
         EstadoTurmaModel.turma_id==TurmaModel.id).filter(TurmaDisciplinaModel.disciplina_id==course.disciplina_id,
         or_(EstadoTurmaModel.arquivada.is_(False),EstadoTurmaModel.turma_id.is_(None))).order_by(TurmaModel.nome).all() if identity.admin else []
     return render_template('curso_ms04_editor.html',identity=identity,curso=leitura.curso(db,course),

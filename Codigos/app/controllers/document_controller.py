@@ -26,7 +26,8 @@ def _get_or_create_disciplina(session_db, disciplina_id=None):
 
         return None, ({"erro": "Disciplina não encontrada"}, 404)
 
-    disciplina = insert_if_missing(session_db, DisciplinaModel,
+    from app.models.unidade_model import unidade_do_contexto
+    disciplina = insert_if_missing(session_db, DisciplinaModel, unidade_id=unidade_do_contexto(session_db.connection()),
                                    codigo="GERAL", defaults={"nome": "Geral", "carga_horaria": 0})
     return disciplina, None
 

@@ -32,9 +32,9 @@ class GeneratedProposalsTests(TestCase):
         committed = (ESCOLA_DIR / name).read_bytes().replace(b'\r\n', b'\n').decode('utf-8')
         self.assertEqual(committed, content, 'Modelos mudaram: crie nova proposta e nova base, sem editar as antigas')
 
-    def test_008_registers_every_previous_one_and_009_is_the_latest(self):
+    def test_008_registers_every_previous_one_and_010_is_the_latest(self):
         migrations = load_migrations()
-        self.assertEqual(migrations[-1]['arquivo'], '009_videos_enviados.sql')
+        self.assertEqual(migrations[-1]['arquivo'], '010_unidades.sql')
         sql = (ESCOLA_DIR / '008_registro_migracoes.sql').read_text(encoding='utf-8')
         for item in [m for m in migrations if m['versao'] < 8]:
             with self.subTest(arquivo=item['arquivo']):

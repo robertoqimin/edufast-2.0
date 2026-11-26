@@ -8,6 +8,8 @@
   "007_cursos_backend_ms04.sql": "5ae00b3cf9b0f9a5c80a3eb34cdce5db22144535694b2fd440706091ec853ad7",
   "008_registro_migracoes.sql": "3ae39cc85f7f74b0338ff91d7bc8c0d71a66fa70f976c71859818f2f452e9b27",
   "009_videos_enviados.sql": "e323229488bbf0bab0c579c6d799daaff211f713307bfdcc1f96126f401affe7",
+  "010_unidades.sql": "50d6a03a0faa452f36c506ba504577f42c7c3b3c91009474f10a153a81fbfee8",
+  "base/esquema_v10.sql": "01564989ec8ddbdf75ee8ab066ced359276c03b5628cd3df60d12d83a725117f",
   "base/esquema_v8.sql": "223c64b6e11b04dcc637071d212e25cc8b97734294d9015348091a91a73f300e",
   "base/esquema_v9.sql": "ed2298d36441fe8030f4cedd97da089205b490da282b424803b8bcaf470052cc"
 }

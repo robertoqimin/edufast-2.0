@@ -1,5 +1,6 @@
 """Models da aplicacao."""
 
+from .unidade_model import UnidadeModel, UsuarioUnidadeModel, TransferenciaUnidadeModel
 from .configuracao_model import ConfiguracaoModel
 from .curso_model import (CursoModel, CapituloModel, TemaModel, AulaModel, OfertaCursoModel,
                          ProgressoAulaModel, AtribuicaoDocenteModel, EstadoTurmaModel, AuditoriaCursoModel)
@@ -30,6 +31,9 @@ from .turma_disciplina_model import TurmaDisciplinaModel
 from .usuario_model import UsuarioModel
 
 __all__ = [
+    "UnidadeModel",
+    "UsuarioUnidadeModel",
+    "TransferenciaUnidadeModel",
     "UsuarioModel",
     "ProfessorModel",
     "ProfessorDisciplinaModel",
